@@ -1,6 +1,19 @@
 # Rencana Game "Cari Macan Tutul" — Bakti BCA × SINTAS Indonesia (JWLS)
 
-> Status: **draft rencana, menunggu persetujuan**. Belum ada kode game.
+> Status: **versi pertama selesai dibangun** (lihat README.md untuk cara menjalankan).
+> Catatan: dua temuan kualitatif di §5 "Perlu konfirmasi" TIDAK dipakai di game sampai dikonfirmasi tim.
+
+## 0. Keputusan tim (final)
+
+| Topik | Keputusan |
+|---|---|
+| Nama game | **Jejak Si Macan Tutul** |
+| Logo | **Tanpa logo resmi** dan tanpa logo macan tutul/SINTAS. Judul cukup berupa teks. |
+| Gaya gambar | **Kartun**, tapi anatomi dan perilaku macan tutul tetap sesuai alam: roset di badan, bintik padat di kepala dan kaki, pupil bulat, ekor panjang berujung gelap, macan kumbang dengan roset samar. |
+| Perangkat | **PC dengan mouse dan layar sentuh**, keduanya didukung. |
+| Papan skor | **Satu perangkat** (`localStorage`) dengan ekspor CSV. |
+| Data pemain | Nama panggilan saja. |
+| Bahasa | Bahasa Indonesia. |
 
 ## 1. Ringkasan konsep
 
@@ -14,8 +27,7 @@ tersembunyi di antara pepohonan, dan jumlahnya acak.
 - Waktu bermain dibatasi. Skor akhir masuk ke **papan skor (leaderboard)**.
 - Pesan edukasinya disisipkan di sela permainan, tanpa angka dari data survei (lihat §5).
 
-Nama game bisa dipilih: **"Jejak Si Tutul"**, **"Mata Kamera: Temukan Macan Tutul Jawa"**,
-**"Tutul Tersembunyi"**, atau usulan lain dari tim.
+Nama game: **"Jejak Si Macan Tutul"**.
 
 ## 2. Alur layar
 
@@ -25,7 +37,7 @@ Nama game bisa dipilih: **"Jejak Si Tutul"**, **"Mata Kamera: Temukan Macan Tutu
        └──────────── (idle timeout) ←── [Papan Skor] ←── [Input Nama] ←── [Hasil + Ajakan aksi]
 ```
 
-1. **Attract screen**: animasi hutan berjalan sendiri, logo Bakti BCA dan SINTAS, fakta yang berganti-ganti,
+1. **Attract screen**: animasi hutan berjalan sendiri, judul game (teks, tanpa logo), fakta yang berganti-ganti,
    tulisan besar "SENTUH UNTUK MULAI", dan Top 5 hari ini. Layar ini menarik pengunjung yang lewat.
 2. **Briefing** (sekitar 5 detik, bisa di-skip): "Kamu peneliti JWLS! Kamera pengintai sudah dipasang di hutan.
    Temukan semua macan tutul jawa, termasuk **macan kumbang** yang hitam!"
@@ -86,7 +98,7 @@ Sudut bingkai viewfinder, titik "● REC", label "Stasiun Kamera", dan efek *shu
 - **Offline-first**: semua aset lokal. Bisa dipasang sebagai PWA agar tetap jalan tanpa internet di lokasi pameran.
 - **Papan skor**: disimpan di perangkat (`localStorage`), dengan tombol **ekspor CSV** sebagai cadangan.
   Kalau ada beberapa perangkat yang harus berbagi satu papan skor, perlu backend kecil (lihat Pertanyaan).
-- **Panel admin tersembunyi** (tap logo 5× lalu PIN): reset papan skor harian, ekspor CSV, atur durasi dan
+- **Panel admin tersembunyi** (tap pojok kiri atas layar awal 5× lalu PIN, atau Ctrl+Shift+A): reset papan skor harian, ekspor CSV, atur durasi dan
   tingkat kesulitan, uji suara.
 - **Pengamanan kiosk**: nonaktifkan zoom, cubit, klik kanan, seleksi teks, dan tekan lama. Layar dijaga tetap
   menyala (Wake Lock). Ada mode layar penuh dan pemulihan otomatis kalau terjadi error.
@@ -106,7 +118,7 @@ js/leaderboard.js   # simpan / urut / ekspor CSV / reset harian
 js/audio.js         # efek suara (WebAudio)
 js/content.js       # SEMUA teks edukasi & UI (mudah diedit tim)
 js/config.js        # durasi, jumlah macan per stasiun, dsb.
-assets/             # logo resmi (dari tim), suara
+assets/             # ikon aplikasi (tanpa logo resmi)
 tools/check-no-digits.mjs   # pemeriksa otomatis: teks edukasi tidak boleh mengandung angka
 ```
 
@@ -165,7 +177,7 @@ Semua teks disimpan di `js/content.js` agar mudah direvisi tim komunikasi atau S
    mode malam IR, animasi, dan suara.
 3. **Layar-layar**: attract, briefing, hasil, input nama, papan skor, dan panel admin.
 4. **Konten edukasi**: kartu fakta, popup decoy, ajakan aksi, dan skrip cek "tanpa angka".
-5. **Branding dan kiosk**: logo resmi, warna, pengamanan kiosk, offline/PWA, dan uji di perangkat pameran.
+5. **Kiosk**: warna, pengamanan kiosk, offline/PWA, dan uji di perangkat pameran.
 6. **Rilis**: deploy (misalnya GitHub Pages untuk demo) dan panduan setup booth (mode kiosk Chrome, reset harian,
    ekspor skor).
 
@@ -180,7 +192,7 @@ Semua teks disimpan di `js/content.js` agar mudah direvisi tim komunikasi atau S
 5. **Data pemain?** Default: hanya nama panggilan. Kalau mau mengumpulkan kontak untuk hadiah, perlu persetujuan
    pemain (consent).
 6. **Bahasa?** Default: Bahasa Indonesia. Opsional: bilingual Indonesia/Inggris.
-7. **Logo resmi** Bakti BCA dan SINTAS Indonesia: mohon dikirim filenya (PNG/SVG). Saya tidak akan menggambar ulang logo.
+7. ~~Logo resmi~~ → diputuskan **tanpa logo**.
 8. **Hadiah harian** untuk skor tertinggi? Kalau ada, papan skor harian bisa ditampilkan lebih menonjol.
 
 ## 8. Sumber

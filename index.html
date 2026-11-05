@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#10261a">
+  <meta name="description" content="Jejak Si Macan Tutul — game edukasi mencari macan tutul jawa di hutan.">
+  <title>Jejak Si Macan Tutul</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <canvas id="game" aria-label="Hutan tempat macan tutul bersembunyi"></canvas>
+
+      <!-- HUD kamera pengintai -->
+      <div id="hud" class="hidden" aria-live="polite">
+        <div class="cam-frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+        <div class="hud-top">
+          <div class="pill hud-score"><span class="lbl" data-t="ui.score"></span><span id="hud-score" class="val">0</span></div>
+          <div class="pill hud-mid">
+            <div class="rec"><span class="dot"></span>REC · <span id="hud-station"></span> · <span id="hud-mode"></span></div>
+            <div id="hud-pips" class="pips"></div>
+          </div>
+          <div class="pill hud-time"><span class="lbl" data-t="ui.time"></span><span id="hud-time" class="val">0:00</span>
+            <div class="bar"><span id="hud-timebar"></span></div></div>
+        </div>
+        <div id="hud-ir" class="ir-tag">IR</div>
+      </div>
+
+      <div id="banner" class="banner"></div>
+      <div id="bubbles"></div>
+
+      <!-- Layar awal -->
+      <section id="screen-attract" class="screen">
+        <div class="attract-shade"></div>
+        <div class="attract-main">
+          <div class="kicker" data-t="credit"></div>
+          <h1 class="game-title" id="attract-title"></h1>
+          <p class="tagline" data-t="tagline"></p>
+          <button class="btn btn-primary btn-big pulse" id="btn-start" data-t="ui.start"></button>
+          <div class="hint-touch" data-t="ui.touchToStart"></div>
+        </div>
+        <div class="attract-side">
+          <div class="card fact-card-mini">
+            <div class="card-kicker" data-t="ui.didYouKnow"></div>
+            <h3 id="attract-fact-title"></h3>
+            <p id="attract-fact-text"></p>
+          </div>
+          <div class="card dark mini-board">
+            <div class="card-kicker" data-t="ui.topToday"></div>
+            <ol id="attract-top" class="mini-list"></ol>
+          </div>
+        </div>
+        <div class="attract-tools">
+          <button class="btn btn-small" id="btn-board" data-t="ui.boardButton"></button>
+          <button class="btn btn-small btn-icon" id="btn-fullscreen" aria-label="Layar penuh" title="Layar penuh">
+            <svg viewBox="0 0 24 24" width="1em" height="1em"><path fill="currentColor" d="M4 9V4h5v2H6v3H4zm10-5h6v5h-2V6h-4V4zM4 15h2v3h3v2H4v-5zm14 3v-3h2v5h-6v-2h4z"/></svg>
+          </button>
+        </div>
+        <div id="admin-hotspot" aria-hidden="true"></div>
+      </section>
+
+      <!-- Briefing -->
+      <section id="screen-briefing" class="screen dim">
+        <div class="panel brief-panel">
+          <div class="card-kicker" data-t="ui.briefKicker"></div>
+          <h2 data-t="ui.briefTitle"></h2>
+          <p class="lead" data-t="ui.briefText"></p>
+          <div class="rules" id="rules"></div>
+          <button class="btn btn-primary btn-big" id="btn-go" data-t="ui.go"></button>
+        </div>
+      </section>
+
+      <!-- Kartu fakta antar stasiun -->
+      <section id="overlay-fact" class="screen dim">
+        <div class="panel fact-panel">
+          <div class="badge" data-t="ui.stationClearKicker"></div>
+          <div class="card-kicker" data-t="ui.didYouKnow"></div>
+          <h2 id="fact-title"></h2>
+          <p class="lead" id="fact-text"></p>
+          <div class="progress"><span id="fact-progress"></span></div>
+          <button class="btn btn-primary" id="btn-fact-next" data-t="ui.next"></button>
+        </div>
+      </section>
+
+      <!-- Hasil + input nama -->
+      <section id="screen-result" class="screen dim">
+        <div class="result-wrap">
+          <div class="panel result-panel">
+            <div class="card-kicker" data-t="ui.resultKicker"></div>
+            <h2 id="result-title"></h2>
+            <div class="score-big"><span id="result-score">0</span><small data-t="ui.resultUnit"></small></div>
+            <div class="stats">
+              <div><b id="result-stations">0</b><span data-t="ui.stations"></span></div>
+              <div><b id="result-mistakes">0</b><span data-t="ui.mistakes"></span></div>
+              <div><b id="result-rank">-</b><span data-t="ui.rankToday"></span></div>
+            </div>
+            <div class="action">
+              <div class="card-kicker" data-t="ui.actionKicker"></div>
+              <p id="result-action"></p>
+            </div>
+          </div>
+          <div class="panel name-panel">
+            <h3 data-t="ui.namePrompt"></h3>
+            <div class="name-display" id="name-display"><span id="name-text"></span><i class="caret"></i></div>
+            <div class="keyboard" id="keyboard"></div>
+            <div class="row">
+              <button class="btn" id="btn-skip" data-t="ui.skip"></button>
+              <button class="btn btn-primary" id="btn-save" data-t="ui.save"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Papan skor -->
+      <section id="screen-board" class="screen dim">
+        <div class="panel board-panel">
+          <h2 data-t="ui.boardTitle"></h2>
+          <div class="boards">
+            <div class="board"><h3 data-t="ui.today"></h3><ol id="board-today" class="board-list"></ol></div>
+            <div class="board"><h3 data-t="ui.allTime"></h3><ol id="board-all" class="board-list"></ol></div>
+          </div>
+          <div class="row">
+            <button class="btn" id="btn-home" data-t="ui.home"></button>
+            <button class="btn btn-primary" id="btn-again" data-t="ui.again"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin -->
+      <section id="overlay-admin" class="screen dim">
+        <div class="panel admin-panel">
+          <div id="admin-pin">
+            <h3 data-t="ui.adminPin"></h3>
+            <div class="pin-display" id="pin-display"></div>
+            <div class="pinpad" id="pinpad"></div>
+            <div class="row"><button class="btn" id="btn-admin-cancel" data-t="ui.adminClose"></button></div>
+          </div>
+          <div id="admin-menu" class="hidden">
+            <h2 data-t="ui.adminTitle"></h2>
+            <div class="admin-row"><span data-t="ui.adminDuration"></span><div id="admin-durations" class="seg"></div></div>
+            <div class="admin-row"><span data-t="ui.adminSound"></span><div id="admin-sound" class="seg"></div></div>
+            <div class="admin-actions">
+              <button class="btn" id="btn-admin-export" data-t="ui.adminExport"></button>
+              <button class="btn btn-danger" id="btn-admin-reset-today" data-t="ui.adminResetToday"></button>
+              <button class="btn btn-danger" id="btn-admin-reset-all" data-t="ui.adminResetAll"></button>
+            </div>
+            <div class="row"><button class="btn btn-primary" id="btn-admin-close" data-t="ui.adminDone"></button></div>
+          </div>
+        </div>
+      </section>
+
+      <button id="btn-mute" class="btn btn-small btn-icon mute" aria-label="Suara" title="Suara">
+        <svg class="on" viewBox="0 0 24 24" width="1em" height="1em"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+        <svg class="off" viewBox="0 0 24 24" width="1em" height="1em"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.6 3 2.7-2.7-1.4-1.4-2.7 2.7-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4z"/></svg>
+      </button>
+      <div id="loading" class="loading">Menyiapkan hutan…</div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/art/leopard.js"></script>
+  <script src="js/art/animals.js"></script>
+  <script src="js/art/forest.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
