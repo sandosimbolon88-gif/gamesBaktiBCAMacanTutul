@@ -8,26 +8,15 @@
   /* ---------- gambar adegan (dipakai juga oleh layar awal) ---------- */
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
-    ctx.drawImage(sc.bg, 0, 0, W, H);
-    for (const it of sc.items) {
-      if (it.found || it.missed) continue;
-      ctx.drawImage(it.sp.canvas, it.x + it.sp.ox, it.y + it.sp.oy, it.sp.lw, it.sp.lh);
-    }
-    ctx.drawImage(sc.fg, 0, 0, W, H);
-    if (sc.mode === 'senja') {
-      ctx.save();
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.fillStyle = 'rgba(240,160,105,0.5)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.restore();
-    }
+    ctx.drawImage(sc.comp, 0, 0, W, H);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah
       for (const it of sc.items) {
-        if (it.found || !it.eyes.length) continue;
+        const eyes = it.eyesVis || it.eyes;
+        if (it.found || !eyes.length) continue;
         const blink = Math.sin(now * 1.3 + it.x * 0.01) > 0.965 ? 0.15 : 1;
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        for (const e of it.eyes) {
+        for (const e of eyes) {
           const rad = Math.max(3.5, 6 * it.scale);
           const gr = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, rad * 3.6);
           gr.addColorStop(0, 'rgba(255,255,255,' + blink + ')');
@@ -37,7 +26,7 @@
           ctx.beginPath(); ctx.arc(e.x, e.y, rad * 3.6, 0, TAU); ctx.fill();
         }
         ctx.restore();
-        for (const e of it.eyes) {
+        for (const e of eyes) {
           ctx.fillStyle = 'rgba(255,255,255,' + blink + ')';
           ctx.beginPath(); ctx.arc(e.x, e.y, Math.max(2.2, 3.4 * it.scale), 0, TAU); ctx.fill();
         }

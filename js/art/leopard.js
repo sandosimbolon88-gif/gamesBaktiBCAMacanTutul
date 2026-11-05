@@ -491,7 +491,8 @@
   A.leopardSprite = function (o) {
     const variant = o.variant || 'spotted';
     const palKey = variant === 'black' && o.night ? 'blackIR' : variant;
-    const pal = A.PAL[palKey];
+    let pal = A.PAL[palKey];
+    if (o.soft && variant !== 'black') pal = Object.assign({}, pal, { outline: variant === 'kuwuk' ? '#5a4128' : '#5a3418' }); // garis luar lebih lembut = lebih menyatu
     const geom = POSES[o.pose](o);
     const b = geom.bounds.slice();
     if (o.cub) { // kepala anak lebih besar
@@ -500,7 +501,7 @@
       b[1] = Math.min(b[1], geom.head.y - 40 * hs);
       b[2] = Math.max(b[2], geom.head.x + 44 * hs);
     }
-    const OL = J.clamp(2.3 / o.scale, 2.4, 6);
+    const OL = J.clamp(2.3 / o.scale, 2.4, 6) * (o.soft ? 0.8 : 1);
     const sp = A.makeSprite(o, b, (g) => {
       const pats = getPatterns(g, palKey, pal);
       return renderBody(g, geom, pal, pats, Object.assign({}, o, { variant }), OL);

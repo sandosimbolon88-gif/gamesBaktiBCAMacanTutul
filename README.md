@@ -46,7 +46,11 @@ Tips booth:
 1. **Layar awal**: hutan bergerak pelan, fakta "Tahukah kamu?" berganti-ganti, dan 5 skor tertinggi hari ini.
 2. **Briefing**: misi peneliti dan aturan main (macan kumbang juga dihitung, awas satwa pengecoh).
 3. **Bermain** (default 90 detik):
-   - Ada sekitar 3–6 macan tutul per stasiun. Kesulitan naik bertahap: lebih kecil, lebih tertutup daun, ada kamuflase daun kering dan bayangan.
+   - Ada sekitar 3–6 macan tutul per stasiun, tersembunyi di **hutan lebat berlapis**: pohon besar, pohon muda, pakis haji, rotan, semak, rumput tinggi, dan tirai daun dari kanopi. Tanaman bisa berada di depan atau di belakang macan tutul.
+   - **Cahaya belang-belang** (bayangan kanopi dan bintik sinar matahari) jatuh juga di tubuh macan tutul, sehingga siluetnya pecah seperti kamuflase di alam. Pakis kering, daun kering, dan bunga oranye warnanya mirip bulu macan tutul.
+   - **Hanya bagian tubuh yang terlihat yang bisa diklik.** Mengklik semak yang menutupi macan tutul tidak dihitung.
+   - Persembunyian sulit: badan tertutup rimbun daun di dahan (hanya kaki dan ekor yang menjuntai), di balik batang pohon, atau mengintip dari semak.
+   - Kesulitan naik setiap stasiun: hutan makin rapat, bayangan makin gelap, macan tutul makin kecil, dan pengecoh makin banyak. Semuanya bisa diatur di `js/config.js` (`density`, `light`, `camo`, `hide`, `scale`, `minVis`).
    - Ada mode **Pagi Berkabut**, **Senja**, dan **Malam · Inframerah**. Di mode malam, pemain mencari mata yang menyala.
    - **Satwa pengecoh** (kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa): kalau salah pilih, muncul info satwa itu dan waktu berkurang 2 detik.
    - Bonus waktu +5 detik setiap stasiun bersih, diikuti kartu fakta edukasi.

@@ -35,7 +35,7 @@
     refresh() {
       this.scene = J.Scene.generate(0, {
         R: J.R, mode: J.rng(J.randomSeed()).pick(['pagi', 'siang', 'senja']),
-        diff: { count: [3, 4], scale: 0.8, occl: 0.2, minVis: 0.65, black: 0.4, minBlack: 1, decoys: 2, cub: 0.8, mode: 'pagi' }
+        diff: { count: [3, 4], scale: 0.7, occl: 0.25, minVis: 0.6, black: 0.4, minBlack: 1, decoys: 2, cub: 0.8, density: 0.55, light: 0.4, camo: 0.35, hide: 0, mode: 'pagi' }
       });
       this.t0 = J.now();
     },

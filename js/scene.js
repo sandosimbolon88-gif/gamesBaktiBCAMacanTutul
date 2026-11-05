@@ -1,5 +1,7 @@
-/* Generator "Stasiun Kamera": merakit hutan acak, menyembunyikan macan tutul & satwa pengecoh,
-   lalu memastikan setiap macan tutul masih cukup terlihat (tidak tertutup total). */
+/* Generator "Stasiun Kamera": merakit hutan lebat acak dengan lapisan kedalaman,
+   menyembunyikan macan tutul & satwa pengecoh di antara tanaman, memberi cahaya belang-belang
+   (kamuflase alami), lalu memastikan setiap macan tutul tetap terlihat sebagian.
+   Hanya bagian tubuh yang TERLIHAT yang bisa diklik. */
 (function () {
   'use strict';
   const J = window.JSMT, A = J.Art, F = A.Forest;
@@ -32,43 +34,94 @@
     return sc;
   };
 
+  /* ---------- tanaman sebagai objek berlapis ---------- */
+  /* Perkiraan batas gambar tiap tanaman (sengaja dilebihkan supaya perhitungan "terlihat" akurat). */
+  function vegBox(t, a) {
+    switch (t) {
+      case 'fern': return { x0: a.x - a.size * 1.3, y0: a.y - a.size * 1.12, x1: a.x + a.size * 1.3, y1: a.y + a.size * 0.5 };
+      case 'grass': return { x0: a.x - a.h * 0.9, y0: a.y - a.h - 4, x1: a.x + a.h * 0.9, y1: a.y + 4 };
+      case 'spray': return { x0: a.x - a.size * 1.08, y0: a.y - a.size * 1.08, x1: a.x + a.size * 1.08, y1: a.y + a.size * 1.08 };
+      case 'vine': return { x0: a.x - 75, y0: a.y - 10, x1: a.x + 75, y1: a.y + a.len + 35 };
+      case 'drape': return { x0: a.x - 95, y0: a.y - 10, x1: a.x + 95, y1: a.y + a.len + 75 };
+      case 'bush': return { x0: a.x - a.w / 2 - 16, y0: a.y - a.h * 1.12, x1: a.x + a.w / 2 + 16, y1: a.y + 10 };
+      case 'foliage': return { x0: a.x - a.rad * 1.15 - 4, y0: a.y - a.rad - 4, x1: a.x + a.rad * 1.15 + 4, y1: a.y + a.rad + 4 };
+      case 'treefern': return { x0: a.x - a.size * 1.35 - 20, y0: a.y - a.h - a.size * 1.12, x1: a.x + a.size * 1.35 + 20, y1: Math.max(a.y + 4, a.y - a.h + a.size * 0.75) };
+      case 'palm': return { x0: a.x - a.size * 1.45, y0: a.y - a.size * 1.2, x1: a.x + a.size * 1.45, y1: a.y + a.size * 0.55 };
+      case 'sapling': return { x0: a.x - 145, y0: a.top - 75, x1: a.x + 145, y1: a.y + 6 };
+      case 'trunk': { const fr = a.w * 1.2 + 40; return { x0: a.x - Math.max(a.w * 0.9, fr * 1.15) - 4, y0: 140 - fr - 4, x1: a.x + Math.max(a.w * 0.9, fr * 1.15) + 4, y1: a.y + 8 }; }
+      default: return { x0: 0, y0: 0, x1: W, y1: H };
+    }
+  }
+  function drawVeg(g, v, p) {
+    const r = J.rng(v.seed), a = v.a, pp = a.dry ? F.dryPalette(p) : p;
+    switch (v.type) {
+      case 'fern': F.fern(g, r, a.x, a.y, a.size, pp, a.angle != null ? { angle: a.angle } : null); break;
+      case 'grass': F.grass(g, r, a.x, a.y, a.h, pp); break;
+      case 'spray': F.leafSpray(g, r, a.x, a.y, a.size, pp, a.dir); break;
+      case 'vine': F.vine(g, r, p, a.x, a.y, a.len, { big: 1.2 }); break;
+      case 'drape': F.drape(g, r, p, a.x, a.y, a.len); break;
+      case 'bush': F.bush(g, r, a.x, a.y, a.w, a.h, p); if (a.flowers) F.flowers(g, r, a.x, a.y, a.w, a.h); break;
+      case 'foliage': F.foliage(g, r, a.x, a.y, a.rad, p); break;
+      case 'treefern': F.treeFern(g, r, p, a.x, a.y, a.h, a.size); break;
+      case 'palm': F.palm(g, r, pp, a.x, a.y, a.size); break;
+      case 'sapling': F.sapling(g, r, p, a.x, a.y, a.top); break;
+      case 'trunk': // batang di depan; puncaknya menyatu ke rimbun daun
+        g.save(); g.beginPath(); g.rect(-50, 120, W + 100, H); g.clip();
+        F.tree(g, r, p, a.x, a.y, a.w, []);
+        g.restore();
+        F.foliage(g, r, a.x, 140, a.w * 1.2 + 40, p);
+        break;
+    }
+  }
+  function drawObj(g, o, p) {
+    if (o.kind === 'animal') { const it = o.it, sp = it.sp; g.drawImage(sp.canvas, it.x + sp.ox, it.y + sp.oy, sp.lw, sp.lh); }
+    else drawVeg(g, o, p);
+  }
+
   function generateOnce(stage, opts) {
     const t0 = performance.now();
     const R = opts.R || J.R || 1;
     const seed = (opts.seed >>> 0) || J.randomSeed();
     const r = J.rng(seed);
-    const d = Object.assign({}, opts.diff || S.difficulty(stage));
+    const d = Object.assign({ density: 0.6, light: 0.5, camo: 0.4, hide: 0, occl: 0.3, minVis: 0.5 }, opts.diff || S.difficulty(stage));
     const mode = opts.mode || d.mode;
     const night = mode === 'malam';
     const p = F.palette(mode);
+    const dens = d.density, camo = d.camo;
 
-    /* ---------- latar belakang ---------- */
+    /* ================= latar belakang (selalu di belakang) ================= */
     const bg = J.makeCanvas(W * R, H * R);
-    const g = bg.getContext('2d', { willReadFrequently: night });
+    const g = bg.getContext('2d');
     g.setTransform(R, 0, 0, R, 0, 0);
-    const groundY = r.range(585, 625);
+    const groundY = r.range(570, 610);
     F.sky(g, p, W, groundY);
-    F.farLayer(g, J.rng(r.seed()), W, groundY - 10, 16, p.far1T, p.far1C);
+    F.farLayer(g, J.rng(r.seed()), W, groundY - 10, Math.round(16 + 10 * dens), p.far1T, p.far1C);
     if (!night) F.rays(g, J.rng(r.seed()), p, W, H);
     if (mode === 'pagi') F.mist(g, W, groundY - 340, groundY + 40, 0.6);
-    F.farLayer(g, J.rng(r.seed()), W, groundY + 10, 10, p.far2T, p.far2C);
+    F.farLayer(g, J.rng(r.seed()), W, groundY + 10, Math.round(10 + 8 * dens), p.far2T, p.far2C);
     if (mode === 'pagi') F.mist(g, W, groundY - 220, groundY + 70, 0.38);
+    F.understory(g, J.rng(r.seed()), p, W, groundY + 10, dens);
     F.ground(g, J.rng(r.seed()), p, W, H, groundY);
-
+    for (let i = 0, n = Math.round(camo * r.range(6, 11)); i < n; i++) {
+      F.dryLeaves(g, J.rng(r.seed()), r.range(40, W - 40), r.range(groundY + 30, H - 20), r.range(60, 150));
+    }
+    for (let i = 0, n = Math.round(2 + camo * 4); i < n; i++) {
+      F.shadowPatch(g, r.range(60, W - 60), r.range(groundY + 40, H - 30), r.range(120, 240), r.range(30, 60));
+    }
+    // pohon besar berdahan (tempat macan tutul bersantai)
     const nT = r.int(3, 5), seg = W / nT;
     const slots = [], trees = [];
     for (let i = 0; i < nT; i++) {
-      trees.push({ x: seg * (i + 0.5) + r.range(-seg * 0.2, seg * 0.2), w: r.range(54, 86), base: groundY + r.range(25, 75) });
+      trees.push({ x: seg * (i + 0.5) + r.range(-seg * 0.2, seg * 0.2), w: r.range(54, 86), base: groundY + r.range(20, 60) });
     }
     for (let i = 0; i < nT; i++) {
       const { x, w, base } = trees[i];
-      // ruang bebas kiri/kanan supaya dahan tidak menembus pohon tetangga
       const roomL = (i > 0 ? x - trees[i - 1].x - trees[i - 1].w * 0.6 : x + 40) - w * 0.5 - 70;
       const roomR = (i < nT - 1 ? trees[i + 1].x - x - trees[i + 1].w * 0.6 : W - x + 40) - w * 0.5 - 70;
       const nb = r.int(1, 3), brs = [], usedY = [];
       for (let k = 0; k < nb; k++) {
         let y, tries = 0;
-        do { y = r.range(240, 470); tries++; } while (usedY.some((u) => Math.abs(u - y) < 90) && tries < 12);
+        do { y = r.range(270, 480); tries++; } while (usedY.some((u) => Math.abs(u - y) < 90) && tries < 12);
         let side = r.chance(0.5) ? 1 : -1;
         if ((side > 0 ? roomR : roomL) < 170) side = -side;
         const room = side > 0 ? roomR : roomL;
@@ -76,33 +129,23 @@
         usedY.push(y);
         brs.push({ side, y, len: Math.min(room, r.range(210, 330)), thick: r.range(24, 32), slope: r.range(-0.05, 0.025) });
       }
-      const t = F.tree(g, J.rng(r.seed()), p, x, base, w, brs);
-      slots.push(...t.slots);
+      slots.push(...F.tree(g, J.rng(r.seed()), p, x, base, w, brs).slots);
     }
-    F.canopy(g, J.rng(r.seed()), p, W);
-    for (let i = 0, n = r.int(2, 4); i < n; i++) F.vine(g, J.rng(r.seed()), p, r.range(80, W - 80), r.range(90, 150), r.range(160, 380));
-    if (r.chance(0.75)) { const rw = r.range(90, 160); F.rock(g, J.rng(r.seed()), p, r.range(100, W - 100), groundY + r.range(50, 120), rw, rw * r.range(0.45, 0.6)); }
-    if (r.chance(0.55)) F.log(g, J.rng(r.seed()), p, r.range(40, W - 360), groundY + r.range(60, 130), r.range(200, 300), r.range(16, 22));
-    const camo = d.camo || 0;
-    for (let i = 0, n = r.int(3, 6); i < n; i++) {
-      const bx = r.range(40, W - 40), by = groundY + r.range(15, 75), bw = r.range(110, 220), bh = r.range(70, 120);
-      if (camo > 0) F.shadowPatch(g, bx, by + 18, bw * 0.75, 34);
-      F.bush(g, J.rng(r.seed()), bx, by, bw, bh, p);
-      if (r.chance(camo * 0.8)) F.flowers(g, J.rng(r.seed()), bx, by, bw, bh);
+    F.canopy(g, J.rng(r.seed()), p, W, dens);
+    for (let i = 0, n = r.int(2, 4) + Math.round(dens * 3); i < n; i++) F.vine(g, J.rng(r.seed()), p, r.range(60, W - 60), r.range(90, 170), r.range(160, 400));
+    for (let i = 0, n = Math.round(dens * 5); i < n; i++) F.drape(g, J.rng(r.seed()), p, r.range(40, W - 40), r.range(120, 180), r.range(60, 160));
+    if (r.chance(0.7)) { const rw = r.range(90, 160); F.rock(g, J.rng(r.seed()), p, r.range(100, W - 100), groundY + r.range(40, 110), rw, rw * r.range(0.45, 0.6)); }
+    if (r.chance(0.55)) F.log(g, J.rng(r.seed()), p, r.range(40, W - 360), groundY + r.range(50, 120), r.range(200, 300), r.range(16, 22));
+    for (let i = 0, n = r.int(4, 7); i < n; i++) {
+      F.bush(g, J.rng(r.seed()), r.range(30, W - 30), groundY + r.range(5, 40), r.range(120, 240), r.range(80, 130), p);
     }
-    for (let i = 0, n = Math.round(camo * r.range(5, 9)); i < n; i++) {
-      F.dryLeaves(g, J.rng(r.seed()), r.range(40, W - 40), r.range(groundY + 40, H - 30), r.range(60, 140));
-    }
-    for (let i = 0, n = Math.round(camo * 4); i < n; i++) {
-      F.shadowPatch(g, r.range(60, W - 60), r.range(groundY + 60, H - 40), r.range(120, 220), r.range(30, 60));
-    }
-    if (!night) F.dapples(g, J.rng(r.seed()), p, W, groundY, H, 14 + Math.round(camo * 14));
 
-    /* ---------- satwa ---------- */
-    const items = [], occ = [];
-    const gMin = groundY + 80, gMax = H - 14;
-    const depth = (y) => J.lerp(0.8, 1.06, J.clamp((y - gMin) / (gMax - gMin), 0, 1));
+    /* ================= satwa ================= */
+    const animals = [], occ = [];
+    const gMin = groundY + 60, gMax = H - 16;
+    const depth = (y) => J.lerp(0.78, 1.05, J.clamp((y - gMin) / (gMax - gMin), 0, 1));
     const freeSlots = r.shuffle(slots.filter((s) => s.x1 - s.x0 > 130));
+    const soft = stage >= 2;
 
     function tryPlace(sp, x, y, ignore) {
       const b = { x0: x + sp.box.x0, y0: y + sp.box.y0, x1: x + sp.box.x1, y1: y + sp.box.y1 };
@@ -110,8 +153,7 @@
       const area = J.boxArea(b);
       for (const o of occ) {
         if (o === ignore) continue;
-        const ov = J.overlapArea(b, o);
-        if (ov > 0.1 * Math.min(area, J.boxArea(o))) return null;
+        if (J.overlapArea(b, o) > 0.1 * Math.min(area, J.boxArea(o))) return null;
       }
       return b;
     }
@@ -126,19 +168,18 @@
       const cand = freeSlots.filter((s) => !s.used && s.x1 - s.x0 >= minLen);
       return cand.length ? r.pick(cand) : null;
     }
-
-    function placeLeopard(pose, variant, cub) {
+    function placeLeopard(pose, variant) {
       for (let attempt = 0; attempt < 5; attempt++) {
         let y = 0, slot = null, ds = 0.94;
         if (pose === 'branch') {
           slot = pickSlot(190 * d.scale);
           if (!slot) return null;
         } else {
-          const lo = gMin + (pose === 'peek' ? -20 : 0), hi = gMax - (pose === 'peek' ? 90 : 0);
+          const lo = gMin + (pose === 'peek' ? -10 : 0), hi = gMax - (pose === 'peek' ? 90 : 0);
           y = r.range(lo, hi); ds = depth(y);
         }
-        const scale = d.scale * ds * r.range(0.93, 1.07) * (cub ? 0.52 : 1);
-        const sp = A.leopardSprite({ pose, variant, night, scale, R, flip: r.chance(0.5), cub });
+        const scale = d.scale * ds * r.range(0.93, 1.07);
+        const sp = A.leopardSprite({ pose, variant, night, scale, R, flip: r.chance(0.5), soft });
         for (let k = 0; k < 14; k++) {
           let x;
           if (slot) {
@@ -150,7 +191,7 @@
           if (b) {
             occ.push(b);
             if (slot) slot.used = true;
-            const it = mk('leopard', { pose, variant, cub: !!cub }, sp, x, y, b);
+            const it = mk('leopard', { pose, variant, cub: false }, sp, x, y, b);
             it.label = labelFor(it);
             return it;
           }
@@ -161,9 +202,9 @@
     }
     function placeCub(mom) {
       const pose = r.pick(['sit', 'walk']);
-      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: Math.max(0.28, mom.scale * 0.52), R, flip: r.chance(0.5), cub: true });
+      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: Math.max(0.24, mom.scale * 0.52), R, flip: r.chance(0.5), cub: true, soft });
       for (const side of r.shuffle([-1, 1])) {
-        const x = mom.x + side * ((mom.box.x1 - mom.box.x0) * 0.5 + 34);
+        const x = mom.x + side * ((mom.box.x1 - mom.box.x0) * 0.5 + 30);
         const y = Math.min(gMax, mom.y + r.range(-4, 10));
         const b = tryPlace(sp, x, y, mom.box);
         if (b) {
@@ -177,7 +218,7 @@
     }
 
     const nLeo = r.int(d.count[0], d.count[1]);
-    const poseW = { walk: 3, sit: 2.2, lie: 2, peek: 1.6, branch: 3.2 };
+    const poseW = { walk: 3, sit: 2.2, lie: 2.4, peek: 1.8, branch: 3.2 };
     let blackLeft = d.minBlack || 0, wantCub = !!d.cub && r.chance(d.cub);
     let placed = 0, guard = 0;
     while (placed < nLeo && guard < nLeo * 8) {
@@ -185,30 +226,30 @@
       const avail = Object.assign({}, poseW);
       if (!pickSlot(190 * d.scale)) delete avail.branch;
       const pose = r.weighted(avail);
-      const black = blackLeft > 0 || r.chance(d.black || 0);
-      const it = placeLeopard(pose, black ? 'black' : 'spotted', false);
+      const blackSoFar = animals.filter((a) => a.variant === 'black').length;
+      const black = blackLeft > 0 || (blackSoFar < Math.ceil(nLeo / 2) && r.chance(d.black || 0));
+      const it = placeLeopard(pose, black ? 'black' : 'spotted');
       if (!it) { poseW[pose] *= 0.7; continue; }
       poseW[pose] *= 0.4;
-      items.push(it); placed++;
+      animals.push(it); placed++;
       if (black && blackLeft > 0) blackLeft--;
       if (wantCub && placed < nLeo && (pose === 'walk' || pose === 'sit' || pose === 'lie')) {
         const cub = placeCub(it);
-        if (cub) { items.push(cub); placed++; wantCub = false; }
+        if (cub) { animals.push(cub); placed++; wantCub = false; }
       }
     }
 
     const dTypes = night ? ['kuwuk', 'kuwuk', 'kijang', 'landak']
-      : stage === 0 ? ['kijang', 'ayam', 'landak']
-        : ['kuwuk', 'kuwuk', 'kijang', 'ayam', 'landak', 'lutung', 'elang'];
+      : stage === 0 ? ['kijang', 'ayam', 'landak', 'kuwuk']
+        : ['kuwuk', 'kuwuk', 'kijang', 'kijang', 'ayam', 'landak', 'lutung', 'elang'];
     for (let i = 0; i < (d.decoys || 0); i++) {
-      let type = r.pick(dTypes);
-      let slot = null;
+      let type = r.pick(dTypes), slot = null;
       if (A.DECOY_ON_BRANCH[type]) { slot = pickSlot(60); if (!slot) type = 'kijang'; }
       for (let k = 0; k < 16; k++) {
         let x, y, ds = 0.94;
         if (slot) { x = r.range(slot.x0 + 30, slot.x1 - 30); y = slot.y(x); }
         else { y = r.range(gMin, gMax); ds = depth(y); x = r.range(40, W - 40); }
-        const sp = A.animalSprite(type, { scale: d.scale * ds * r.range(0.93, 1.07), R, flip: r.chance(0.5), night, pose: r.chance(0.6) ? 'walk' : 'sit' });
+        const sp = A.animalSprite(type, { scale: d.scale * ds * r.range(0.93, 1.07), R, flip: r.chance(0.5), night, pose: r.chance(0.6) ? 'walk' : 'sit', soft });
         const b = tryPlace(sp, x, y);
         if (b) {
           occ.push(b);
@@ -216,135 +257,198 @@
           const it = mk('decoy', { type, variant: type }, sp, x, y, b);
           it.info = C.decoys[type];
           it.label = it.info.name;
-          items.push(it);
+          animals.push(it);
           break;
         }
       }
     }
 
-    /* ---------- lapisan depan (penutup) ---------- */
+    /* ================= tanaman berlapis ================= */
     const fr = J.rng(r.seed());
-    const fgItems = [];
-    const add = (type, a, owner, essential) => fgItems.push({ type, a, owner: owner || null, essential: !!essential, seed: fr.seed(), box: null });
-    for (let x = -30; x < W + 40; x += fr.range(140, 230)) add('fern', { x, y: H + 18, size: fr.range(100, 165) });
-    for (let i = 0, n = fr.int(6, 10); i < n; i++) add('grass', { x: fr.range(0, W), y: H - fr.range(0, 40), h: fr.range(40, 80) });
-    add('spray', { x: -10, y: fr.range(560, 820), size: fr.range(120, 170), dir: -0.3 });
-    add('spray', { x: W + 10, y: fr.range(560, 820), size: fr.range(120, 170), dir: Math.PI + 0.3 });
-    for (let i = 0, n = fr.int(2, 4); i < n; i++) add('vine', { x: fr.range(60, W - 60), y: -10, len: fr.range(140, 320) });
+    const objs = [];
+    const addV = (type, a, z, owner, essential) => {
+      const v = { kind: 'veg', type, a, z, owner: owner || null, essential: !!essential, seed: fr.seed() };
+      v.box = vegBox(type, a);
+      objs.push(v);
+      return v;
+    };
+    const gy = () => fr.range(groundY + 15, H - 10);
+    // pohon & tanaman tinggi di tengah (bisa berdiri di depan satwa)
+    for (let i = 0, n = Math.round(dens * 2 + fr()); i < n; i++) { const y = fr.range(groundY + 30, groundY + 170); addV('trunk', { x: fr.range(40, W - 40), y, w: fr.range(28, 48) }, y); }
+    for (let i = 0, n = Math.round(dens * 5); i < n; i++) { const y = fr.range(groundY + 20, H - 80); addV('sapling', { x: fr.range(30, W - 30), y, top: y - fr.range(230, 380) }, y); }
+    for (let i = 0, n = Math.round(dens * 3 + fr()); i < n; i++) { const y = fr.range(groundY + 20, H - 50); addV('treefern', { x: fr.range(40, W - 40), y, h: fr.range(110, 240), size: fr.range(90, 140) }, y); }
+    // semak, pakis, rotan, rumput tinggi, daun lebar
+    for (let i = 0, n = Math.round(4 + dens * 10); i < n; i++) { const y = gy(); addV('bush', { x: fr.range(20, W - 20), y, w: fr.range(90, 210), h: fr.range(60, 120), flowers: fr.chance(camo * 0.5) }, y); }
+    for (let i = 0, n = Math.round(5 + dens * 11); i < n; i++) { const y = gy(); addV('fern', { x: fr.range(20, W - 20), y, size: fr.range(60, 130), dry: fr.chance(camo * 0.35) }, y); }
+    for (let i = 0, n = Math.round(dens * 4); i < n; i++) { const y = gy(); addV('palm', { x: fr.range(30, W - 30), y, size: fr.range(120, 200), dry: fr.chance(camo * 0.25) }, y); }
+    for (let i = 0, n = Math.round(3 + dens * 7); i < n; i++) { const y = gy(); addV('grass', { x: fr.range(20, W - 20), y, h: fr.range(60, 135), dry: fr.chance(camo * 0.35) }, y); }
+    for (let i = 0, n = Math.round(dens * 4); i < n; i++) { const y = gy(); addV('spray', { x: fr.range(20, W - 20), y, size: fr.range(70, 120), dir: -Math.PI / 2 + fr.range(-0.7, 0.7), dry: fr.chance(camo * 0.2) }, y); }
+    // daun di sekitar dahan (di depan satwa yang di dahan)
+    for (const s of slots) {
+      for (let k = 0, n = Math.round(dens * 2 + fr()); k < n; k++) {
+        const x = fr.range(s.x0, s.x1);
+        addV('foliage', { x, y: s.y(x) - fr.range(0, 30), rad: fr.range(30, 55) }, s.y(x) + 4);
+      }
+    }
+    // tirai daun dari kanopi
+    for (let i = 0, n = Math.round(dens * 3); i < n; i++) addV('drape', { x: fr.range(40, W - 40), y: fr.range(120, 170), len: fr.range(120, 300) }, 3000);
 
-    const occl = d.occl || 0;
-    for (const it of items) {
+    // penutup khusus tiap satwa
+    for (const it of animals) {
       const b = it.box, bw = b.x1 - b.x0, bh = b.y1 - b.y0;
       const isLeo = it.kind === 'leopard';
-      let k = Math.round(occl * (isLeo ? 3.2 : 2) + fr.range(-0.45, 0.45));
+      const onBranch = it.pose === 'branch' || A.DECOY_ON_BRANCH[it.type];
+      const z = it.y;
+      let k = Math.round((d.occl || 0) * (isLeo ? 3.4 : 2.2) + fr.range(-0.45, 0.45));
       if (it.pose === 'peek') {
-        add('bush', { x: it.x, y: it.y + 92 * it.scale, w: 150 * it.scale + 40, h: 104 * it.scale + 12 }, it, true);
+        addV('bush', { x: it.x, y: it.y + 92 * it.scale, w: 150 * it.scale + 40, h: 104 * it.scale + 12 }, z + 2, it, true);
+        k = Math.max(0, k - 1);
+      } else if (isLeo && onBranch && fr.chance(d.hide || 0)) {
+        // badan tersembunyi di rimbun daun, kaki & ekor menjuntai
+        const fx = it.x + (it.sp.head ? -it.sp.head.x * 0.25 : 0);
+        addV('foliage', { x: fx, y: it.y - 26 * it.scale, rad: 70 * it.scale + 14 }, z + 3, it, true);
+        k = Math.max(0, k - 1);
+      } else if (isLeo && !onBranch && (it.pose === 'walk' || it.pose === 'sit' || it.pose === 'lie') && fr.chance(d.hide || 0)) {
+        // bersembunyi di balik batang pohon
+        addV('trunk', { x: it.cx + fr.range(-0.12, 0.12) * bw, y: it.y + fr.range(6, 26), w: J.clamp(bw * 0.28, 26, 56) }, z + 2, it, true);
         k = Math.max(0, k - 1);
       }
       for (let j = 0; j < k; j++) {
         let px = 0, py = 0;
         for (let t = 0; t < 10; t++) {
           px = fr.range(b.x0 + bw * 0.1, b.x1 - bw * 0.1);
-          py = fr.range(b.y0 + bh * 0.3, b.y1);
-          if (!it.head || Math.hypot(px - it.head.x, py - it.head.y) > it.head.r * (1.9 - occl)) break;
+          py = fr.range(b.y0 + bh * 0.25, b.y1);
+          if (!it.head || Math.hypot(px - it.head.x, py - it.head.y) > it.head.r * (1.8 - (d.occl || 0))) break;
         }
-        if (it.pose === 'branch' || A.DECOY_ON_BRANCH[it.type]) {
-          if (fr.chance(0.65)) add('foliage', { x: px, y: py, rad: bh * fr.range(0.3, 0.42) }, it);
-          else add('spray', { x: px, y: py, size: bh * 0.6, dir: fr.range(0, Math.PI * 2) }, it);
+        const zz = z + fr.range(1, 30);
+        if (onBranch) {
+          if (fr.chance(0.65)) addV('foliage', { x: px, y: py, rad: bh * fr.range(0.3, 0.42) }, zz, it);
+          else addV('spray', { x: px, y: py, size: bh * 0.6, dir: fr.range(0, Math.PI * 2) }, zz, it);
         } else {
-          const base = b.y1 + fr.range(4, 24);
-          const tp = fr.pick(['fern', 'fern', 'bush', 'grass', 'spray']);
-          const hh = Math.max(24, base - py);
-          if (tp === 'fern') add('fern', { x: px, y: base, size: hh * fr.range(1.0, 1.25) }, it);
-          else if (tp === 'bush') add('bush', { x: px, y: base, w: bw * fr.range(0.35, 0.6), h: hh * fr.range(0.9, 1.1) }, it);
-          else if (tp === 'grass') add('grass', { x: px, y: base, h: hh * 1.15 }, it);
-          else add('spray', { x: px, y: base, size: hh * 1.2, dir: -Math.PI / 2 + fr.range(-0.6, 0.6) }, it);
+          const base = b.y1 + fr.range(4, 24), hh = Math.max(24, base - py);
+          const tp = fr.pick(['fern', 'fern', 'bush', 'grass', 'spray', 'palm']);
+          const dry = fr.chance(camo * 0.4);
+          if (tp === 'fern') addV('fern', { x: px, y: base, size: hh * fr.range(1.0, 1.25), dry }, zz, it);
+          else if (tp === 'bush') addV('bush', { x: px, y: base, w: bw * fr.range(0.35, 0.6), h: hh * fr.range(0.9, 1.1) }, zz, it);
+          else if (tp === 'grass') addV('grass', { x: px, y: base, h: hh * 1.15, dry }, zz, it);
+          else if (tp === 'palm') addV('palm', { x: px, y: base, size: hh * 1.1, dry }, zz, it);
+          else addV('spray', { x: px, y: base, size: hh * 1.2, dir: -Math.PI / 2 + fr.range(-0.6, 0.6), dry }, zz, it);
         }
       }
     }
-    // beberapa penutup acak di tempat lain supaya posisi macan tutul tidak ketahuan
-    for (let i = 0, n = fr.int(2, 4); i < n; i++) {
-      const x = fr.range(60, W - 60), y = fr.range(gMin, H);
-      if (fr.chance(0.5)) add('fern', { x, y, size: fr.range(70, 120) });
-      else add('bush', { x, y, w: fr.range(90, 160), h: fr.range(60, 100) });
-    }
-    for (const s of slots) if (!s.used && fr.chance(0.5)) add('foliage', { x: fr.range(s.x0, s.x1), y: s.y((s.x0 + s.x1) / 2) - 10, rad: fr.range(36, 56) });
+    // bingkai paling depan
+    for (let x = -30; x < W + 40; x += fr.range(140, 230)) addV('fern', { x, y: H + 18, size: fr.range(100, 165) }, 5000);
+    for (let i = 0, n = fr.int(5, 9); i < n; i++) addV('grass', { x: fr.range(0, W), y: H - fr.range(0, 30), h: fr.range(40, 80) }, 5000);
+    addV('spray', { x: -10, y: fr.range(560, 820), size: fr.range(120, 170), dir: -0.3 }, 5000);
+    addV('spray', { x: W + 10, y: fr.range(560, 820), size: fr.range(120, 170), dir: Math.PI + 0.3 }, 5000);
+    for (let i = 0, n = fr.int(1, 3); i < n; i++) addV('vine', { x: fr.range(60, W - 60), y: -10, len: fr.range(140, 300) }, 5000);
 
-    const fg = J.makeCanvas(W * R, H * R);
-    const fgc = fg.getContext('2d', { willReadFrequently: true });
-    function drawFg() {
-      fgc.setTransform(1, 0, 0, 1, 0, 0);
-      fgc.clearRect(0, 0, fg.width, fg.height);
-      fgc.setTransform(R, 0, 0, R, 0, 0);
-      for (const f of fgItems) {
-        const rr = J.rng(f.seed), a = f.a;
-        if (f.type === 'fern') f.box = F.fern(fgc, rr, a.x, a.y, a.size, p);
-        else if (f.type === 'grass') f.box = F.grass(fgc, rr, a.x, a.y, a.h, p);
-        else if (f.type === 'spray') f.box = F.leafSpray(fgc, rr, a.x, a.y, a.size, p, a.dir);
-        else if (f.type === 'vine') f.box = F.vine(fgc, rr, p, a.x, a.y, a.len, { big: 1.2 });
-        else if (f.type === 'bush') f.box = F.bush(fgc, rr, a.x, a.y, a.w, a.h, p);
-        else if (f.type === 'foliage') f.box = F.foliage(fgc, rr, a.x, a.y, a.rad, p);
-      }
-    }
-    function visibility(it, fd) {
-      const sp = it.sp, m = sp.mask, mw = m.width, mh = m.height, md = m.data;
-      const offx = (it.x + sp.ox) * R, offy = (it.y + sp.oy) * R, fw = fg.width, fh = fg.height;
-      const step = Math.max(2, Math.round(3 * R));
-      let tot = 0, vis = 0;
-      for (let y = 0; y < mh; y += step) {
-        for (let x = 0; x < mw; x += step) {
-          if (md[(y * mw + x) * 4 + 3] < 128) continue;
+    for (const it of animals) objs.push({ kind: 'animal', it, z: it.y, box: it.box });
+    const order = () => objs.sort((a, b) => a.z - b.z);
+    order();
+
+    /* ================= jaminan terlihat & topeng bagian terlihat ================= */
+    for (const it of animals) {
+      const sp = it.sp, cw = sp.canvas.width, ch = sp.canvas.height;
+      const lc = J.makeCanvas(cw, ch), lg = lc.getContext('2d', { willReadFrequently: true });
+      const need = it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
+      const md = sp.mask.data, n = cw * ch;
+      let vm = null;
+      for (let iter = 0; iter < 30; iter++) {
+        const idx = objs.findIndex((o) => o.kind === 'animal' && o.it === it);
+        const front = [];
+        for (let i = idx + 1; i < objs.length; i++) if (J.overlapArea(objs[i].box, it.box) > 0) front.push(objs[i]);
+        lg.setTransform(1, 0, 0, 1, 0, 0);
+        lg.clearRect(0, 0, cw, ch);
+        lg.setTransform(R, 0, 0, R, -(it.x + sp.ox) * R, -(it.y + sp.oy) * R);
+        for (const o of front) drawObj(lg, o, p);
+        const cov = lg.getImageData(0, 0, cw, ch).data;
+        vm = new Uint8Array(n);
+        let tot = 0, vis = 0;
+        for (let i = 0; i < n; i++) {
+          if (md[i * 4 + 3] < 100) continue;
           tot++;
-          const fx = Math.round(offx + x), fy = Math.round(offy + y);
-          if (fx < 0 || fy < 0 || fx >= fw || fy >= fh) continue;
-          if (fd[(fy * fw + fx) * 4 + 3] < 110) vis++;
+          if (cov[i * 4 + 3] < 110) { vm[i] = 1; vis++; }
         }
+        it.vis = tot ? vis / tot : 1;
+        if (it.vis >= need) break;
+        const byOverlap = (a, b) => J.overlapArea(b.box, it.box) - J.overlapArea(a.box, it.box);
+        let cands = front.filter((o) => o.kind === 'veg' && !o.essential).sort(byOverlap);
+        // persembunyian khusus boleh dilepas hanya jika macan tutul hampir tak terlihat
+        if (!cands.length && it.vis < need * 0.7) cands = front.filter((o) => o.kind === 'veg').sort(byOverlap);
+        if (!cands.length) break;
+        const drop = it.vis < need * 0.5 ? 2 : 1;
+        for (const c of cands.slice(0, drop)) objs.splice(objs.indexOf(c), 1);
       }
-      return tot ? vis / tot : 1;
-    }
-    for (let iter = 0; iter < 10; iter++) {
-      drawFg();
-      const fd = fgc.getImageData(0, 0, fg.width, fg.height).data;
-      let changed = false;
-      for (const it of items) {
-        it.vis = visibility(it, fd);
-        const need = it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
-        if (it.vis >= need) continue;
-        const cands = fgItems.filter((f) => !f.essential && f.box && J.overlapArea(f.box, it.box) > 0)
-          .sort((a, b) => J.overlapArea(b.box, it.box) - J.overlapArea(a.box, it.box));
-        if (cands.length) { fgItems.splice(fgItems.indexOf(cands[0]), 1); changed = true; }
-      }
-      if (!changed) break;
+      it.vmask = vm;
+      // mata hanya menyala jika tidak tertutup
+      it.eyesVis = it.eyes.filter((e) => {
+        const ex = Math.round((e.x - it.x - sp.ox) * R), ey = Math.round((e.y - it.y - sp.oy) * R);
+        for (let dy = -3; dy <= 3; dy += 3) for (let dx = -3; dx <= 3; dx += 3) {
+          const x = ex + dx, y = ey + dy;
+          if (x >= 0 && y >= 0 && x < cw && y < ch && vm[y * cw + x]) return true;
+        }
+        return false;
+      });
     }
 
-    /* ---------- mode malam: kamera inframerah ---------- */
+    /* ================= gabungkan menjadi satu gambar ================= */
+    const comp = J.makeCanvas(W * R, H * R);
+    const cg = comp.getContext('2d', { willReadFrequently: night });
+    cg.setTransform(R, 0, 0, R, 0, 0);
+    cg.drawImage(bg, 0, 0, W, H);
+    for (const o of objs) drawObj(cg, o, p);
+    F.dapple(cg, J.rng(r.seed()), W, H, d.light || 0, groundY, night);
+    if (mode === 'pagi') { cg.fillStyle = 'rgba(240,250,240,0.08)'; cg.fillRect(0, 0, W, H); }
+    if (mode === 'senja') {
+      cg.save(); cg.globalCompositeOperation = 'multiply';
+      cg.fillStyle = 'rgba(240,160,105,0.5)'; cg.fillRect(0, 0, W, H);
+      cg.restore();
+    }
     if (night) {
-      A.toIR(bg, { falloff: true, gain: 0.82, foliage: 0.7, cx: 0.5, cy: 0.86, rad: 0.58, noise: 12 });
-      const diag = Math.hypot(W, H) * 0.6;
-      for (const it of items) {
+      A.toIR(comp, { falloff: true, gain: 0.95, foliage: 0.72, cx: 0.5, cy: 0.86, rad: 0.62, noise: 12 });
+      const diag = Math.hypot(W, H) * 0.62;
+      for (const it of animals) { // versi untuk sorotan saat ditemukan
         const dist = Math.hypot(it.cx - W * 0.5, it.cy - H * 0.86) / diag;
         A.toIR(it.sp.canvas, { level: J.clamp(1.28 - dist * 1.1, 0.4, 1.06), gain: 1.12, noise: 8 });
       }
-      A.toIR(fg, { falloff: true, gain: 1.05, foliage: 0.75, cx: 0.5, cy: 0.92, rad: 0.66, noise: 10 });
     }
 
-    items.sort((a, b) => a.y - b.y);
+    animals.sort((a, b) => a.y - b.y);
     return {
-      seed, stage, diff: d, mode, night, bg, fg, items, R,
-      leopards: items.filter((i) => i.kind === 'leopard'),
+      seed, stage, diff: d, mode, night, comp, items: animals, R,
+      leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)
     };
+  }
+
+  /* Hanya bagian tubuh yang terlihat yang bisa diklik. */
+  function visHit(it, lx, ly, tol) {
+    const sp = it.sp, R = sp.R, m = sp.mask, mw = m.width, mh = m.height, vm = it.vmask;
+    const px = (lx - it.x - sp.ox) * R, py = (ly - it.y - sp.oy) * R;
+    const test = (x, y) => {
+      x = Math.round(x); y = Math.round(y);
+      if (x < 0 || y < 0 || x >= mw || y >= mh) return false;
+      return vm ? vm[y * mw + x] === 1 : m.data[(y * mw + x) * 4 + 3] > 60;
+    };
+    if (test(px, py)) return true;
+    if (tol > 0) {
+      for (const f of [0.5, 1]) for (let k = 0; k < 12; k++) {
+        const a = (k / 12) * Math.PI * 2;
+        if (test(px + Math.cos(a) * tol * R * f, py + Math.sin(a) * tol * R * f)) return true;
+      }
+    }
+    return false;
   }
 
   /* Cari satwa di titik (lx, ly). Prioritas: kena tepat > macan tutul dalam toleransi > pengecoh. */
   S.hit = function (scene, lx, ly, tol) {
     const list = scene.items.slice().sort((a, b) => b.y - a.y);
     const inBox = (it, t) => lx >= it.box.x0 - t && lx <= it.box.x1 + t && ly >= it.box.y0 - t && ly <= it.box.y1 + t;
-    for (const it of list) if (inBox(it, 0) && A.spriteHit(it.sp, lx - it.x, ly - it.y, 0)) return it;
+    for (const it of list) if (inBox(it, 0) && visHit(it, lx, ly, 0)) return it;
     for (const kind of ['leopard', 'decoy']) {
       for (const it of list) {
-        if (it.kind !== kind || !inBox(it, tol)) continue;
-        if (A.spriteHit(it.sp, lx - it.x, ly - it.y, tol)) return it;
+        if (it.kind === kind && inBox(it, tol) && visHit(it, lx, ly, tol)) return it;
       }
     }
     return null;

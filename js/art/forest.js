@@ -190,10 +190,11 @@
     return { x0: Math.min(sx0, sx1), x1: Math.max(sx0, sx1), side, y: (px) => yT0 + slope * (px - x0), used: false };
   };
 
-  F.canopy = function (g, r, p, W) {
+  F.canopy = function (g, r, p, W, low) {
+    low = low || 0;
     const cs = [];
     for (let x = -80; x < W + 80; x += r.range(70, 120)) {
-      const base = r.range(10, 70), n = r.int(3, 5);
+      const base = r.range(10, 70) + low * r.range(40, 90), n = r.int(3, 5);
       for (let k = 0; k < n; k++) cs.push([x + r.range(-50, 50), base + r.range(-60, 36), r.range(50, 92)]);
     }
     F.blobs(g, cs, p.canopy, p.canopyHi, p.outline, 3.5, p.canopyDark);
@@ -237,9 +238,10 @@
     return { x0: x - rad * 1.1, y0: y - rad * 0.95, x1: x + rad * 1.1, y1: y + rad * 0.95 };
   };
 
-  function frond(g, x, y, a, len, col, p) {
+  function frond(g, x, y, a, len, col, p, o) {
+    o = o || {};
     const dx = Math.cos(a), dy = Math.sin(a);
-    const droop = len * 0.32 * (Math.abs(dx) + 0.25);
+    const droop = len * (o.droop || 0.32) * (Math.abs(dx) + 0.25);
     const cx = x + dx * len * 0.55, cy = y + dy * len * 0.55;
     const tx = x + dx * len, ty = y + dy * len + droop;
     const pts = [], N = 13;
@@ -250,7 +252,7 @@
       const L = Math.hypot(ddx, ddy) || 1;
       pts.push([px, py, ddx / L, ddy / L, t]);
     }
-    const leafL = len * 0.2;
+    const leafL = len * (o.leafL || 0.2), leafW = o.leafW || 0.2;
     for (let pass = 0; pass < 2; pass++) {
       g.fillStyle = pass === 0 ? p.outline : col;
       const grow = pass === 0 ? 1.7 : 0;
@@ -260,7 +262,7 @@
           const vx = nx * s + ux * 0.5, vy = ny * s + uy * 0.5;
           const ang = Math.atan2(vy, vx);
           g.beginPath();
-          g.ellipse(px + vx * l * 0.48, py + vy * l * 0.48, l * 0.55 + grow, l * 0.2 + grow, ang, 0, TAU);
+          g.ellipse(px + vx * l * 0.48, py + vy * l * 0.48, l * 0.55 + grow, l * leafW + grow, ang, 0, TAU);
           g.fill();
         }
       }
@@ -425,6 +427,116 @@
       for (let k = 0; k < 5; k++) { const a = (k / 5) * TAU; g.beginPath(); g.arc(fx + Math.cos(a) * s, fy + Math.sin(a) * s, s * 0.7, 0, TAU); g.fill(); }
       g.fillStyle = '#5a2a0a'; g.beginPath(); g.arc(fx, fy, s * 0.45, 0, TAU); g.fill();
     }
+  };
+
+  /* Palet pakis/daun kering (cokelat-oranye) — warnanya mirip macan tutul. */
+  F.dryPalette = function (p) {
+    return Object.assign({}, p, {
+      fern: '#b47b3c', fernHi: '#cf9b52', fernDark: '#7a4e22',
+      leaf: '#b8843f', leafHi: '#d3a257', leafVein: '#ecd09a', grass: '#b49448', grassHi: '#cdb062'
+    });
+  };
+
+  /* Pakis haji (paku pohon) — khas hutan pegunungan Jawa. */
+  F.treeFern = function (g, r, p, x, baseY, h, size) {
+    const topX = x + r.range(-18, 18), topY = baseY - h;
+    const trunk = new Path2D(`M${x} ${baseY} Q${x + r.range(-14, 14)} ${(baseY + topY) / 2} ${topX} ${topY}`);
+    g.lineCap = 'round';
+    g.strokeStyle = p.outline; g.lineWidth = 18; g.stroke(trunk);
+    g.strokeStyle = '#5b4330'; g.lineWidth = 12.5; g.stroke(trunk);
+    g.strokeStyle = '#3e2c1e'; g.lineWidth = 2;
+    for (let i = 0; i < 12; i++) {
+      const t = r(), px = J.lerp(x, topX, t) + r.range(-3, 3), py = J.lerp(baseY, topY, t);
+      g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py - 3); g.stroke();
+    }
+    const n = r.int(9, 13), fr = [];
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI / 2 + (i / (n - 1) - 0.5) * Math.PI * 1.85 + r.range(-0.1, 0.1);
+      fr.push({ a, len: size * r.range(0.75, 1.05), col: r.chance(0.5) ? p.fern : p.fernHi });
+    }
+    fr.sort((A, B) => Math.sin(A.a) - Math.sin(B.a));
+    for (const f of fr) frond(g, topX, topY, f.a, f.len, f.col, p, { droop: 0.42 });
+    g.fillStyle = p.fernDark; circ(g, topX, topY, 8); g.fill();
+    return { x0: topX - size * 1.15, y0: topY - size * 0.85, x1: topX + size * 1.15, y1: baseY + 4 };
+  };
+
+  /* Rumpun rotan/palem: pelepah panjang melengkung. */
+  F.palm = function (g, r, p, x, y, size) {
+    const n = r.int(4, 7);
+    for (let i = 0; i < n; i++) {
+      frond(g, x, y, -Math.PI / 2 + r.range(-1.15, 1.15), size * r.range(0.8, 1.1), r.chance(0.5) ? p.leaf : p.leafHi, p, { leafL: 0.26, leafW: 0.09, droop: 0.4 });
+    }
+    return { x0: x - size * 1.15, y0: y - size * 1.05, x1: x + size * 1.15, y1: y + 6 };
+  };
+
+  /* Pohon muda kurus dengan mahkota daun. */
+  F.sapling = function (g, r, p, x, baseY, topY) {
+    const w = r.range(8, 15), tx = x + r.range(-14, 14);
+    const trunk = new Path2D(`M${x} ${baseY} Q${x + r.range(-26, 26)} ${(baseY + topY) / 2} ${tx} ${topY}`);
+    g.lineCap = 'round';
+    g.strokeStyle = p.outline; g.lineWidth = w + 5; g.stroke(trunk);
+    g.strokeStyle = p.trunk; g.lineWidth = w; g.stroke(trunk);
+    const cs = [], n = r.int(5, 9), rad = r.range(42, 70);
+    for (let i = 0; i < n; i++) { const a = r() * TAU, d = rad * r.range(0, 0.6); cs.push([tx + Math.cos(a) * d * 1.2, topY + Math.sin(a) * d * 0.6, rad * r.range(0.42, 0.62)]); }
+    F.blobs(g, cs, r.chance(0.5) ? p.canopy : p.bush, p.canopyHi, p.outline, 3, p.canopyDark);
+    return { x0: Math.min(x, tx) - rad * 1.3, y0: topY - rad * 0.95, x1: Math.max(x, tx) + rad * 1.3, y1: baseY + 4 };
+  };
+
+  /* Gerombol daun yang menggantung dari kanopi. */
+  F.drape = function (g, r, p, x, y0, len) {
+    const vb = F.vine(g, r, p, x, y0, len, { big: 1.1 });
+    const fb = F.foliage(g, r, x + r.range(-12, 12), y0 + len, r.range(34, 56), p);
+    return { x0: Math.min(vb.x0, fb.x0), y0: y0, x1: Math.max(vb.x1, fb.x1), y1: fb.y1 };
+  };
+
+  /* Semak bawah di kejauhan yang rapat dan agak buram. */
+  F.understory = function (g, r, p, W, groundY, dens) {
+    const cs = [];
+    for (let x = -40; x < W + 40; x += r.range(28, 52)) cs.push([x, groundY - r.range(10, 150 * (0.4 + dens)), r.range(30, 70)]);
+    g.save(); g.globalAlpha = 0.85;
+    F.blobs(g, cs, '#5f9a4c', '#78ae5d', null, 0, '#4d843f');
+    g.restore();
+  };
+
+  /* Cahaya belang-belang: bayangan kanopi + bintik sinar matahari.
+     Jatuh juga di tubuh macan tutul sehingga siluetnya pecah — kamuflase alami. */
+  F.dapple = function (g, r, W, H, s, groundY, night) {
+    if (!(s > 0)) return;
+    g.save();
+    g.globalCompositeOperation = 'multiply';
+    const n = Math.round(12 + 20 * s);
+    for (let i = 0; i < n; i++) {
+      const x = r.range(-100, W + 100), y = r.range(130, H), rad = r.range(80, 230);
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+      gr.addColorStop(0, 'rgba(38,70,34,' + (0.6 * s) + ')');
+      gr.addColorStop(1, 'rgba(38,70,34,0)');
+      g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    const lg = g.createLinearGradient(0, groundY - 260, 0, H);
+    lg.addColorStop(0, 'rgba(70,100,60,0)');
+    lg.addColorStop(0.45, 'rgba(70,100,60,' + (0.4 * s) + ')');
+    lg.addColorStop(1, 'rgba(70,100,60,' + (0.22 * s) + ')');
+    g.fillStyle = lg; g.fillRect(0, groundY - 260, W, H);
+    if (!night) {
+      g.globalCompositeOperation = 'soft-light';
+      const zones = r.int(4, 7);
+      for (let z = 0; z < zones; z++) {
+        const zx = r.range(0, W), zy = r.range(220, H - 30), m = Math.round(24 + 46 * s);
+        for (let k = 0; k < m; k++) {
+          const x = zx + r.range(-190, 190), y = zy + r.range(-100, 100), rr = r.range(4, 15);
+          const gr = g.createRadialGradient(x, y, 0, x, y, rr);
+          const al = r.range(0.25, 0.5) * s;
+          gr.addColorStop(0, 'rgba(255,226,130,' + al + ')');
+          gr.addColorStop(0.6, 'rgba(255,226,130,' + al * 0.6 + ')');
+          gr.addColorStop(1, 'rgba(255,226,130,0)');
+          g.fillStyle = gr;
+          g.save(); g.translate(x, y); g.scale(1.4, 1); g.translate(-x, -y);
+          g.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+          g.restore();
+        }
+      }
+    }
+    g.restore();
   };
 
   F.vignette = function (W, H, R, strength) {
