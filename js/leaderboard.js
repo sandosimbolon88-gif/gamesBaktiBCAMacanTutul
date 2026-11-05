@@ -47,6 +47,41 @@
     },
     resetToday() { const k = dayKey(); LB.saveAll(LB.load().filter((e) => e.day !== k)); },
     resetAll() { LB.saveAll([]); },
+    /* Cadangan data untuk dipindah ke PC lain. */
+    backup(settings) {
+      return { app: 'jejak-si-macan-tutul', format: 1, exportedAt: new Date().toISOString(), settings: settings || null, leaderboard: LB.load() };
+    },
+    /* Gabungkan skor dari file cadangan (skor yang sudah ada tidak digandakan). */
+    importBackup(data) {
+      const list = Array.isArray(data) ? data : data && Array.isArray(data.leaderboard) ? data.leaderboard : null;
+      if (!list || (data && data.app && data.app !== 'jejak-si-macan-tutul')) throw new Error('format');
+      const cur = LB.load();
+      const seen = new Set(cur.map((e) => e.id || e.ts + '|' + e.name));
+      let added = 0, skipped = 0;
+      for (const raw of list) {
+        if (!raw || typeof raw !== 'object') { skipped++; continue; }
+        const score = Math.floor(Number(raw.score));
+        const ts = Number(raw.ts) || Date.now();
+        if (!isFinite(score) || score < 0 || score > 100000) { skipped++; continue; }
+        const e = {
+          id: typeof raw.id === 'string' && raw.id ? raw.id.slice(0, 40) : ts.toString(36) + Math.random().toString(36).slice(2, 7),
+          ts,
+          day: typeof raw.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.day) ? raw.day : dayKey(new Date(ts)),
+          name: String(raw.name || '').slice(0, 20) || 'Penjelajah',
+          score,
+          stages: Math.max(0, Math.floor(Number(raw.stages) || 0)),
+          mistakes: Math.max(0, Math.floor(Number(raw.mistakes) || 0))
+        };
+        const key = e.id;
+        if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
+        seen.add(key);
+        cur.push(e);
+        added++;
+      }
+      cur.sort((a, b) => a.ts - b.ts);
+      LB.saveAll(cur);
+      return { added, skipped };
+    },
     csv() {
       const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih']];
       for (const e of LB.load().sort((a, b) => a.ts - b.ts)) {

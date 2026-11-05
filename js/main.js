@@ -199,6 +199,7 @@
     if (state === 'play') return;
     UI.overlay('overlay-admin', true);
     $('admin-pin').classList.remove('hidden');
+    adminMsg('');
     $('admin-menu').classList.add('hidden');
     UI.askPin((pin) => {
       if (pin === String(CFG.adminPin)) { $('admin-pin').classList.add('hidden'); $('admin-menu').classList.remove('hidden'); renderAdmin(); }
@@ -228,13 +229,46 @@
   }
   on('btn-admin-cancel', closeAdmin);
   on('btn-admin-close', closeAdmin);
-  on('btn-admin-export', () => {
-    const blob = new Blob(['﻿' + J.Leaderboard.csv()], { type: 'text/csv;charset=utf-8' });
+  function download(name, text, type) {
+    const blob = new Blob([text], { type });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'skor-jejak-si-macan-tutul-' + J.Leaderboard.dayKey() + '.csv';
+    a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  function adminMsg(text, err) {
+    const m = $('admin-msg');
+    m.textContent = text || '';
+    m.classList.toggle('err', !!err);
+  }
+  on('btn-admin-export', () => {
+    download('skor-jejak-si-macan-tutul-' + J.Leaderboard.dayKey() + '.csv', '\ufeff' + J.Leaderboard.csv(), 'text/csv;charset=utf-8');
+  });
+  on('btn-admin-backup', () => {
+    const stamp = J.Leaderboard.dayKey() + '-' + new Date().toTimeString().slice(0, 5).replace(':', '');
+    download('cadangan-jejak-si-macan-tutul-' + stamp + '.json', JSON.stringify(J.Leaderboard.backup(settings), null, 1), 'application/json');
+    adminMsg(C.ui.adminBackupDone);
+  });
+  on('btn-admin-import', () => { $('admin-import-file').value = ''; $('admin-import-file').click(); });
+  $('admin-import-file').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const data = JSON.parse(String(rd.result).replace(/^\ufeff/, ''));
+        const res = J.Leaderboard.importBackup(data);
+        if (data && data.settings && typeof data.settings === 'object') {
+          if (CFG.durationOptions.includes(data.settings.duration)) settings.duration = data.settings.duration;
+          if (typeof data.settings.sound === 'boolean') settings.sound = data.settings.sound;
+          saveSettings(); applySound(); renderAdmin();
+        }
+        adminMsg(J.tpl(C.ui.adminImported, res));
+      } catch (err) { adminMsg(C.ui.adminImportFail, true); }
+    };
+    rd.onerror = () => adminMsg(C.ui.adminImportFail, true);
+    rd.readAsText(f);
   });
   on('btn-admin-reset-today', () => { if (confirm(C.ui.adminConfirm)) J.Leaderboard.resetToday(); });
   on('btn-admin-reset-all', () => { if (confirm(C.ui.adminConfirm)) J.Leaderboard.resetAll(); });
@@ -264,7 +298,7 @@
       lock();
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') lock(); });
     }
-    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    if (!window.JSMT_SINGLE_FILE && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
   }

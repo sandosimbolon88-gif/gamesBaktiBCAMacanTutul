@@ -145,6 +145,12 @@
             <div class="admin-row"><span data-t="ui.adminSound"></span><div id="admin-sound" class="seg"></div></div>
             <div class="admin-actions">
               <button class="btn" id="btn-admin-export" data-t="ui.adminExport"></button>
+              <div class="admin-pair">
+                <button class="btn" id="btn-admin-backup" data-t="ui.adminBackup"></button>
+                <button class="btn" id="btn-admin-import" data-t="ui.adminImport"></button>
+              </div>
+              <input type="file" id="admin-import-file" accept=".json,application/json" hidden>
+              <div class="admin-msg" id="admin-msg"></div>
               <button class="btn btn-danger" id="btn-admin-reset-today" data-t="ui.adminResetToday"></button>
               <button class="btn btn-danger" id="btn-admin-reset-all" data-t="ui.adminResetAll"></button>
             </div>

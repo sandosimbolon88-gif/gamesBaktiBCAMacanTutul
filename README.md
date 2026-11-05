@@ -12,7 +12,11 @@ Pemain berperan sebagai peneliti yang memeriksa rekaman kamera pengintai dan har
 
 ## Cara menjalankan
 
-**Cara cepat:** buka `index.html` dengan Google Chrome atau Microsoft Edge (klik dua kali file-nya).
+**Paling mudah (satu file, bisa dipindah antar PC):** pakai **`dist/jejak-si-macan-tutul.html`**.
+Salin file ini ke flashdisk atau PC mana pun, lalu buka dengan Chrome atau Edge. Tidak perlu internet atau instalasi.
+Panduan singkat untuk panitia ada di `dist/PANDUAN-PINDAH-PC.txt`.
+
+**Dari folder proyek:** buka `index.html` dengan Google Chrome atau Microsoft Edge (klik dua kali file-nya).
 
 **Disarankan untuk pameran** adalah menjalankan server lokal. Dengan cara ini game tetap jalan tanpa internet dan layar tidak meredup sendiri:
 
@@ -50,11 +54,26 @@ Tips booth:
 4. **Hasil**: skor, peringkat hari ini, ajakan aksi konservasi, dan isi nama lewat keyboard di layar atau keyboard fisik.
 5. **Papan skor**, lalu otomatis kembali ke layar awal. Game juga kembali ke layar awal kalau ditinggal 45 detik.
 
+## Pindah antar PC (game + data skor)
+
+1. **Game:** salin `dist/jejak-si-macan-tutul.html` ke PC tujuan.
+2. **Data skor:** skor tersimpan di browser masing-masing PC, jadi pindahkan lewat file cadangan:
+   - Di PC lama, buka Panel Admin, pilih **Simpan cadangan**, lalu ambil file `cadangan-jejak-si-macan-tutul-….json` dari folder Downloads.
+   - Di PC baru, buka Panel Admin, pilih **Muat cadangan**, lalu pilih file `.json` tadi.
+   - Skor **digabungkan** dengan skor yang sudah ada di PC baru. Memuat file yang sama berkali-kali **tidak membuat skor dobel**. Pengaturan durasi dan suara ikut terbawa.
+3. Cara yang sama juga berlaku kalau pindah dari `http://localhost` ke versi satu file (atau sebaliknya) di PC yang sama, karena penyimpanannya terpisah.
+
+Setelah mengubah `js/content.js` atau `js/config.js` (misalnya mengganti PIN), buat ulang file tunggalnya:
+
+```bash
+node tools/build-single.mjs
+```
+
 ## Panel admin
 
 - Buka dengan **ketuk pojok kiri atas layar awal 5 kali**, atau tekan **Ctrl+Shift+A**.
 - PIN bawaan adalah **`1234`**. **Ganti sebelum pameran** di `js/config.js` (`adminPin`).
-- Isinya: durasi sesi (60/90/120 detik), suara nyala/mati, **unduh skor (CSV)**, hapus skor hari ini, dan hapus semua skor.
+- Isinya: durasi sesi (60/90/120 detik), suara nyala/mati, **unduh skor (CSV untuk Excel)**, **simpan/muat cadangan** (untuk pindah PC), hapus skor hari ini, dan hapus semua skor.
 
 ## Mengubah konten dan pengaturan
 
@@ -102,7 +121,8 @@ js/leaderboard.js     papan skor lokal + ekspor CSV
 js/audio.js           efek suara (disintesis, tanpa file)
 js/ui.js, js/main.js  layar, input, mode kiosk, panel admin
 sw.js                 cache offline
-tools/                pemeriksa "tanpa angka" & halaman preview aset
+tools/                pemeriksa "tanpa angka", build satu file, preview aset
+dist/                 versi SATU FILE siap pindah PC + panduan panitia
 docs/PLAN.md          rencana & keputusan
 ```
 

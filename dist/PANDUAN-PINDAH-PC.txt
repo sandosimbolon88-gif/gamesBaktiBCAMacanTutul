@@ -1,0 +1,27 @@
+JEJAK SI MACAN TUTUL — PANDUAN PINDAH PC
+=========================================
+
+MEMASANG DI PC LAIN
+1. Salin file "jejak-si-macan-tutul.html" ke PC tujuan (flashdisk, Google Drive, atau email).
+2. Buka dengan Google Chrome atau Microsoft Edge:
+   klik kanan file > Open with / Buka dengan > Chrome atau Edge.
+   Tidak perlu internet dan tidak perlu instal apa pun.
+3. Layar penuh: klik tombol [ ] di pojok kiri bawah layar awal, atau tekan F11.
+
+MEMINDAHKAN PAPAN SKOR (DATA)
+Skor tersimpan di browser masing-masing PC, jadi perlu dipindah lewat file cadangan:
+a. Di PC LAMA: buka Panel Admin
+   (ketuk pojok kiri atas layar awal 5 kali, atau tekan Ctrl+Shift+A), masukkan PIN,
+   lalu pilih "Simpan cadangan". File "cadangan-jejak-si-macan-tutul-....json"
+   tersimpan di folder Downloads.
+b. Salin file .json itu ke PC BARU (bersama file .html).
+c. Di PC BARU: buka game > Panel Admin > "Muat cadangan" > pilih file .json tadi.
+   Skor digabungkan dan tidak akan dobel walau dimuat dua kali.
+   Pengaturan durasi dan suara juga ikut terbawa.
+
+TIPS SELAMA PAMERAN
+- Simpan cadangan setiap akhir hari.
+- Pakai browser yang sama setiap hari dan jangan hapus riwayat/data browser.
+- "Unduh skor (CSV untuk Excel)" untuk rekap pemenang harian.
+- Matikan sleep/screen saver di pengaturan daya PC.
+- PIN admin: tanyakan ke panitia (PIN bawaan 1234 bila belum diganti).
