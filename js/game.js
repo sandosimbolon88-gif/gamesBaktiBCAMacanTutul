@@ -8,7 +8,7 @@
   /* ---------- gambar adegan (dipakai juga oleh layar awal) ---------- */
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
-    ctx.drawImage(sc.comp, 0, 0, W, H);
+    ctx.drawImage(sc.comp,0,0,W,H);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
@@ -89,9 +89,16 @@
   class Game {
     constructor(opts) {
       this.onEnd = opts.onEnd;
+      this.timers = new Set();
       this.active = false;
       this.scene = null;
     }
+
+    later(fn, ms) {
+      const id = setTimeout(() => { this.timers.delete(id); if (this.active) fn(); }, ms);
+      this.timers.add(id);
+    }
+    clearTimers() { for (const id of this.timers) clearTimeout(id); this.timers.clear(); }
 
     buildFactQueue() {
       const rr = J.rng(J.randomSeed());
@@ -110,8 +117,10 @@
     }
 
     start(duration) {
+      this.clearTimers();
       this.duration = duration;
       this.timeLeft = duration;
+      this.baseFound = 0; this.bonusFound = 0; this.bonusScore = 0;
       this.score = 0; this.stage = 0; this.stagesCleared = 0; this.mistakes = 0;
       this.effects = []; this.particles = [];
       this.paused = false; this.ending = false; this.active = true;
@@ -126,27 +135,39 @@
     }
 
     loadScene(sc) {
+      if (J.resetCamera) J.resetCamera();
       this.scene = sc;
+      this.bonus = new J.Bonus(sc);
+      UI().hud.bonus(false, this.bonusScore);
       const now = J.now();
       this.stageStart = now; this.lastFind = now; this.hintTarget = null; this.nextScene = null;
       UI().hud.station(this.stage + 1, sc.mode);
       UI().hud.pips(sc.leopards);
       UI().clearBubbles();
-      if (sc.night) setTimeout(() => this.active && UI().banner(UI().esc(C.ui.nightTip), 'calm'), 450);
+      if (sc.night) this.later(() => this.active && UI().banner(UI().esc(C.ui.nightTip), 'calm'), 450);
     }
 
-    stop() { this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
+    stop() { this.clearTimers(); this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
 
     /* ---------- input ---------- */
-    pointer(lx, ly, tol) {
+    pointer(lx, ly, tol, bonusAtDown) {
       if (!this.active || this.paused || this.ending) return;
       const now = J.now();
       if (now < this.lockUntil) return;
+      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : this.bonus.hit(lx, ly, tol);
+      if (bonus) {
+        this.bonus.capture();
+        this.bonusFound++; this.bonusScore += CFG.bonusPoints; this.score += CFG.bonusPoints;
+        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + CFG.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
+        this.effects.push({ type: 'ring', x: bonus.cx, y: bonus.cy, r0: 20, r1: 140, t0: now, dur: 0.6 });
+        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore);
+        return;
+      }
       const it = J.Scene.hit(this.scene, lx, ly, tol);
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score++;
+        this.score++; this.baseFound++;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
         this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+1', t0: now, dur: 0.9, color: '#ffe15a' });
@@ -183,26 +204,34 @@
       }
     }
 
+    skipStation() {
+      if (!this.active || this.paused || this.ending) return;
+      this.paused = true; UI().clearBubbles();
+      UI().banner('Stasiun dilewati<small>Mengganti kamera...</small>');
+      const nextStage = this.stage + 1;
+      this.later(() => { if (!this.active) return; this.stage = nextStage;
+        const sc = J.Scene.generate(nextStage, { R: J.R });
+        this.addShutter(() => { this.loadScene(sc); }, false, () => { this.paused = false; this.lastFind = J.now(); });
+      }, 450);
+    }
+
     stageClear() {
       this.paused = true;
       UI().clearBubbles();
       this.stagesCleared++;
-      this.timeLeft += CFG.clearBonusSec;
-      UI().hud.time(this.timeLeft, this.duration);
       J.Audio.clear();
-      UI().banner(UI().esc(C.ui.cleared) + '<small>' + UI().esc(J.tpl(C.ui.bonus, { s: CFG.clearBonusSec })) + '</small>');
+      UI().banner(UI().esc(C.ui.cleared));
       const wasNight = this.scene.night;
       const nextStage = this.stage + 1;
-      setTimeout(() => { // buat stasiun berikutnya selagi pemain membaca fakta
+      this.later(() => { // buat stasiun berikutnya selagi pemain membaca fakta
         if (!this.active) return;
         try { this.nextScene = J.Scene.generate(nextStage, { R: J.R }); } catch (e) { console.error(e); }
       }, 120);
-      setTimeout(() => {
+      this.later(() => {
         if (!this.active) return;
         UI().showFact(this.nextFact(wasNight), () => {
-          if (!this.active) return;
-          this.stage = nextStage;
-          const sc = this.nextScene || J.Scene.generate(nextStage, { R: J.R });
+          if (!this.active) return; this.stage = nextStage;
+          const sc = this.nextScene || J.Scene.generate(nextStage, { R: J.R }); this.nextScene = null;
           this.addShutter(() => { this.loadScene(sc); }, false, () => { this.paused = false; this.lastFind = J.now(); });
         });
       }, 1150);
@@ -218,11 +247,11 @@
       J.Audio.over();
       UI().banner(UI().esc(C.ui.timeUp));
       for (const l of this.scene.leopards) if (!l.found) l.missed = true;
-      setTimeout(() => {
+      this.later(() => {
         if (!this.active) return;
         this.active = false;
         UI().hud.show(false);
-        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes });
+        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, bonusFound: this.bonusFound, bonusScore: this.bonusScore });
       }, 2600);
     }
 
@@ -230,6 +259,8 @@
     update(dt, now) {
       if (!this.active) return;
       if (!this.paused && !this.ending) {
+        this.bonus.update(dt);
+        UI().hud.bonus(!!this.bonus.current, this.bonusScore);
         this.timeLeft -= dt;
         const sec = Math.ceil(this.timeLeft);
         if (sec !== this.lastTickSec) {
@@ -267,6 +298,7 @@
     render(ctx, now) {
       if (!this.scene) return;
       J.drawScene(ctx, this.scene, now);
+      if (this.bonus && !this.ending) this.bonus.render(ctx);
       // lingkaran petunjuk kuat
       if (this.active && !this.paused && this.hintTarget && now - this.lastFind > CFG.strongHintAfterSec) {
         const it = this.hintTarget, k = (Math.sin(now * 3) + 1) / 2;

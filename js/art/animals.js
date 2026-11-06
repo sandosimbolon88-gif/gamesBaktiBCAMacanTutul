@@ -195,8 +195,90 @@
     }
   };
 
+  Object.assign(DRAW, {
+    binturong: {
+      bounds: [-185, -116, 117, 35],
+      draw(g, ol) {
+        const o = '#101c22', fur = '#35474a';
+        line(g, 'M -62 -45 C -118 -55 -127 18 -161 18 Q -181 18 -167 -4', 19, fur, ol, o);
+        for (const x of [-54, 45]) line(g, `M ${x} -34 L ${x+9} -4`, 15, '#26363b', ol, o);
+        const body = ell(-8, -52, 72, 34, -.1);
+        part(g, body, fur, ol, o);
+        g.save(); g.clip(body); g.strokeStyle = '#688080'; g.lineWidth = 1.7;
+        for (let i=0;i<36;i++) { const x=-65+i*3.8; g.beginPath(); g.moveTo(x,-75); g.lineTo(x-9,-46); g.stroke(); } g.restore();
+        part(g, new Path2D('M 45 -70 L 46 -105 L 64 -89 L 84 -96 L 100 -64 Z'), fur, ol, o);
+        line(g, 'M 49 -94 L 43 -110 M 84 -91 L 89 -108', 3, '#9eb1a5', 0, o);
+        part(g, ell(72,-66,28,25),fur,ol,o);
+        part(g, ell(91,-54,20,13),'#7a8d89',ol*.5,o);
+        part(g, ell(106,-57,6,4),o,ol*.4,o);
+        g.fillStyle='#deb75f'; for(const x of [62,82]) {g.beginPath();g.arc(x,-72,3,0,TAU);g.fill();}
+        g.strokeStyle='#dddcc5';g.lineWidth=1.1;
+        for(const y of [-58,-52,-46]) {g.beginPath();g.moveTo(91,y);g.lineTo(116,y-4);g.stroke();}
+        return {eyes:[{x:62,y:-72},{x:82,y:-72}],head:{x:76,y:-65,r:26}};
+      }
+    },
+    trenggiling: {
+      bounds: [-152, -84, 112, 12],
+      draw(g, ol) {
+        const o='#3b3023', scales='#9e8c61';
+        const tail=new Path2D('M -44 -45 C -78 -38 -99 -11 -142 -8 Q -100 10 -47 -15 Z');
+        part(g,tail,scales,ol,o);
+        for(const x of [-36,40]) line(g,`M ${x} -20 L ${x+5} -2 L ${x+15} -2`,9,'#6e6249',ol,o);
+        const body=new Path2D('M -63 -28 C -67 -85 14 -95 57 -48 L 73 -24 L 36 -10 L -36 -12 Z');
+        part(g,body,scales,ol,o);
+        g.save();g.clip(body);g.lineWidth=1.6;g.strokeStyle='#5c5035';
+        for(let row=0;row<5;row++)for(let col=0;col<9;col++) {
+          const x=-63+col*17+(row%2)*8,y=-76+row*15;
+          const q=new Path2D(`M ${x} ${y} Q ${x+8} ${y+18} ${x+17} ${y} Q ${x+9} ${y-5} ${x} ${y}`);
+          g.fillStyle=(row+col)%2?'#b1a075':'#93805b';g.fill(q);g.stroke(q);
+        }g.restore();
+        part(g,new Path2D('M 46 -46 Q 66 -50 79 -33 L 105 -19 Q 99 -13 84 -17 L 58 -20 Z'),'#a79671',ol,o);
+        g.fillStyle=o;g.beginPath();g.arc(71,-34,2.8,0,TAU);g.arc(104,-19,2.3,0,TAU);g.fill();
+        g.strokeStyle='#ede4c8';g.lineWidth=1.2;g.beginPath();g.moveTo(50,0);g.lineTo(56,4);g.moveTo(45,-1);g.lineTo(50,4);g.stroke();
+        return {eyes:[{x:71,y:-34}],head:{x:77,y:-29,r:18}};
+      }
+    },
+    linsang: {
+      bounds: [-158, -100, 115, 10],
+      draw(g,ol) {
+        const o='#332a21', fur='#d9c591';
+        line(g,'M -52 -40 Q -104 -3 -144 -25',12,fur,ol,o);
+        g.strokeStyle=o;g.lineWidth=9;
+        for(let i=0;i<6;i++){g.beginPath();g.moveTo(-70-i*13,-26+(i>2?2:-i));g.lineTo(-75-i*13,-16+(i>2?2:-i));g.stroke();}
+        for(const x of [-43,43])line(g,`M ${x} -33 L ${x+9} -3`,7,fur,ol,o);
+        const body=ell(0,-45,64,20,-.06);part(g,body,fur,ol,o);
+        g.save();g.clip(body);g.fillStyle='#4a3621';
+        for(let i=0;i<18;i++){g.beginPath();g.ellipse(-51+(i%9)*13,-54+Math.floor(i/9)*17,6,4.5,.3,0,TAU);g.fill();}g.restore();
+        part(g,new Path2D('M 49 -51 Q 53 -84 72 -80 L 90 -61 L 106 -50 L 85 -43 L 60 -37 Z'),fur,ol,o);
+        part(g,ell(62,-82,8,11,-.2),fur,ol,o);part(g,ell(84,-78,7,10,.3),fur,ol,o);
+        g.fillStyle=o;g.beginPath();g.arc(85,-63,3,0,TAU);g.arc(104,-50,3,0,TAU);g.fill();
+        g.strokeStyle=o;g.lineWidth=4;g.beginPath();g.moveTo(59,-70);g.lineTo(71,-61);g.stroke();
+        return {eyes:[{x:85,y:-63}],head:{x:79,y:-61,r:19}};
+      }
+    },
+    monyet: {
+      bounds: [-102, -142, 58, 55],
+      draw(g,ol) {
+        const o='#34342c', fur='#8f9281';
+        line(g,'M -21 -6 C -71 -15 -78 52 -94 42',7,fur,ol,o);
+        part(g,ell(0,-47,27,38),fur,ol,o);
+        part(g,ell(7,-42,16,26),'#c6c4a7',ol*.3,o);
+        for(const sd of [-1,1]) {
+          line(g,`M ${sd*18} -60 Q ${sd*39} -35 ${sd*25} -11`,9,fur,ol,o);
+          part(g,ell(sd*24,-8,12,7),fur,ol,o);
+        }
+        for(const sd of [-1,1])part(g,ell(sd*25,-104,9,12),'#b9a58b',ol,o);
+        part(g,ell(0,-108,25,25),fur,ol,o);
+        part(g,ell(0,-104,18,18),'#c5ac91',ol*.5,o);
+        part(g,ell(0,-93,13,9),'#d6bfa3',ol*.4,o);
+        g.fillStyle=o;for(const x of [-8,8]){g.beginPath();g.arc(x,-111,3,0,TAU);g.fill();}
+        g.strokeStyle=o;g.lineWidth=1.4;g.beginPath();g.moveTo(-5,-91);g.quadraticCurveTo(0,-88,5,-91);g.stroke();
+        return {eyes:[{x:-8,y:-111},{x:8,y:-111}],head:{x:0,y:-105,r:24}};
+      }
+    }
+  });
   A.DECOY_TYPES = Object.keys(DRAW).concat(['kuwuk']);
-  A.DECOY_ON_BRANCH = { lutung: true, elang: true };
+  A.DECOY_ON_BRANCH = { lutung: true, elang: true, binturong: true, monyet: true };
 
   /* o: { scale, R, flip } */
   A.animalSprite = function (type, o) {

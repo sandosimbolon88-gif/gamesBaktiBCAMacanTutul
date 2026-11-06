@@ -224,6 +224,8 @@
   const POSES = {
     walk(o) {
       const kw = o.variant === 'kuwuk';
+      const gait = o.gait == null ? 0 : Math.sin(o.gait) * 23;
+      const lift = o.gait == null ? 0 : Math.cos(o.gait) * 5;
       return {
         bounds: [kw ? -170 : -235, -170, 162, 14],
         shadow: [0, 0, 118, 10],
@@ -231,17 +233,17 @@
           kw
             ? { k: 'line', d: 'M -86 -78 C -116 -70 -134 -52 -150 -34', w: 13, f: 'spot', tail: true, tip: 'M -144 -40 C -146 -38 -148 -36 -150 -34' }
             : { k: 'line', d: 'M -86 -78 C -130 -66 -146 -18 -184 -12 C -204 -9 -218 -22 -214 -40', w: 15, f: 'spot', tail: true, tip: 'M -205 -13 C -214 -18 -217 -30 -214 -40' },
-          { k: 'line', d: 'M 58 -66 L 64 -34 L 60 -7', w: 18, f: 'spot', far: true },
-          { k: 'ell', e: [64, -7, 12, 6.5, 0], f: 'spot', far: true },
-          { k: 'line', d: 'M -74 -62 Q -94 -40 -88 -26 L -82 -7', w: 18, f: 'spot', far: true },
-          { k: 'ell', e: [-78, -7, 12, 6.5, 0], f: 'spot', far: true },
+          { k: 'line', d: `M 58 -66 L ${64-gait*.4} -34 L ${60-gait} ${-7-Math.max(0,lift)}`, w: 18, f: 'spot', far: true },
+          { k: 'ell', e: [64-gait, -7-Math.max(0,lift), 12, 6.5, 0], f: 'spot', far: true },
+          { k: 'line', d: `M -74 -62 Q -94 -40 ${-88+gait*.4} -26 L ${-82+gait} ${-7-Math.max(0,-lift)}`, w: 18, f: 'spot', far: true },
+          { k: 'ell', e: [-78+gait, -7-Math.max(0,-lift), 12, 6.5, 0], f: 'spot', far: true },
           { k: 'shape', d: 'M -96 -84 C -66 -104 6 -98 52 -104 C 82 -108 102 -92 98 -68 C 95 -48 74 -42 46 -45 C 14 -40 -30 -38 -68 -44 C -98 -48 -114 -68 -96 -84 Z',
             f: 'body', own: true, body: { belly: [-6, -37, 86, 12, 0], shade: [-4, -44, 104, 18], hi: [-10, -96, 80, 8] } },
           { k: 'ell', e: [-62, -70, 30, 32, -0.2], f: 'body', own: true },
-          { k: 'line', d: 'M -60 -54 Q -82 -36 -76 -24 L -66 -7', w: 20, f: 'spot', own: true },
-          { k: 'ell', e: [-60, -7, 13, 7, 0], f: 'spot', own: true },
-          { k: 'line', d: 'M 74 -70 Q 84 -40 84 -28 L 86 -7', w: 20, f: 'spot', own: true },
-          { k: 'ell', e: [92, -7, 13, 7, 0], f: 'spot', own: true },
+          { k: 'line', d: `M -60 -54 Q -82 -36 ${-76-gait*.4} -24 L ${-66-gait} ${-7-Math.max(0,lift)}`, w: 20, f: 'spot', own: true },
+          { k: 'ell', e: [-60-gait, -7-Math.max(0,lift), 13, 7, 0], f: 'spot', own: true },
+          { k: 'line', d: `M 74 -70 Q 84 -40 ${84+gait*.4} -28 L ${86+gait} ${-7-Math.max(0,-lift)}`, w: 20, f: 'spot', own: true },
+          { k: 'ell', e: [92+gait, -7-Math.max(0,-lift), 13, 7, 0], f: 'spot', own: true },
           { k: 'shape', d: 'M 46 -100 C 66 -126 96 -134 112 -120 L 116 -84 C 100 -72 84 -62 70 -58 Z', f: 'body' }
         ],
         head: { x: 114, y: -120, s: 1, turn: 0.45, tilt: 0 }

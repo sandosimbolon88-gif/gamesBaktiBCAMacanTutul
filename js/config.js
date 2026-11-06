@@ -1,8 +1,13 @@
 /* Pengaturan permainan. Aman diubah oleh panitia booth. */
 window.JSMT_CONFIG = {
-  durationSec: 90,            // lama satu sesi (detik)
-  durationOptions: [60, 90, 120],
-  clearBonusSec: 5,           // bonus waktu setiap stasiun bersih
+  durationSec: 180,            // lama satu sesi (detik)
+  durationOptions: [60, 90, 120, 180],
+  bonusPoints: 3,
+  bonusFirstSec: 4,
+  bonusPassSec: 9,
+  bonusGapSec: 10,
+  bonusMaxPasses: 2,
+  clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 2,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk
   strongHintAfterSec: 20,     // lingkaran petunjuk
@@ -27,13 +32,13 @@ window.JSMT_CONFIG = {
      hide: peluang bersembunyi total (badan di balik daun / batang pohon, hanya sebagian terlihat),
      mode: siang | pagi | senja | malam */
   stages: [
-    { count: [3, 4], scale: 0.6,  occl: 0.45, minVis: 0.42, black: 0.25, minBlack: 0, decoys: 2, cub: 0,   density: 0.65, light: 0.55, camo: 0.5,  hide: 0.15, mode: 'siang' },
-    { count: [3, 4], scale: 0.56, occl: 0.52, minVis: 0.38, black: 0.35, minBlack: 1, decoys: 3, cub: 0.3, density: 0.75, light: 0.65, camo: 0.6,  hide: 0.25, mode: 'pagi' },
-    { count: [4, 5], scale: 0.52, occl: 0.58, minVis: 0.33, black: 0.3,  minBlack: 0, decoys: 3, cub: 0.6, density: 0.85, light: 0.75, camo: 0.75, hide: 0.3,  mode: 'siang' },
-    { count: [3, 4], scale: 0.55, occl: 0.52, minVis: 0.34, black: 0.45, minBlack: 1, decoys: 3, cub: 0,   density: 0.85, light: 0.35, camo: 0.55, hide: 0.3,  mode: 'malam' },
-    { count: [4, 5], scale: 0.48, occl: 0.64, minVis: 0.28, black: 0.4,  minBlack: 0, decoys: 4, cub: 0.4, density: 0.92, light: 0.82, camo: 0.88, hide: 0.4,  mode: 'senja' },
-    { count: [4, 6], scale: 0.45, occl: 0.7,  minVis: 0.26, black: 0.4,  minBlack: 0, decoys: 4, cub: 0.4, density: 1,    light: 0.9,  camo: 0.95, hide: 0.5,  mode: 'siang' }
+    { count: [8, 9], scale: 0.50,  occl: 0.68, minVis: 0.30, black: 0.25, minBlack: 0, decoys: 7, cub: 0.45, density: 1.00, light: 0.86, camo: 0.90, hide: 0.32, mode: 'siang' },
+    { count: [9, 10], scale: 0.54, occl: 0.56, minVis: 0.37, black: 0.35, minBlack: 1, decoys: 8, cub: 0.40, density: 0.94, light: 0.74, camo: 0.77, hide: 0.20, mode: 'pagi' },
+    { count: [10, 11], scale: 0.50, occl: 0.62, minVis: 0.32, black: 0.3,  minBlack: 0, decoys: 8, cub: 0.60, density: 0.97, light: 0.82, camo: 0.85, hide: 0.26,  mode: 'siang' },
+    { count: [10, 12], scale: 0.48, occl: 0.66, minVis: 0.30, black: 0.45, minBlack: 1, decoys: 8, cub: 0.35, density: 0.98, light: 0.52, camo: 0.88, hide: 0.30,  mode: 'malam' },
+    { count: [11, 13], scale: 0.46, occl: 0.72, minVis: 0.27, black: 0.4,  minBlack: 0, decoys: 9, cub: 0.55, density: 1.00, light: 0.92, camo: 0.96, hide: 0.36,  mode: 'senja' },
+    { count: [11, 13], scale: 0.44, occl: 0.78, minVis: 0.24, black: 0.4,  minBlack: 0, decoys: 9, cub: 0.65, density: 1,    light: 1,    camo: 1,    hide: 0.42,  mode: 'siang' }
   ],
-  endless: { count: [4, 6], scale: 0.43, minScale: 0.36, occl: 0.72, minVis: 0.24, black: 0.45, minBlack: 0, decoys: 5, cub: 0.4,
-    density: 1, light: 1, camo: 1, hide: 0.55, modes: ['pagi', 'malam', 'senja', 'siang'] }
+  endless: { count: [10, 12], scale: 0.44, minScale: 0.40, occl: 0.80, minVis: 0.22, black: 0.45, minBlack: 0, decoys: 10, cub: 0.65,
+    density: 1, light: 1, camo: 1, hide: 0.46, modes: ['pagi', 'malam', 'senja', 'siang'] }
 };

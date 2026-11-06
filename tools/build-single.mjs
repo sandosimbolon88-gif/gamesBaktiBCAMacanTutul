@@ -13,9 +13,10 @@ const read = (p) => readFileSync(path.join(root, p), 'utf8');
 execFileSync(process.execPath, [path.join(root, 'tools', 'check-no-digits.mjs')], { stdio: 'inherit' });
 
 let html = read('index.html');
+const hero = 'data:image/webp;base64,' + readFileSync(path.join(root, 'assets/forest-hero.webp')).toString('base64');
 
 // 2) CSS
-html = html.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => `<style>\n${read(href)}\n</style>`);
+html = html.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => `<style>\n${read(href).replaceAll("../assets/forest-hero.webp", hero)}\n</style>`);
 
 // 3) ikon sebagai data URI, manifest tidak dipakai di mode satu file
 const icon = Buffer.from(read('assets/icon.svg')).toString('base64');

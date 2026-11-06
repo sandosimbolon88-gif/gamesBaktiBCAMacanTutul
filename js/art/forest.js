@@ -8,17 +8,17 @@
 
   F.palette = function (mode) {
     const p = {
-      sky0: '#eef7d8', sky1: '#c8e6a4',
-      far1T: '#b9d8a0', far1C: '#abd191', far2T: '#95c07d', far2C: '#8bba73',
-      ground0: '#93ad52', ground1: '#6c8c35', trail: 'rgba(196,166,104,0.55)', trailHi: 'rgba(222,198,140,0.35)',
-      trunk: '#7b5636', trunkDark: '#5a3b22', trunkHi: '#9c7149', outline: '#22331a',
-      canopy: '#4b963b', canopyHi: '#74ba55', canopyDark: '#377629',
-      bush: '#3e8a37', bushHi: '#67b04f', bushDark: '#2c6a29',
-      fern: '#2f7d33', fernHi: '#4c9f43', fernDark: '#1d5622',
-      leaf: '#3b9140', leafHi: '#5aac4d', leafVein: '#a6d880',
-      grass: '#4f9230', grassHi: '#70b043',
+      sky0: '#e5edd3', sky1: '#b1cdb4',
+      far1T: '#adc8ba', far1C: '#99bda9', far2T: '#7fa995', far2C: '#749c86',
+      ground0: '#8f9d61', ground1: '#4b7250', trail: 'rgba(196,166,104,0.55)', trailHi: 'rgba(222,198,140,0.35)',
+      trunk: '#6c5940', trunkDark: '#3d4331', trunkHi: '#8f7857', outline: '#173f35',
+      canopy: '#39795c', canopyHi: '#74a56b', canopyDark: '#255e4c',
+      bush: '#32765b', bushHi: '#69a16e', bushDark: '#235345',
+      fern: '#276b50', fernHi: '#58936a', fernDark: '#174b3b',
+      leaf: '#367d5c', leafHi: '#70a974', leafVein: '#b7ce91',
+      grass: '#537d4c', grassHi: '#82a369',
       litter: ['#a7843e', '#8d6b2f', '#bb9549', '#7f903b', '#9c6b35'],
-      rock: '#8e948a', rockHi: '#b4b9ae', moss: '#6aa443', vine: '#3d6e2a',
+      rock: '#8e948a', rockHi: '#b4b9ae', moss: '#6aa443', vine: '#315f42',
       ray: 'rgba(255,255,225,0.14)', dapple: 'rgba(255,248,190,0.22)'
     };
     if (mode === 'senja') {
@@ -41,7 +41,7 @@
   F.sky = function (g, p, W, y1) {
     const gr = g.createLinearGradient(0, 0, 0, y1);
     gr.addColorStop(0, p.sky0); gr.addColorStop(1, p.sky1);
-    g.fillStyle = gr; g.fillRect(0, 0, W, 900);
+    g.fillStyle = gr; g.fillRect(0, 0, W, J.H);
   };
 
   F.farLayer = function (g, r, W, yBase, n, trunk, canopy) {

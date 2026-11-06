@@ -2,16 +2,25 @@
 (function () {
   'use strict';
   const J = window.JSMT, A = J.Art, CFG = window.JSMT_CONFIG, C = window.JSMT_CONTENT, UI = J.UI;
-  const W = J.W, H = J.H;
+  const W=J.VW,H=J.VH,WORLD_W=J.W,WORLD_H=J.H;
   const $ = (id) => document.getElementById(id);
   const SETTINGS_KEY = 'jsmt.settings.v1';
 
   const stage = $('stage'), canvas = $('game'), ctx = canvas.getContext('2d');
   let state = 'boot', lastInput = J.now(), lastFrame = 0, vignette = null, vignR = 0;
-  let pendingResult = null, lastEntryId = null, boardTimer = null;
+  let pendingResult=null,lastEntryId=null,boardTimer=null;
+  const FIT_ZOOM=W/WORLD_W;
+  const camera={x:WORLD_W/2,y:WORLD_H/2,zoom:FIT_ZOOM,min:FIT_ZOOM,max:1.8};
+  function clampCamera(){if(camera.zoom<=camera.min+.0001){camera.zoom=camera.min;camera.x=WORLD_W/2;camera.y=WORLD_H/2;return;}const hw=W/(2*camera.zoom),hh=H/(2*camera.zoom);camera.x=J.clamp(camera.x,hw,WORLD_W-hw);camera.y=J.clamp(camera.y,hh,WORLD_H-hh);}
+  function resetCamera(){camera.x=WORLD_W/2;camera.y=WORLD_H/2;camera.zoom=FIT_ZOOM;clampCamera();}
+  function screenToWorld(cx,cy){const r=canvas.getBoundingClientRect(),sx=(cx-r.left)/r.width*W,sy=(cy-r.top)/r.height*H;return{x:camera.x+(sx-W/2)/camera.zoom,y:camera.y+(sy-H/2)/camera.zoom,scale:W/r.width/camera.zoom};}
+
+  J.resetCamera = resetCamera;
+  J.worldToScreen = (x,y) => ({ x:(x-camera.x)*camera.zoom+W/2, y:(y-camera.y)*camera.zoom+H/2 });
 
   /* ---------- pengaturan ---------- */
   const settings = Object.assign({ duration: CFG.durationSec, sound: true }, loadSettings());
+  if (!CFG.durationOptions.includes(settings.duration)) settings.duration = CFG.durationSec;
   function loadSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { /* abaikan */ } }
 
@@ -67,6 +76,7 @@
     if (prev === 'attract') { UI.stopAttractFacts(); J.Audio.ambient(false); }
     if (next === 'attract') {
       game.stop();
+      document.getElementById("session-length").textContent = Math.round(settings.duration/60*10)/10 + " menit";
       attract.refresh();
       UI.show('screen-attract');
       UI.renderMiniBoard();
@@ -75,6 +85,7 @@
     } else if (next === 'briefing') {
       UI.show('screen-briefing');
     } else if (next === 'play') {
+      resetCamera();
       UI.show(null);
       game.start(settings.duration);
     } else if (next === 'result') {
@@ -90,6 +101,7 @@
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
+    $('result-breakdown').textContent = res.baseFound + ' temuan utama + ' + res.bonusScore + ' poin bonus (' + res.bonusFound + ' lintasan)';
     $('result-stations').textContent = res.stages;
     $('result-mistakes').textContent = res.mistakes;
     $('result-rank').textContent = '#' + J.Leaderboard.wouldRank('today', res.score, res.mistakes);
@@ -101,7 +113,7 @@
   function saveResult(skip) {
     if (!pendingResult) return;
     const name = skip ? C.ui.defaultName : UI.cleanName(UI.getName());
-    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes });
+    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, rulesVersion: 3 });
     lastEntryId = e.id;
     pendingResult = null;
     J.Audio.click();
@@ -113,33 +125,52 @@
     const now = ts / 1000;
     const dt = Math.min(0.05, lastFrame ? now - lastFrame : 0);
     lastFrame = now;
-    ctx.setTransform(J.R, 0, 0, J.R, 0, 0);
-    const nowS = J.now();
-    if (state === 'play' || state === 'result') {
-      game.update(dt, nowS);
-      game.render(ctx, nowS);
-    } else {
-      attract.render(nowS);
-    }
+    ctx.setTransform(J.R,0,0,J.R,0,0);ctx.clearRect(0,0,W,H);const nowS=J.now();
+    if(state==='play'||state==='result'){game.update(dt,nowS);ctx.save();ctx.translate(W/2,H/2);ctx.scale(camera.zoom,camera.zoom);ctx.translate(-camera.x,-camera.y);game.render(ctx,nowS);ctx.restore();}
+    else{ctx.save();const fit=W/WORLD_W;ctx.translate(W/2,H/2);ctx.scale(fit,fit);ctx.translate(-WORLD_W/2,-WORLD_H/2);attract.render(nowS);ctx.restore();}
     if (!vignette || vignR !== J.R) { vignette = A.Forest.vignette(W, H, J.R, 0.42); vignR = J.R; }
     ctx.drawImage(vignette, 0, 0, W, H);
     // kembali ke layar awal jika ditinggal
-    if (state !== 'attract' && state !== 'play' && !UI.isOpen('overlay-admin') && nowS - lastInput > CFG.idleTimeoutSec) goto('attract');
+    if (state !== 'attract' && (state !== 'play' || game.paused && !game.ending) && !UI.isOpen('overlay-admin') && nowS - lastInput > CFG.idleTimeoutSec) goto('attract');
     requestAnimationFrame(frame);
   }
 
   /* ---------- input ---------- */
-  function toLogical(e) {
-    const r = canvas.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H, scale: W / r.width };
-  }
-  canvas.addEventListener('pointerdown', (e) => {
+  const pointers=new Map();let drag=null,pinch=null;
+  canvas.addEventListener('pointerdown', e => {
     if (state !== 'play') return;
-    e.preventDefault();
-    const p = toLogical(e);
-    const tolPx = e.pointerType === 'mouse' ? CFG.tolMouse : CFG.tolTouch;
-    game.pointer(p.x, p.y, tolPx * p.scale);
+    e.preventDefault(); canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) {
+      const p=screenToWorld(e.clientX,e.clientY), tol=e.pointerType==='mouse'?CFG.tolMouse:CFG.tolTouch;
+      drag = { id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false, bonusTarget:game.bonus.hit(p.x,p.y,tol*p.scale) };
+    }
+    else if (pointers.size === 2) { const a = [...pointers.values()]; pinch = { d: Math.hypot(a[1].x-a[0].x, a[1].y-a[0].y), z: camera.zoom }; drag = null; }
   });
+  canvas.addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId) || state !== 'play') return;
+    const old = pointers.get(e.pointerId); pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2 && pinch) {
+      const a = [...pointers.values()], d = Math.hypot(a[1].x-a[0].x, a[1].y-a[0].y);
+      camera.zoom = J.clamp(pinch.z*d/Math.max(20,pinch.d), camera.min, camera.max); clampCamera();
+    } else if (drag && drag.id === e.pointerId) {
+      if (Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy) > 10) drag.moved = true;
+      if (camera.zoom > camera.min+.0001) {
+        const r = canvas.getBoundingClientRect(), k = W/r.width/camera.zoom;
+        camera.x -= (e.clientX-old.x)*k; camera.y -= (e.clientY-old.y)*k; clampCamera();
+      }
+    }
+  });
+  function finishPointer(e) {
+    if (!pointers.has(e.pointerId)) return;
+    if (e.type === 'pointerup' && pointers.size === 1 && drag && !drag.moved && state === 'play') {
+      const p = screenToWorld(e.clientX,e.clientY), tol = e.pointerType === 'mouse' ? CFG.tolMouse : CFG.tolTouch;
+      game.pointer(p.x,p.y,tol*p.scale,drag.bonusTarget);
+    }
+    pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; drag = null;
+  }
+  canvas.addEventListener('pointerup',finishPointer); canvas.addEventListener('pointercancel',finishPointer);
+  canvas.addEventListener('wheel',e=>{if(state!=='play')return;e.preventDefault();const b=screenToWorld(e.clientX,e.clientY);camera.zoom=J.clamp(camera.zoom*Math.exp(-e.deltaY*.0012),camera.min,camera.max);const a=screenToWorld(e.clientX,e.clientY);camera.x+=b.x-a.x;camera.y+=b.y-a.y;clampCamera();},{passive:false});
   window.addEventListener('pointerdown', () => { lastInput = J.now(); J.Audio.unlock(); }, true);
   window.addEventListener('keydown', (e) => {
     lastInput = J.now();
@@ -158,8 +189,7 @@
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('dblclick', (e) => e.preventDefault());
-  document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
-  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove',e=>{if(state==='play')e.preventDefault();},{passive:false});
 
   /* ---------- tombol ---------- */
   function on(id, fn) { $(id).addEventListener('click', (e) => { e.stopPropagation(); fn(e); }); }
@@ -167,7 +197,12 @@
   on('btn-start', () => { J.Audio.unlock(); J.Audio.click(); goto('briefing'); });
   on('btn-board', () => { J.Audio.click(); goto('board'); });
   on('btn-fullscreen', () => toggleFullscreen());
+  on('btn-jwls', () => UI.overlay('overlay-jwls', true));
+  on('btn-jwls-close', () => UI.overlay('overlay-jwls', false));
+  on('btn-jwls-source', () => window.open('https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul', '_blank', 'noopener,noreferrer'));
   on('btn-go', () => { J.Audio.click(); goto('play'); });
+  on('btn-reset-view',()=>{J.Audio.click();resetCamera();});
+  on('btn-skip-station', () => { J.Audio.click(); game.skipStation(); });
   on('btn-save', () => saveResult(false));
   on('btn-skip', () => saveResult(true));
   on('btn-again', () => { J.Audio.click(); goto('briefing'); });
@@ -279,6 +314,7 @@
     return {
       spotted: mk({ pose: 'sit', variant: 'spotted', scale: 0.6 }),
       black: mk({ pose: 'sit', variant: 'black', scale: 0.6 }),
+      moving: mk({ pose: 'walk', variant: 'spotted', scale: 0.6 }),
       kuwuk: A.animalSprite('kuwuk', { scale: 1.3, R: 2, pose: 'sit' }).canvas.toDataURL()
     };
   }

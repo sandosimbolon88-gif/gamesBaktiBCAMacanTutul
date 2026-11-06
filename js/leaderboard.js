@@ -70,7 +70,11 @@
           name: String(raw.name || '').slice(0, 20) || 'Penjelajah',
           score,
           stages: Math.max(0, Math.floor(Number(raw.stages) || 0)),
-          mistakes: Math.max(0, Math.floor(Number(raw.mistakes) || 0))
+          mistakes: Math.max(0, Math.floor(Number(raw.mistakes) || 0)),
+          baseFound: Math.max(0, Math.floor(Number(raw.baseFound) || 0)),
+          bonusFound: Math.max(0, Math.floor(Number(raw.bonusFound) || 0)),
+          bonusScore: Math.max(0, Math.floor(Number(raw.bonusScore) || 0)),
+          rulesVersion: Number(raw.rulesVersion) === 3 ? 3 : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
@@ -83,10 +87,10 @@
       return { added, skipped };
     },
     csv() {
-      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih']];
+      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih', 'temuan_utama', 'bonus_lintasan', 'poin_bonus', 'versi_aturan']];
       for (const e of LB.load().sort((a, b) => a.ts - b.ts)) {
         const d = new Date(e.ts);
-        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0]);
+        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0, e.baseFound ?? e.score, e.bonusFound || 0, e.bonusScore || 0, e.rulesVersion || 1]);
       }
       return rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     }

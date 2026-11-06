@@ -21,7 +21,7 @@
   UI.esc = esc;
 
   /* ---------- layar ---------- */
-  const screens = ['screen-attract', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin'];
+  const screens = ['screen-attract', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin', 'overlay-jwls'];
   UI.show = function (id) {
     for (const s of screens) { if (s !== 'overlay-admin') $(s).classList.toggle('active', s === id); }
   };
@@ -57,6 +57,11 @@
       $('hud-mode').textContent = C.ui.modes[mode] || '';
       $('hud').classList.toggle('night', mode === 'malam');
     },
+    bonus(active, score) {
+      const el = $('hud-bonus');
+      el.classList.toggle('live', active);
+      el.textContent = active ? '✦ Macan melintas! Klik untuk +' + CFG.bonusPoints + ' poin' : '✦ Bonus lintasan +' + CFG.bonusPoints + ' · terkumpul ' + score;
+    },
     pips(leopards) {
       const box = $('hud-pips');
       if (box.children.length !== leopards.length) {
@@ -85,10 +90,12 @@
   UI.bubble = function (lx, ly, title, text, extra) {
     const box = $('bubbles');
     while (box.children.length > 1) box.removeChild(box.firstChild);
+    const point = J.worldToScreen ? J.worldToScreen(lx,ly) : {x:lx,y:ly};
+    lx = point.x; ly = point.y;
     const d = document.createElement('div');
     d.className = 'bubble' + (ly < 300 ? ' below' : '');
-    d.style.left = J.clamp((lx / J.W) * 100, 15, 85) + '%';
-    d.style.top = (ly / J.H) * 100 + '%';
+    d.style.left = J.clamp((lx / J.VW) * 100, 15, 85) + '%';
+    d.style.top = (ly / J.VH) * 100 + '%';
     d.innerHTML = '<b>' + esc(title) + '</b><span>' + esc(text) + (extra ? ' <em>' + esc(extra) + '</em>' : '') + '</span>';
     box.appendChild(d);
     setTimeout(() => d.classList.add('fade'), 3200);
@@ -96,29 +103,15 @@
   };
   UI.clearBubbles = () => { $('bubbles').innerHTML = ''; };
 
-  /* ---------- kartu fakta ---------- */
-  let factTimer = null, factRAF = null;
+  /* ---------- kartu fakta tanpa timer ---------- */
   UI.showFact = function (fact, onNext) {
-    $('fact-title').textContent = fact.title;
-    $('fact-text').textContent = fact.text;
-    UI.overlay('overlay-fact', true);
-    const t0 = performance.now(), dur = CFG.factAutoSec * 1000;
-    const bar = $('fact-progress');
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      clearTimeout(factTimer); cancelAnimationFrame(factRAF);
-      UI.overlay('overlay-fact', false);
-      $('btn-fact-next').onclick = null;
-      onNext();
-    };
-    const step = () => { bar.style.width = J.clamp(((performance.now() - t0) / dur) * 100, 0, 100) + '%'; factRAF = requestAnimationFrame(step); };
-    step();
-    factTimer = setTimeout(finish, dur);
+    $('fact-title').textContent = fact.title; $('fact-text').textContent = fact.text;
+    $('fact-source').textContent = fact.source || 'Edukasi macan tutul jawa · JWLS';
+    UI.overlay('overlay-fact', true); let done = false;
+    const finish = () => { if (done) return; done = true; UI.overlay('overlay-fact', false); $('btn-fact-next').onclick = null; onNext(); };
     $('btn-fact-next').onclick = (e) => { e.stopPropagation(); J.Audio.click(); finish(); };
   };
-  UI.cancelFact = function () { clearTimeout(factTimer); cancelAnimationFrame(factRAF); UI.overlay('overlay-fact', false); };
+  UI.cancelFact = function () { UI.overlay('overlay-fact', false); };
 
   /* ---------- layar awal ---------- */
   let factIdx = 0, factInt = null;
