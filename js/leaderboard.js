@@ -80,7 +80,7 @@
           clueScore: Math.max(0, Math.floor(Number(raw.clueScore) || 0)),
           skips: Math.max(0, Math.floor(Number(raw.skips) || 0)),
           skipPenalty: Math.max(0, Math.floor(Number(raw.skipPenalty) || 0)),
-          rulesVersion: [3,4,5,6,7].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
+          rulesVersion: [3,4,5,6,7,8].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }

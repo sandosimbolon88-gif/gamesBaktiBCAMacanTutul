@@ -1,10 +1,10 @@
-# Jejak Si Macan Tutul · V7 Kompetisi Expo
+# Jejak Si Macan Tutul · V8 Kompetisi Expo
 
 Game edukasi Bakti BCA: cari macan tutul jawa di hutan Bromo Tengger Semeru, kenali satwa lain, dan pelajari Java Wide Leopard Survey (JWLS).
 
 Versi ini melanjutkan **attachment Macan Tutul V2**, termasuk durasi awal tiga menit, hutan lebat, zoom, pergantian stasiun, dan kartu fakta yang dibaca tanpa mengurangi waktu permainan.
 
-![Pengecoh bergerak, pagi berkabut dan malam inframerah V7](docs/living-forest.gif)
+![Bonus ekor dan macan merunduk dari semak V8](docs/living-forest.gif)
 
 [Demo bonus macan lari dan mengintip](docs/bonus-demo.gif)
 
@@ -31,9 +31,9 @@ Setiap stasiun memilih salah satu komposisi, lalu mengacak jumlah, jenis, posisi
 
 | Variasi | Macan utama | Pengecoh |
 | --- | --- | --- |
-| Jejak langka | 2–3 | 12–16 |
-| Satwa beragam | 3–4 | 10–14 |
-| Lebih banyak target | 4–6 | 9–13 |
+| Jejak langka | 3 | 12–16 |
+| Satwa beragam | 4 | 10–14 |
+| Lebih banyak target | 5–6 | 9–13 |
 
 Jumlah macan tidak terus bertambah pada level lanjut. Tantangan berasal dari kamuflase, tutupan hutan, mode pencahayaan, dan pilihan pengecoh. Batas ukuran macan tetap dipertahankan. Hutan diacak dari seed baru pada setiap stasiun dan sesi; kepadatan konfigurasi permainan dijaga pada 0,94–1,00. Seed yang sama mereproduksi susunan hutan dan satwa yang sama; noise inframerah bersifat dekoratif.
 
@@ -45,13 +45,15 @@ Macan utama memiliki **12 pose**: merunduk/mengendap, mengendus tanah, meregangk
 
 Keempat belas jenis pengecoh memiliki **3–5 pose per jenis** (57 variasi total), sesuai perilaku: kijang/kancil berdiri, berjalan, merumput dan waspada; mamalia kecil mengendus atau merunduk; primata berjalan atau meraih dahan; burung mencari makan, menoleh, dan membuka sayap; trenggiling meringkuk dan landak mengembangkan duri.
 
-Stasiun mengacak pola **tersebar, berkelompok, atau campuran**. Jarak berdekatan tetap menjaga area tubuh terpilih dan tidak menumpuk siluet secara berlebihan. Pose memanjat/mencakar dipasang pada batang; pose bertengger/meraih dahan memakai lokasi dahan; pose tanah berbaur dengan pakis dan serasah. Tanaman penutup dan mask klik dihitung dari pose sebenarnya. Kelompok satwa dalam permainan adalah simulasi gabungan rekaman, bukan gambaran bahwa macan dewasa hidup bergerombol.
+Semua stasiun memakai pola **tersebar**. Posisi diacak dalam zona horizontal yang berbeda: minimal 380 satuan dunia antarpusat, minimal 120 antarbatas siluet, serta bentang target meliputi sekurangnya enam puluh persen lebar hutan. Batas yang sama berlaku untuk anak macan; anak tidak lagi otomatis ditempatkan dekat induknya. Pola berkelompok/campuran dihapus. Pose memanjat/mencakar dipasang pada batang; pose bertengger/meraih dahan memakai lokasi dahan; pose tanah berbaur dengan pakis dan serasah. Tanaman penutup dan mask klik dihitung dari pose sebenarnya. Satwa dalam permainan adalah simulasi gabungan rekaman pengamatan, bukan gambaran populasi pada satu titik.
 
 ## Hutan bergerak dan stasiun malam
 
 Sebagian pengecoh memakai animasi: kucing kuwuk dan landak berjalan bolak-balik pada lintasan pendek, monyet bergelantungan dari titik dahan, dan elang terbang sambil mengepakkan sayap pada stasiun pagi. Musang dan bajing juga dapat memanjat batang pohon. Semua termasuk populasi pengecoh yang sama, bukan penambahan target. Warna kuwuk dan musang tetap dekat dengan warna macan, dengan pola dan anatomi pembeda.
 
 Lintasan dibatasi agar tidak menutupi target utama atau cakaran. Tanaman dan objek di depan memotong gambar serta area klik dengan mask yang sama. Pengecoh dapat tertutup sementara selama bergerak; klik pada bagian yang tertutup tidak dihukum. Menekan satwa yang terlihat lalu melepas ketika ia bergerak tetap mencatat satwa yang disentuh; drag/pinch tetap menjadi navigasi. Gerak satwa dan daun berhenti selama jeda/kartu fakta.
+
+Empat awan bergerak pelan di celah kanopi pada lapisan di belakang hutan. Batang, daun, satwa, dan area klik tetap berada di depannya; awan tidak membuka tutupan hutan. Gerak awan ikut berhenti saat jeda.
 
 Rumpun daun kecil pada pohon bergoyang halus; area goyangnya ditempatkan di luar area satwa dan petunjuk sehingga tidak menciptakan sasaran atau penalti tersembunyi.
 
@@ -65,10 +67,10 @@ HUD menunjukkan nilai yang berlaku di stasiun tersebut. Pengecoh diam maupun ber
 ## Aturan
 
 - **Target utama: +3 poin, malam +5** untuk tiap macan tutul atau macan kumbang. Temukan semuanya untuk menyelesaikan stasiun.
-- **Bonus satwa: +5 poin, malam +7** untuk macan yang berlari melompat, muncul dari semak, atau mengintip dari kiri/kanan. Gerak lari memiliki dua belas frame animasi dan fase tubuh melayang. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
-- Bonus pertama muncul setelah tiga hingga lima detik waktu main aktif. Maksimal tiga kemunculan per stasiun: lari melewati layar selama 3,2 detik, lintasan di antara semak selama 2,4 detik, dan kepala mengintip selama 1,8 detik. Ada jeda enam hingga delapan detik antarkemunculan; urutan ketiga pola diacak. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
+- **Bonus satwa: +5 poin, malam +7** untuk lari melompat, lintasan semak, kepala mengintip, ekor menyembul, atau macan merunduk yang naik dari semak. Gerak lari memiliki dua belas frame animasi dan fase tubuh melayang. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
+- Bonus pertama muncul setelah dua hingga empat detik waktu main aktif. Maksimal empat kemunculan per stasiun dengan jeda empat hingga enam detik: salah satu lintasan lari/semak, kepala mengintip, ekor, dan tubuh merunduk; urutannya diacak. Durasi: lari 3,2 detik, lintasan semak 2,4 detik, kepala 1,8 detik, ekor 2,2 detik, tubuh merunduk 2,6 detik. Ekor memiliki dua belas frame gerak dan sprite terpisah tanpa kepala/badan tersembunyi. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
 - **Cakaran pohon: +1 poin** per kelompok bekas cakaran, sekali saja. Ada dua kelompok per stasiun; keduanya bonus opsional yang tidak masuk target utama. Semua cakaran terang yang digambar pada batang merupakan objek interaktif.
-- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Setiap stasiun memuat sembilan hingga enam belas pengecoh dan dua hingga enam macan utama, sesuai komposisi acak. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
+- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Setiap stasiun memuat sembilan hingga enam belas pengecoh dan tiga hingga enam macan utama, sesuai komposisi acak. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
 - Setiap klik pada pengecoh, diam maupun bergerak, mengurangi dua poin dan lima detik, termasuk klik ulang pada satwa yang sama. Skor minimum nol; waktu dan jumlah kesalahan tetap dipotong/dicatat ketika skor sudah nol.
 - Scroll atau cubit untuk zoom, geser untuk menjelajah, dan pilih **Lihat Semua** untuk kembali ke tampilan penuh. Menggeser dan mencubit tidak dihitung sebagai jawaban.
 - **Ganti stasiun (−1 poin)** melewati kamera tanpa mengisi target yang belum ditemukan. Skor berkurang satu, dengan minimum nol. Contoh: dari lima macan, tiga sudah ditemukan = sembilan poin → skip → delapan poin tersisa. Klik berulang pada tombol selama transisi tidak menggandakan penalti.
@@ -88,7 +90,7 @@ Skor hanya tersimpan di browser/perangkat tersebut. Untuk pindah PC:
 2. Di PC baru, buka game, pilih **Muat cadangan**, lalu pilih JSON. Impor menggabungkan skor dan mengabaikan ID yang sudah ada.
 3. Ekspor CSV untuk rekap; kolom temuan utama, poin temuan, penalti poin pengecoh, jumlah bonus satwa, poin bonus, cakaran, poin cakaran, jumlah skip, penalti skip, dan versi aturan disertakan.
 
-Skor versi lama tidak dihapus otomatis. Karena V7 memberi nilai lebih tinggi pada stasiun malam, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
+Skor versi lama tidak dihapus otomatis. Karena V8 mengubah populasi dan frekuensi peluang bonus, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
 
 ## Mengembangkan
 

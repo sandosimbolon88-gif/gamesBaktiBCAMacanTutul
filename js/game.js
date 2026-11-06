@@ -8,6 +8,7 @@
   /* ---------- gambar adegan (dipakai juga oleh layar awal) ---------- */
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
+    if(sc.motion)sc.motion.renderSky(ctx);
     ctx.drawImage(sc.comp,0,0,W,H);
     if(sc.motion)sc.motion.render(ctx);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah

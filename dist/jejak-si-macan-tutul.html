@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · aee9a18 -->
+<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · e6a04a6 -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -490,6 +490,9 @@ window.JSMT_CONFIG = {
   cubMaxScale: 0.58,
   bonusRunScale: 1.0,
   bonusHeadScale: 1.35,
+  bonusTailScale: 1.05,
+  targetMinDistance: 380,     // jarak antarpusat semua macan, termasuk anak (satuan dunia)
+  targetMinGap: 120,          // jarak minimum antarsiluet
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   targetPoints: 3,
@@ -497,16 +500,18 @@ window.JSMT_CONFIG = {
   decoyPenaltyPoints: 2,
   bonusPoints: 5,
   nightBonusPoints: 7,
-  bonusFirstSec: 4,
+  bonusFirstSec: 3,
   bonusPassSec: 3.2,
   bonusCoverSec: 2.4,
   bonusPeekSec: 1.8,
-  bonusGapSec: 7,
-  bonusMaxPasses: 3,
+  bonusTailSec: 2.2,
+  bonusRiseSec: 2.6,
+  bonusGapSec: 5,
+  bonusMaxPasses: 4,
   cluePoints: 1,
   cluesPerStation: 2,
   skipPenaltyPoints: 1,
-  rulesVersion: 7,
+  rulesVersion: 8,
   clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 5,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk
@@ -533,19 +538,19 @@ window.JSMT_CONFIG = {
      mode: siang | pagi | senja | malam */
   // Komposisi dipilih ulang dari seed setiap stasiun; angka sudah termasuk anak macan.
   stationMixes: [
-    { id:'langka', count:[2,3], decoys:[12,16] },
-    { id:'beragam', count:[3,4], decoys:[10,14] },
-    { id:'ramai', count:[4,6], decoys:[9,13] }
+    { id:'langka', count:[3,3], decoys:[12,16] },
+    { id:'beragam', count:[4,4], decoys:[10,14] },
+    { id:'ramai', count:[5,6], decoys:[9,13] }
   ],
   stages: [
-    { count: [2, 6], scale: 0.50,  occl: 0.68, minVis: 0.30, black: 0.25, minBlack: 0, decoys: 12, cub: 0.45, density: 1.00, light: 0.86, camo: 0.90, hide: 0.32, mode: 'siang' },
-    { count: [2, 6], scale: 0.54, occl: 0.56, minVis: 0.37, black: 0.35, minBlack: 1, decoys: 12, cub: 0.40, density: 0.94, light: 0.74, camo: 0.77, hide: 0.20, mode: 'pagi' },
-    { count: [2, 6], scale: 0.50, occl: 0.62, minVis: 0.32, black: 0.3,  minBlack: 0, decoys: 12, cub: 0.60, density: 0.97, light: 0.82, camo: 0.85, hide: 0.26,  mode: 'siang' },
-    { count: [2, 6], scale: 0.48, occl: 0.66, minVis: 0.30, black: 0.45, minBlack: 1, decoys: 12, cub: 0.35, density: 0.98, light: 0.52, camo: 0.88, hide: 0.30,  mode: 'malam' },
-    { count: [2, 6], scale: 0.46, occl: 0.72, minVis: 0.27, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.55, density: 1.00, light: 0.92, camo: 0.96, hide: 0.36,  mode: 'senja' },
-    { count: [2, 6], scale: 0.44, occl: 0.78, minVis: 0.24, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.65, density: 1,    light: 1,    camo: 1,    hide: 0.42,  mode: 'siang' }
+    { count: [3, 6], scale: 0.50,  occl: 0.68, minVis: 0.30, black: 0.25, minBlack: 0, decoys: 12, cub: 0.45, density: 1.00, light: 0.86, camo: 0.90, hide: 0.32, mode: 'siang' },
+    { count: [3, 6], scale: 0.54, occl: 0.56, minVis: 0.37, black: 0.35, minBlack: 1, decoys: 12, cub: 0.40, density: 0.94, light: 0.74, camo: 0.77, hide: 0.20, mode: 'pagi' },
+    { count: [3, 6], scale: 0.50, occl: 0.62, minVis: 0.32, black: 0.3,  minBlack: 0, decoys: 12, cub: 0.60, density: 0.97, light: 0.82, camo: 0.85, hide: 0.26,  mode: 'siang' },
+    { count: [3, 6], scale: 0.48, occl: 0.66, minVis: 0.30, black: 0.45, minBlack: 1, decoys: 12, cub: 0.35, density: 0.98, light: 0.52, camo: 0.88, hide: 0.30,  mode: 'malam' },
+    { count: [3, 6], scale: 0.46, occl: 0.72, minVis: 0.27, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.55, density: 1.00, light: 0.92, camo: 0.96, hide: 0.36,  mode: 'senja' },
+    { count: [3, 6], scale: 0.44, occl: 0.78, minVis: 0.24, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.65, density: 1,    light: 1,    camo: 1,    hide: 0.42,  mode: 'siang' }
   ],
-  endless: { count: [2, 6], scale: 0.44, minScale: 0.40, occl: 0.80, minVis: 0.22, black: 0.45, minBlack: 0, decoys: 12, cub: 0.65,
+  endless: { count: [3, 6], scale: 0.44, minScale: 0.40, occl: 0.80, minVis: 0.22, black: 0.45, minBlack: 0, decoys: 12, cub: 0.65,
     density: 1, light: 1, camo: 1, hide: 0.46, modes: ['pagi', 'malam', 'senja', 'siang'] }
 };
 
@@ -579,7 +584,7 @@ window.JSMT_CONTENT = {
       { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Macan utama memberi tiga poin. Saat malam lebih sulit: setiap temuan memberi lima poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
       { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Pengecoh bisa berjalan, terbang, memanjat atau bergelantungan. Setiap klik salah mengurangi dua poin dan lima detik, termasuk satwa bergerak. Skor minimum nol.' },
-      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Bonus macan berlari, keluar semak, atau mengintip memberi lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau hanya kepala dan ekornya muncul dari semak. Bonus lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',
@@ -1492,6 +1497,19 @@ window.JSMT_CONTENT = {
     const pal = A.PAL[key];
     return A.makeSprite(o, [-44, -46, 44, 40], g =>
       drawHead(g, pal, getPatterns(g, key, pal), { x:0, y:0, s:1.1, turn:0, tilt:0 }, o, 2.6));
+  };
+
+  // Ekor terpisah untuk bonus: tidak menyertakan kepala atau badan tersembunyi.
+  A.leopardTailSprite = function (o) {
+    const key=o.variant==='black'&&o.night?'blackIR':o.variant||'spotted',pal=A.PAL[key];
+    return A.makeSprite(o,[-90,-160,145,65],g=>{
+      const sway=Math.sin(o.gait||0)*22,pats=getPatterns(g,key,pal);
+      const d=new Path2D(`M -53 47 C -55 -8 -17 -107 24 -91 C 65 -75 ${101+sway} -96 ${85+sway} -137`);
+      g.lineCap='round';g.lineJoin='round';g.strokeStyle=pal.outline;g.lineWidth=23;g.stroke(d);
+      g.strokeStyle=pats.spot;g.lineWidth=17;g.stroke(d);
+      const tip=new Path2D(`M ${92+sway} -111 Q ${93+sway} -124 ${85+sway} -137`);
+      g.strokeStyle=pal.spot;g.lineWidth=18;g.stroke(tip);
+    });
   };
 
   A.scratchSprite = function (o) {
@@ -2671,6 +2689,16 @@ window.JSMT_CONTENT = {
       }
       return null;
     }
+    cloudX(cloud) {
+      const span=J.W+cloud.width;
+      return ((cloud.x+this.clock*cloud.speed+cloud.width)%span+span)%span-cloud.width;
+    }
+    renderSky(ctx) {
+      const sc=this.scene;ctx.drawImage(sc.sky,0,0,J.W,J.H);
+      ctx.save();ctx.globalAlpha=sc.night?.14:.48;
+      for(const c of sc.clouds){const x=this.cloudX(c);ctx.drawImage(c.canvas,x,c.y,c.width,c.height);}
+      ctx.restore();
+    }
     render(ctx) {
       for(const it of this.items)ctx.drawImage(it.visibleCanvas,it.x+it.sp.ox,it.y+it.sp.oy,it.sp.lw,it.sp.lh);
       for(const w of this.scene.wind){
@@ -2681,6 +2709,19 @@ window.JSMT_CONTENT = {
   }
   Motion.prepare=function(sc,objs,p,drawObj,trees) {
     const r=J.rng(sc.seed^0x71bc),R=sc.R;
+    const cr=J.rng(sc.seed^0x8c10);
+    sc.clouds=Array.from({length:4},(_,i)=>{
+      const width=cr.range(460,720),height=cr.range(100,160),canvas=J.makeCanvas(width*R,height*R),g=canvas.getContext('2d');
+      g.setTransform(R,0,0,R,0,0);
+      const shade=sc.mode==='senja'?'255,226,183':'250,255,245';
+      for(let j=0;j<6;j++){
+        const x=width*(.16+j*.13),y=height*cr.range(.42,.64),rx=width*cr.range(.16,.21),ry=height*cr.range(.26,.44);
+        g.save();g.translate(x,y);g.scale(1,ry/rx);
+        const local=g.createRadialGradient(0,0,rx*.16,0,0,rx);local.addColorStop(0,'rgba('+shade+',.85)');local.addColorStop(1,'rgba('+shade+',0)');
+        g.fillStyle=local;g.beginPath();g.arc(0,0,rx,0,TAU);g.fill();g.restore();
+      }
+      return {canvas,width,height,x:i*J.W/4-cr.range(100,300),y:cr.range(180,390),speed:cr.range(10,18)};
+    });
     for(const it of sc.items.filter(x=>x.moving)){
       const m=it.motion;
       m.x=it.x;m.y=it.y;m.phase=0;m.speed=m.kind==='fly'?.34:m.kind==='walk'?.60:.28;
@@ -2756,13 +2797,14 @@ window.JSMT_CONTENT = {
   S.generate = function (stage, opts) {
     opts = Object.assign({}, opts);
     let sc = null;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 12; i++) {
       sc = generateOnce(stage, opts);
       const need = sc.diff.count[0];
-      if (sc.leopards.length >= need) return sc;
+      const span=Math.max(...sc.leopards.map(it=>it.cx))-Math.min(...sc.leopards.map(it=>it.cx));
+      if (sc.leopards.length === sc.targetCount && sc.leopards.length >= need && span>=W*.60) return sc;
       opts.seed = J.rng(sc.seed + 7919 * (i + 1)).seed();
     }
-    return sc;
+    throw new Error('Stasiun gagal memenuhi jumlah dan sebaran target.');
   };
 
   /* ---------- tanaman sebagai objek berlapis ---------- */
@@ -2833,7 +2875,9 @@ window.JSMT_CONTENT = {
     const g = bg.getContext('2d');
     g.setTransform(R, 0, 0, R, 0, 0);
     const groundY = r.range(H * 0.63, H * 0.67);
-    F.sky(g, p, W, groundY);
+    const sky=J.makeCanvas(W*R,H*R),skyG=sky.getContext('2d');
+    skyG.setTransform(R,0,0,R,0,0);F.sky(skyG,p,W,groundY);
+    if(night)A.toIR(sky,{falloff:true,gain:.95,foliage:.72,cx:.5,cy:.86,rad:.62,noise:0});
     F.farLayer(g, J.rng(r.seed()), W, groundY - 10, Math.round(38 + 26 * dens), p.far1T, p.far1C);
     if (!night) F.rays(g, J.rng(r.seed()), p, W, H);
     if (mode === 'pagi') F.mist(g, W, groundY - 340, groundY + 40, 0.6);
@@ -2918,49 +2962,41 @@ window.JSMT_CONTENT = {
       return cand.length ? r.pick(nearX==null ? cand : cand.slice(0,Math.min(3,cand.length))) : null;
     }
     function desiredLocation(index,attempt) {
-      const cluster=distribution==='clustered'||distribution==='mixed'&&index%2===0;
-      if(attempt<24&&cluster){const c=clusters[index%clusters.length];return {x:J.clamp(c.x+r.range(-185,185),180,W-180),y:J.clamp(c.y+r.range(-105,105),gMin,gMax)};}
-      if(attempt<24&&distribution!=='clustered')return {x:J.clamp((index+.5)*W/nLeo+r.range(-W/nLeo*.25,W/nLeo*.25),160,W-160),y:r.range(gMin,gMax)};
-      return {x:r.range(140,W-140),y:r.range(gMin,gMax)};
+      const width=W/nLeo,center=(lanes[index]+.5)*width;
+      return {x:J.clamp(center+r.range(-width*.12,width*.12),160,W-160),y:r.range(gMin,gMax)};
     }
-    function placeLeopard(pose,variant,index) {
+    function placeLeopard(pose,variant,index,cub=false) {
       const onBranch=pose==='branch',onTrunk=pose==='scratch'||pose==='climb';
-      for(let attempt=0;attempt<48;attempt++){
+      for(let attempt=0;attempt<64;attempt++){
         const want=desiredLocation(index,attempt),ds=(onBranch||onTrunk) ? .94 : depth(want.y);
-        const scale=J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*(pose==='peek'?1.12:1);
+        const scale=cub?r.range(CFG.cubMinScale,CFG.cubMaxScale):J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*(pose==='peek'?1.12:1);
         let x=want.x,y=want.y,slot=null,tree=null,flip=r.chance(.5);
         if(onBranch){slot=pickSlot(190*scale,want.x);if(!slot)continue;const half=96*scale;x=J.clamp(want.x,slot.x0+half,slot.x1-half);if(slot.x1-slot.x0<half*2)x=(slot.x0+slot.x1)/2;y=slot.y(x);}
         else if(onTrunk){
           const candidates=trees.slice().sort((a,b)=>Math.abs(a.x-want.x)-Math.abs(b.x-want.x));
-          tree=r.pick(candidates.slice(0,Math.min(3,candidates.length)));
+          tree=r.pick(candidates.slice(0,Math.min(2,candidates.length)));
           const side=flip?1:-1,paw=pose==='scratch'?128:92;
           x=tree.x+side*(tree.w*.40+paw*scale);y=pose==='scratch'?tree.base-6:tree.base-r.range(150,280);
         }
         if(pose==='peek')y=Math.min(y,gMax-80);
-        const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft});
+        const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft,cub});
         const box=tryPlace(sp,x,y);if(!box)continue;
-        const spread=distribution==='scattered'?110:65;
-        if(animals.some(a=>a.kind==='leopard'&&!a.cub&&Math.hypot(a.cx-(box.x0+box.x1)/2,a.cy-(box.y0+box.y1)/2)<spread))continue;
+        const cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2;
+        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.40)continue;
+        if(animals.some(a=>a.kind==='leopard'&&(Math.hypot(a.cx-cx,a.cy-cy)<CFG.targetMinDistance||Math.hypot(Math.max(0,a.box.x0-box.x1,box.x0-a.box.x1),Math.max(0,a.box.y0-box.y1,box.y0-a.box.y1))<CFG.targetMinGap)))continue;
         occ.push(box);if(slot)slot.used=true;
-        const it=mk('leopard',{pose,variant,cub:false,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
+        const it=mk('leopard',{pose,variant,cub,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
       }
       return null;
     }
-    function placeCub(mom) {
+    function placeCub(mom,index) {
       const pose=r.pick(['crouch','sniff','groom','curl','walk'].filter(p=>p!==mom.pose));
-      const sp=A.leopardSprite({pose,variant:mom.variant,night,scale:J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale),R,flip:r.chance(.5),cub:true,soft});
-      for(let attempt=0;attempt<16;attempt++){
-        const side=attempt%2?1:-1;
-        const x=mom.x+side*((mom.box.x1-mom.box.x0)*.5+r.range(38,100)),y=J.clamp(mom.y+r.range(-40,55),gMin,gMax);
-        const box=tryPlace(sp,x,y);if(!box)continue;
-        occ.push(box);const it=mk('leopard',{pose,variant:mom.variant,cub:true,onBranch:false,onTrunk:false},sp,x,y,box);it.label=labelFor(it);return it;
-      }
-      return null;
+      return placeLeopard(pose,mom.variant,index,true);
     }
 
     const nLeo=r.int(d.count[0],d.count[1]);
-    const distribution=r.pick(['scattered','clustered','mixed']);
-    const clusters=Array.from({length:nLeo>=4?r.int(1,2):1},()=>({x:r.range(390,W-390),y:r.range(gMin+30,gMax-30)}));
+    const distribution='scattered';
+    const lanes=r.shuffle(Array.from({length:nLeo},(_,i)=>i));
     const firstPose=r.pick(['crouch','sniff','stretch','groom','curl']);
     const deck=[firstPose,...r.shuffle(A.LEOPARD_STATIC_POSES.filter(p=>p!==firstPose))];
     let blackLeft=d.minBlack||0,wantCub=!!d.cub&&r.chance(d.cub),placed=0,guard=0;
@@ -2970,7 +3006,7 @@ window.JSMT_CONTENT = {
       const it=placeLeopard(pose,black?'black':'spotted',placed);if(!it)continue;
       animals.push(it);placed++;if(black&&blackLeft>0)blackLeft--;
       if(wantCub&&placed<nLeo&&!it.onBranch&&!it.onTrunk&&pose!=='peek'){
-        const cub=placeCub(it);if(cub){animals.push(cub);placed++;wantCub=false;}
+        const cub=placeCub(it,placed);if(cub){animals.push(cub);placed++;wantCub=false;}
       }
     }
 
@@ -3213,7 +3249,7 @@ window.JSMT_CONTENT = {
 
     animals.sort((a, b) => a.y - b.y);
     const scene={
-      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix, distribution,
+      seed, stage, diff: d, mode, night, comp, sky, items: animals, R, bonusCover, habitat, mix, distribution,
       targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
       forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
       clues: animals.filter(i => i.kind === "clue"),
@@ -3344,7 +3380,7 @@ window.JSMT_CONTENT = {
           clueScore: Math.max(0, Math.floor(Number(raw.clueScore) || 0)),
           skips: Math.max(0, Math.floor(Number(raw.skips) || 0)),
           skipPenalty: Math.max(0, Math.floor(Number(raw.skipPenalty) || 0)),
-          rulesVersion: [3,4,5,6,7].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
+          rulesVersion: [3,4,5,6,7,8].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
@@ -3431,7 +3467,7 @@ window.JSMT_CONTENT = {
     bonus(active, score, clueScore=0,scene) {
       const el=$('hud-bonus');
       el.classList.toggle('live',!!active);
-      const cue=active ? (active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
+      const cue=active ? (active.type==='tail'?'Ekor di semak!':active.type==='rise'?'Gerak di semak!':active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
       el.textContent=cue+' · Bonus macan +'+(scene?.night?CFG.nightBonusPoints:CFG.bonusPoints)+' / Cakaran +'+CFG.cluePoints+' · Terkumpul '+(score+clueScore);
     },
     pips(leopards) {
@@ -3612,7 +3648,7 @@ window.JSMT_CONTENT = {
 
 </script>
   <script>/* js/bonus.js */
-/* Kemunculan singkat: berlari melompat, masuk semak, atau kepala mengintip.
+/* Kemunculan singkat: lari, semak, kepala, ekor, dan tubuh merunduk muncul.
    Sprite yang dirender dan yang bisa dipilih memakai mask vegetasi yang sama. */
 (function () {
   'use strict';
@@ -3620,19 +3656,20 @@ window.JSMT_CONTENT = {
   const cache = new Map();
 
   function sprites(scene, type, flip, variant) {
-    const head = type.startsWith('peek');
-    const key = [scene.R,scene.night,head,flip,variant,CFG.bonusRunScale,CFG.bonusHeadScale].join('|');
+    const head=type.startsWith('peek'),tail=type==='tail',rise=type==='rise';
+    const style=head?'head':tail?'tail':rise?'rise':'run';
+    const key = [scene.R,scene.night,style,flip,variant,CFG.bonusRunScale,CFG.bonusHeadScale,CFG.bonusTailScale].join('|');
     if (cache.has(key)) return cache.get(key);
     const frames = [];
-    for (let i=0; i<(head ? 1 : 12); i++) {
-      const o = { pose:'run', variant, night:scene.night, scale:head ? CFG.bonusHeadScale : CFG.bonusRunScale,
+    for (let i=0; i<(head||rise ? 1 : 12); i++) {
+      const o = { pose:rise?'crouch':'run', variant, night:scene.night, scale:head ? CFG.bonusHeadScale : tail?CFG.bonusTailScale:CFG.bonusRunScale,
         R:scene.R, flip, gait:i/12*Math.PI*2 };
-      const sp = head ? A.leopardHeadSprite(o) : A.leopardSprite(o);
+      const sp = head ? A.leopardHeadSprite(o) : tail?A.leopardTailSprite(o):A.leopardSprite(o);
       if (scene.night) A.toIR(sp.canvas,{level:1,gain:1.1,noise:0});
       frames.push(sp);
     }
     // Batasi cache ketika ukuran jendela/densitas piksel berubah berulang kali.
-    if (cache.size >= 12) cache.delete(cache.keys().next().value);
+    if (cache.size >= 24) cache.delete(cache.keys().next().value);
     cache.set(key,frames);
     return frames;
   }
@@ -3643,7 +3680,7 @@ window.JSMT_CONTENT = {
       this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
       this.nextAt = CFG.bonusFirstSec+this.rng.range(-1,1);
-      this.sequence = this.rng.shuffle(['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right']);
+      this.sequence = this.rng.shuffle([this.rng.pick(['dash','cover']),this.rng.chance(.5) ? 'peek-left' : 'peek-right','tail','rise']);
     }
     update(dt) {
       this.clock += dt;
@@ -3657,7 +3694,7 @@ window.JSMT_CONTENT = {
     spawn(type) {
       if (this.current || this.passes>=CFG.bonusMaxPasses) return null;
       type = type || this.sequence[this.passes % this.sequence.length];
-      const peek = type.startsWith('peek');
+      const peek = type.startsWith('peek'),tail=type==='tail',rise=type==='rise';
       const flip = peek ? type==='peek-right' : this.rng.chance(.5);
       const variant = (this.scene.stage+this.passes)%3===2 ? 'black' : 'spotted';
       const frames = sprites(this.scene,type,flip,variant), sp=frames[0];
@@ -3669,6 +3706,12 @@ window.JSMT_CONTENT = {
         from=center-650; to=center+650; baseY=this.scene.habitat.y;
         opening={x0:center-360,y0:baseY-350,x1:center+360,y1:baseY+70};
         duration=CFG.bonusCoverSec;
+      } else if(tail||rise){
+        const gate=center+(this.rng.chance(.5)?-360:360);
+        from=gate+(tail?this.rng.range(-35,35):0);to=from;
+        baseY=this.scene.habitat.y-(tail?100:185);
+        opening={x0:gate-200,y0:this.scene.habitat.y-380,x1:gate+200,y1:this.scene.habitat.y+60};
+        duration=tail?CFG.bonusTailSec:CFG.bonusRiseSec;
       } else if (peek) {
         from=-90; to=115; baseY=J.H*.61;
         opening={x0:0,y0:0,x1:225,y1:J.H};
@@ -3677,20 +3720,21 @@ window.JSMT_CONTENT = {
       }
       if (flip && !peek) [from,to]=[to,from];
       this.current={kind:'bonus',type,sp,frames,from,to,baseY,opening,duration,
-        started:this.clock,label:peek ? 'Kepala mengintip' : 'Lari melompat',found:false,
+        started:this.clock,label:peek ? 'Kepala mengintip' : tail?'Ekor di semak':rise?'Mengendap dari semak':'Lari melompat',found:false,
         visibleCanvas:J.makeCanvas(sp.canvas.width,sp.canvas.height)};
       this.passes++;
       this.place(this.current,0);
       return this.current;
     }
     place(it,q) {
-      const age=q*it.duration, peek=it.type.startsWith('peek');
+      const age=q*it.duration, peek=it.type.startsWith('peek'),emerge=it.type==='tail'||it.type==='rise';
       const reveal=q<.22 ? J.ease.inOut(q/.22) : q<.65 ? 1 : 1-J.ease.inOut((q-.65)/.35);
       const phase=age*Math.PI*2*3.3;
       it.progress=q;
       it.x=J.lerp(it.from,it.to,peek ? reveal : q);
-      it.y=it.baseY-(peek ? 0 : Math.max(0,Math.sin(phase))*48);
-      it.sp=it.frames[peek ? 0 : Math.floor(age*3.3*12)%it.frames.length];
+      it.y=emerge?it.baseY+(1-reveal)*230:it.baseY-(peek ? 0 : Math.max(0,Math.sin(phase))*48);
+      it.reveal=emerge?reveal:1;
+      it.sp=it.frames[it.frames.length===1 ? 0 : Math.floor(age*(emerge?1.4:3.3)*12)%it.frames.length];
       const b=it.sp.box;
       it.box={x0:it.x+b.x0,y0:it.y+b.y0,x1:it.x+b.x1,y1:it.y+b.y1};
       it.cx=(it.box.x0+it.box.x1)/2;it.cy=(it.box.y0+it.box.y1)/2;
@@ -3704,7 +3748,7 @@ window.JSMT_CONTENT = {
       g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
       g.save();g.setTransform(R,0,0,R,-(it.x+sp.ox)*R,-(it.y+sp.oy)*R);
       const o=it.opening;g.beginPath();g.rect(o.x0,o.y0,o.x1-o.x0,o.y1-o.y0);g.clip();
-      g.drawImage(sp.canvas,it.x+sp.ox,it.y+sp.oy,sp.lw,sp.lh);
+      g.globalAlpha=it.reveal;g.drawImage(sp.canvas,it.x+sp.ox,it.y+sp.oy,sp.lw,sp.lh);g.globalAlpha=1;
       g.globalCompositeOperation='destination-out';
       g.drawImage(this.scene.bonusCover,0,0,J.W,J.H);
       g.restore();
@@ -3747,6 +3791,7 @@ window.JSMT_CONTENT = {
   /* ---------- gambar adegan (dipakai juga oleh layar awal) ---------- */
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
+    if(sc.motion)sc.motion.renderSky(ctx);
     ctx.drawImage(sc.comp,0,0,W,H);
     if(sc.motion)sc.motion.render(ctx);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah

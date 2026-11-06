@@ -617,6 +617,19 @@
       drawHead(g, pal, getPatterns(g, key, pal), { x:0, y:0, s:1.1, turn:0, tilt:0 }, o, 2.6));
   };
 
+  // Ekor terpisah untuk bonus: tidak menyertakan kepala atau badan tersembunyi.
+  A.leopardTailSprite = function (o) {
+    const key=o.variant==='black'&&o.night?'blackIR':o.variant||'spotted',pal=A.PAL[key];
+    return A.makeSprite(o,[-90,-160,145,65],g=>{
+      const sway=Math.sin(o.gait||0)*22,pats=getPatterns(g,key,pal);
+      const d=new Path2D(`M -53 47 C -55 -8 -17 -107 24 -91 C 65 -75 ${101+sway} -96 ${85+sway} -137`);
+      g.lineCap='round';g.lineJoin='round';g.strokeStyle=pal.outline;g.lineWidth=23;g.stroke(d);
+      g.strokeStyle=pats.spot;g.lineWidth=17;g.stroke(d);
+      const tip=new Path2D(`M ${92+sway} -111 Q ${93+sway} -124 ${85+sway} -137`);
+      g.strokeStyle=pal.spot;g.lineWidth=18;g.stroke(tip);
+    });
+  };
+
   A.scratchSprite = function (o) {
     return A.makeSprite(o, [-24, -55, 24, 55], g => {
       g.lineCap = 'round';

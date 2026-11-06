@@ -60,7 +60,7 @@
     bonus(active, score, clueScore=0,scene) {
       const el=$('hud-bonus');
       el.classList.toggle('live',!!active);
-      const cue=active ? (active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
+      const cue=active ? (active.type==='tail'?'Ekor di semak!':active.type==='rise'?'Gerak di semak!':active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
       el.textContent=cue+' · Bonus macan +'+(scene?.night?CFG.nightBonusPoints:CFG.bonusPoints)+' / Cakaran +'+CFG.cluePoints+' · Terkumpul '+(score+clueScore);
     },
     pips(leopards) {

@@ -72,6 +72,7 @@ try:
         page.evaluate('JSMT.randomSeed=()=>424242')
         page.locator('#btn-go').click()
         page.evaluate('JSMT.debug.game.loadScene(JSMT.Scene.generate(0,{seed:424242,R:JSMT.R,diff:{...JSMT_CONFIG.stages[0],count:[5,5]}}))')
+        page.evaluate('JSMT.debug.game.bonus.nextAt=Infinity')
         page.wait_for_timeout(600)
         assert page.evaluate('JSMT.debug.game.duration') == 180
 
@@ -153,14 +154,14 @@ try:
             const stationSeed=seed+stage*7919;
             const sc=JSMT.Scene.generate(stage,{{seed:stationSeed,R:.65}});JSMT.debug.game.scene=sc;
             const decoys=sc.items.filter(x=>x.kind==='decoy');
-            out.push({{stage,seed:stationSeed,count:sc.leopards.length,wanted:sc.diff.count[0],max:sc.diff.count[1],requested:sc.targetCount,mix:sc.mix,distribution:sc.distribution,poses:sc.leopards.map(x=>x.pose),decoyPoses:decoys.map(x=>[x.type,x.pose]),nearest:Math.min(...sc.leopards.flatMap((a,i)=>sc.leopards.slice(i+1).map(b=>Math.hypot(a.cx-b.cx,a.cy-b.cy)))),density:sc.diff.density,movers:sc.motion.items.map(it=>[it.type,it.motion.kind]),trunks:decoys.filter(it=>it.onTrunk).length,wind:sc.wind.length,vegetation:sc.vegetationCount,signature:JSON.stringify([sc.forestLayout,sc.items.map(x=>[x.kind,x.type,x.pose,x.x,x.y])]),decoys:decoys.length,expectedDecoys:sc.diff.decoys,
+            out.push({{stage,seed:stationSeed,count:sc.leopards.length,wanted:sc.diff.count[0],max:sc.diff.count[1],requested:sc.targetCount,mix:sc.mix,distribution:sc.distribution,poses:sc.leopards.map(x=>x.pose),decoyPoses:decoys.map(x=>[x.type,x.pose]),nearest:Math.min(...sc.leopards.flatMap((a,i)=>sc.leopards.slice(i+1).map(b=>Math.hypot(a.cx-b.cx,a.cy-b.cy)))),gap:Math.min(...sc.leopards.flatMap((a,i)=>sc.leopards.slice(i+1).map(b=>Math.hypot(Math.max(0,a.box.x0-b.box.x1,b.box.x0-a.box.x1),Math.max(0,a.box.y0-b.box.y1,b.box.y0-a.box.y1))))),span:Math.max(...sc.leopards.map(it=>it.cx))-Math.min(...sc.leopards.map(it=>it.cx)),density:sc.diff.density,movers:sc.motion.items.map(it=>[it.type,it.motion.kind]),trunks:decoys.filter(it=>it.onTrunk).length,wind:sc.wind.length,vegetation:sc.vegetationCount,signature:JSON.stringify([sc.forestLayout,sc.items.map(x=>[x.kind,x.type,x.pose,x.x,x.y])]),decoys:decoys.length,expectedDecoys:sc.diff.decoys,
               types:new Set(decoys.map(x=>x.type)).size,warm:decoys.filter(x=>JSMT.Art.DECOY_WARM_TYPES.includes(x.type)).length,minAdultScale:Math.min(...sc.leopards.filter(x=>!x.cub).map(x=>x.scale)),minCubScale:Math.min(...sc.leopards.filter(x=>x.cub).map(x=>x.scale),1),clues:sc.clues.length,cluesSelectable:sc.clues.every(it=>!!find(it)),minVis:Math.min(...sc.leopards.map(x=>x.vis)),requiredVis:sc.diff.minVis,
               allSelectable:sc.leopards.every(it=>!!find(it)),ms:sc.genMs}});
           }}JSMT.debug.game.scene=old;return out;
         }}''')
         (OUT / 'scene-checks.json').write_text(json.dumps(scenes, indent=2))
         for sc in scenes:
-            assert 2<=sc['count']<=6 and sc['wanted']<=sc['count']<=sc['max'] and sc['count']==sc['requested'],sc
+            assert 3<=sc['count']<=6 and sc['wanted']<=sc['count']<=sc['max'] and sc['count']==sc['requested'],sc
             assert 9<=sc['decoys']<=16 and sc['decoys']>sc['count'],sc
             assert sc['density']>=.94 and sc['vegetation']>=250,sc
             assert sc['minAdultScale']>=.60 and sc['minCubScale']>=.48,sc
@@ -184,10 +185,9 @@ try:
         assert len(set(x['decoys'] for x in scenes))>=4
         assert len(set(x['signature'] for x in scenes))==len(scenes)
 
-        assert len(set(x['distribution'] for x in scenes))==3
+        assert set(x['distribution'] for x in scenes)=={'scattered'}
         assert len(set(p for x in scenes for p in x['poses']))>=10
-        assert any(x['distribution']=='clustered' and x['nearest']<500 for x in scenes)
-        assert any(x['distribution']=='scattered' and x['nearest']>600 for x in scenes)
+        assert all(x['nearest']>=380 and x['gap']>=120 and x['span']>=1440 for x in scenes)
 
         # Every catalog pose must have its own silhouette, valid metadata and uncropped margins.
         art=page.evaluate('''() => {
@@ -197,13 +197,14 @@ try:
             out.push({type,pose,area:n,hash:hash>>>0,edge,eyes:sp.eyes.every(e=>Number.isFinite(e.x)&&Number.isFinite(e.y))});};
           for(const pose of A.LEOPARD_STATIC_POSES)for(const variant of ['spotted','black'])check(A.leopardSprite({pose,variant,scale:.67,R:1}),variant,pose);
           for(const type of A.DECOY_TYPES)for(const pose of A.DECOY_POSES[type])check(A.animalSprite(type,{pose,scale:.85,R:1}),type,pose);
+          for(const variant of ['spotted','black'])for(let i=0;i<12;i++)check(A.leopardTailSprite({variant,scale:1.05,R:1,gait:i/12*Math.PI*2}),variant+'-tail','tail-'+i);
           return out;
         }''')
         for a in art:
             assert a['area']>100 and a['edge']==0 and a['eyes'],a
         for species in set(a['type'] for a in art):
             variants=[a for a in art if a['type']==species]
-            assert len(set(a['hash'] for a in variants))==len(variants),(species,variants)
+            if not species.endswith('-tail'):assert len(set(a['hash'] for a in variants))==len(variants),(species,variants)
         (OUT/'pose-catalog.json').write_text(json.dumps(art,indent=2))
 
         # Round-end rendering, names, saving, backup and CSV retain bonus details.
@@ -218,7 +219,7 @@ try:
         record = page.evaluate('JSMT.Leaderboard.load()[0]')
         assert record['bonusScore'] == 5 and record['bonusFound'] == 1
         assert record['score'] == record['baseScore'] + record['bonusScore'] + record['clueScore'] - record['skipPenalty'] - record['decoyPenalty']
-        assert record['clueScore'] == 1 and record['rulesVersion'] == 7
+        assert record['clueScore'] == 1 and record['rulesVersion'] == 8
         assert record['baseScore']==record['baseFound']*3 and record['decoyPenalty']==4
         assert 'penalti_pengecoh' in page.evaluate('JSMT.Leaderboard.csv()')
         assert page.evaluate('JSMT.Leaderboard.importBackup(JSMT.Leaderboard.backup({})).added') == 0
@@ -232,7 +233,7 @@ try:
           const game=JSMT.debug.game;game.paused=true;const out=[];const find={FIND_POINT};
           for(const mode of ['siang','malam']){{
             const sc=JSMT.Scene.generate(0,{{seed:123,R:.65,mode}});game.scene=sc;
-            for(const type of ['dash','cover','peek-left','peek-right']){{
+            for(const type of ['dash','cover','peek-left','peek-right','tail','rise']){{
               game.bonus=new JSMT.Bonus(sc);const b=game.bonus,it=b.spawn(type);
               const alpha=()=>{{const a=it.visibleCanvas.getContext('2d').getImageData(0,0,it.visibleCanvas.width,it.visibleCanvas.height).data;let n=0;for(let i=3;i<a.length;i+=4)if(a[i]>100)n++;return n;}};
               const start=alpha();b.place(it,.5);const visible=alpha();const p=find(it);
@@ -246,16 +247,42 @@ try:
                 if(raw[k]>100&&rendered[k]<20){{hiddenPixels++;if(b.hit(it.x+it.sp.ox+x/it.sp.R,it.y+it.sp.oy+y/it.sp.R,18))hiddenRejected=false;}}
               }}
               b.place(it,1);const end=alpha();b.update(it.duration+.01);
-              out.push({{mode,type,start,visible,end,yes,hiddenRejected,hiddenPixels,duration:it.duration,expired:!b.current,headOnly:!type.startsWith('peek')||it.sp.lh<170}});
+              out.push({{mode,type,start,visible,end,yes,hiddenRejected,hiddenPixels,duration:it.duration,expired:!b.current,tailOnly:type!=='tail'||(!it.sp.head&&!it.sp.eyes.length),headOnly:!type.startsWith('peek')||it.sp.lh<170}});
             }}
           }}return out;
         }}''')
         for x in patterns:
             assert x['start'] == 0 and x['end'] == 0 and x['visible'] > 200, x
-            assert x['yes'] and x['hiddenRejected'] and x['expired'] and x['headOnly'], x
+            assert x['yes'] and x['hiddenRejected'] and x['expired'] and x['headOnly'] and x['tailOnly'], x
             assert x['duration'] <= 3.2, x
             if x['type']!='dash': assert x['hiddenPixels']>0,x
         (OUT/'bonus-patterns.json').write_text(json.dumps(patterns,indent=2))
+
+        # Four bounded opportunities: first at 2–4s, gaps 4–6s, including tail and rise.
+        schedule=page.evaluate('''()=>{
+          const sc=JSMT.Scene.generate(0,{seed:123,R:.5}),b=new JSMT.Bonus(sc),events=[];let prev=null;
+          for(let i=0;i<1400;i++){b.update(.05);if(b.current!==prev){if(b.current)events.push({type:b.current.type,start:b.current.started,duration:b.current.duration});prev=b.current;}}
+          return events;
+        }''')
+        assert len(schedule)==4 and 2<=schedule[0]['start']<=4.1,schedule
+        assert {'tail','rise'}<=set(x['type'] for x in schedule),schedule
+        for prev,cur in zip(schedule,schedule[1:]):assert 3.9<=cur['start']-prev['start']-prev['duration']<=6.2,schedule
+        (OUT/'bonus-schedule.json').write_text(json.dumps(schedule,indent=2))
+
+        # Clouds move behind the forest: no change to opaque tree/animal pixels.
+        clouds=page.evaluate('''()=>{
+          const out=[];
+          for(const mode of ['pagi','siang','senja','malam']){
+            const sc=JSMT.Scene.generate(0,{seed:123,R:.5,mode}),c=JSMT.makeCanvas(sc.comp.width,sc.comp.height),g=c.getContext('2d');
+            const paint=()=>{g.setTransform(sc.R,0,0,sc.R,0,0);sc.motion.renderSky(g);g.drawImage(sc.comp,0,0,JSMT.W,JSMT.H);return g.getImageData(0,0,c.width,c.height).data;};
+            const x=sc.clouds.map(c=>sc.motion.cloudX(c)),a=paint();sc.motion.update(4);const b=paint();
+            const cover=sc.comp.getContext('2d').getImageData(0,0,c.width,c.height).data;let changed=0,blocked=0;
+            for(let i=0;i<a.length;i+=4){if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]){changed++;if(cover[i+3]===255)blocked++;}}
+            out.push({mode,count:sc.clouds.length,changed,blocked,moved:sc.clouds.every((c,i)=>sc.motion.cloudX(c)!==x[i])});
+          }return out;
+        }''')
+        for sc in clouds:assert sc['count']==4 and sc['changed']>100 and sc['blocked']==0 and sc['moved'],sc
+        (OUT/'clouds.json').write_text(json.dumps(clouds,indent=2))
 
         # Moving distractions share visible-pixel hit masks, remain within reserved tracks,
         # do not cover main targets, and keep their negative score at every lighting mode.
@@ -294,7 +321,7 @@ try:
         (OUT/'moving-decoys.json').write_text(json.dumps(moving,indent=2))
 
         # Real taps on every moving species, including a held tap and a drag.
-        page.evaluate('''()=>{JSMT.debug.goto('play');const g=JSMT.debug.game;g.loadScene(JSMT.Scene.generate(0,{seed:87654,R:JSMT.R,mode:'pagi'}));g.effects=[];g.bonus.passes=3;g.paused=true;}''')
+        page.evaluate('''()=>{JSMT.debug.goto('play');const g=JSMT.debug.game;g.loadScene(JSMT.Scene.generate(0,{seed:87654,R:JSMT.R,mode:'pagi'}));g.effects=[];g.bonus.passes=JSMT_CONFIG.bonusMaxPasses;g.paused=true;}''')
         penalties=page.evaluate(f'''()=>{{const g=JSMT.debug.game,find={FIND_POINT},out=[];g.score=50;g.paused=false;
           for(const it of g.scene.motion.items){{
             let p=null;for(let k=0;k<40&&!p;k++){{try{{p=find(it);}}catch(e){{g.scene.motion.update(.4);}}}}
@@ -318,7 +345,7 @@ try:
 
         # A mixed day/night session persists actual weighted points through results/CSV/backup.
         night=page.evaluate(f'''()=>{{
-          JSMT.debug.goto('play');const g=JSMT.debug.game,find={FIND_POINT};g.effects=[];g.bonus.passes=3;
+          JSMT.debug.goto('play');const g=JSMT.debug.game,find={FIND_POINT};g.effects=[];g.bonus.passes=JSMT_CONFIG.bonusMaxPasses;
           g.loadScene(JSMT.Scene.generate(0,{{seed:555,R:.65,diff:{{...JSMT_CONFIG.stages[0],count:[5,5]}}}}));
           let p=find(g.scene.leopards[0]);g.pointer(p.x,p.y,0);const day=g.score;
           g.loadScene(JSMT.Scene.generate(3,{{seed:555,R:.65,diff:{{...JSMT_CONFIG.stages[3],count:[5,5]}}}}));
@@ -338,7 +365,7 @@ try:
         assert weighted['baseFound']==3 and weighted['baseScore']==13 and weighted['bonusScore']==7 and weighted['score']==17,weighted
         page.evaluate('''()=>{const b=JSMT.Leaderboard.backup({});JSMT.Leaderboard.resetAll();JSMT.Leaderboard.importBackup(b);}''')
         assert page.evaluate('JSMT.Leaderboard.load().slice(-1)[0].baseScore')==13
-        assert page.evaluate('JSMT.Leaderboard.load().slice(-1)[0].rulesVersion')==7
+        assert page.evaluate('JSMT.Leaderboard.load().slice(-1)[0].rulesVersion')==8
 
         # Three main targets yield nine points; skipping deducts one and retains eight.
         page.evaluate('JSMT.debug.goto("play")')
@@ -451,7 +478,7 @@ try:
             single.evaluate('JSMT.debug.goto("briefing")')
             check_layout(single,'.brief-panel')
         assert not errors, errors
-        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','per-click point and time penalty','weighted main score','random population balance','pose variety and silhouette catalog','night rewards','moving decoys and occlusion','trunk decoys','wind and pause','clustered and scattered placement','dense randomized forest','target size floor','target visibility','return to menu and cancel','admin settings from play','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
+        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','per-click point and time penalty','weighted main score','random population balance','pose variety and silhouette catalog','night rewards','moving decoys and occlusion','trunk decoys','wind and pause','minimum three widely spaced targets','moving clouds','tail and bush emergence','increased bonus frequency','dense randomized forest','target size floor','target visibility','return to menu and cancel','admin settings from play','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
         browser.close()
 finally:
     server.shutdown()

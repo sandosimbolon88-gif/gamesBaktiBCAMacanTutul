@@ -37,13 +37,14 @@
   S.generate = function (stage, opts) {
     opts = Object.assign({}, opts);
     let sc = null;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 12; i++) {
       sc = generateOnce(stage, opts);
       const need = sc.diff.count[0];
-      if (sc.leopards.length >= need) return sc;
+      const span=Math.max(...sc.leopards.map(it=>it.cx))-Math.min(...sc.leopards.map(it=>it.cx));
+      if (sc.leopards.length === sc.targetCount && sc.leopards.length >= need && span>=W*.60) return sc;
       opts.seed = J.rng(sc.seed + 7919 * (i + 1)).seed();
     }
-    return sc;
+    throw new Error('Stasiun gagal memenuhi jumlah dan sebaran target.');
   };
 
   /* ---------- tanaman sebagai objek berlapis ---------- */
@@ -114,7 +115,9 @@
     const g = bg.getContext('2d');
     g.setTransform(R, 0, 0, R, 0, 0);
     const groundY = r.range(H * 0.63, H * 0.67);
-    F.sky(g, p, W, groundY);
+    const sky=J.makeCanvas(W*R,H*R),skyG=sky.getContext('2d');
+    skyG.setTransform(R,0,0,R,0,0);F.sky(skyG,p,W,groundY);
+    if(night)A.toIR(sky,{falloff:true,gain:.95,foliage:.72,cx:.5,cy:.86,rad:.62,noise:0});
     F.farLayer(g, J.rng(r.seed()), W, groundY - 10, Math.round(38 + 26 * dens), p.far1T, p.far1C);
     if (!night) F.rays(g, J.rng(r.seed()), p, W, H);
     if (mode === 'pagi') F.mist(g, W, groundY - 340, groundY + 40, 0.6);
@@ -199,49 +202,41 @@
       return cand.length ? r.pick(nearX==null ? cand : cand.slice(0,Math.min(3,cand.length))) : null;
     }
     function desiredLocation(index,attempt) {
-      const cluster=distribution==='clustered'||distribution==='mixed'&&index%2===0;
-      if(attempt<24&&cluster){const c=clusters[index%clusters.length];return {x:J.clamp(c.x+r.range(-185,185),180,W-180),y:J.clamp(c.y+r.range(-105,105),gMin,gMax)};}
-      if(attempt<24&&distribution!=='clustered')return {x:J.clamp((index+.5)*W/nLeo+r.range(-W/nLeo*.25,W/nLeo*.25),160,W-160),y:r.range(gMin,gMax)};
-      return {x:r.range(140,W-140),y:r.range(gMin,gMax)};
+      const width=W/nLeo,center=(lanes[index]+.5)*width;
+      return {x:J.clamp(center+r.range(-width*.12,width*.12),160,W-160),y:r.range(gMin,gMax)};
     }
-    function placeLeopard(pose,variant,index) {
+    function placeLeopard(pose,variant,index,cub=false) {
       const onBranch=pose==='branch',onTrunk=pose==='scratch'||pose==='climb';
-      for(let attempt=0;attempt<48;attempt++){
+      for(let attempt=0;attempt<64;attempt++){
         const want=desiredLocation(index,attempt),ds=(onBranch||onTrunk) ? .94 : depth(want.y);
-        const scale=J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*(pose==='peek'?1.12:1);
+        const scale=cub?r.range(CFG.cubMinScale,CFG.cubMaxScale):J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*(pose==='peek'?1.12:1);
         let x=want.x,y=want.y,slot=null,tree=null,flip=r.chance(.5);
         if(onBranch){slot=pickSlot(190*scale,want.x);if(!slot)continue;const half=96*scale;x=J.clamp(want.x,slot.x0+half,slot.x1-half);if(slot.x1-slot.x0<half*2)x=(slot.x0+slot.x1)/2;y=slot.y(x);}
         else if(onTrunk){
           const candidates=trees.slice().sort((a,b)=>Math.abs(a.x-want.x)-Math.abs(b.x-want.x));
-          tree=r.pick(candidates.slice(0,Math.min(3,candidates.length)));
+          tree=r.pick(candidates.slice(0,Math.min(2,candidates.length)));
           const side=flip?1:-1,paw=pose==='scratch'?128:92;
           x=tree.x+side*(tree.w*.40+paw*scale);y=pose==='scratch'?tree.base-6:tree.base-r.range(150,280);
         }
         if(pose==='peek')y=Math.min(y,gMax-80);
-        const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft});
+        const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft,cub});
         const box=tryPlace(sp,x,y);if(!box)continue;
-        const spread=distribution==='scattered'?110:65;
-        if(animals.some(a=>a.kind==='leopard'&&!a.cub&&Math.hypot(a.cx-(box.x0+box.x1)/2,a.cy-(box.y0+box.y1)/2)<spread))continue;
+        const cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2;
+        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.40)continue;
+        if(animals.some(a=>a.kind==='leopard'&&(Math.hypot(a.cx-cx,a.cy-cy)<CFG.targetMinDistance||Math.hypot(Math.max(0,a.box.x0-box.x1,box.x0-a.box.x1),Math.max(0,a.box.y0-box.y1,box.y0-a.box.y1))<CFG.targetMinGap)))continue;
         occ.push(box);if(slot)slot.used=true;
-        const it=mk('leopard',{pose,variant,cub:false,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
+        const it=mk('leopard',{pose,variant,cub,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
       }
       return null;
     }
-    function placeCub(mom) {
+    function placeCub(mom,index) {
       const pose=r.pick(['crouch','sniff','groom','curl','walk'].filter(p=>p!==mom.pose));
-      const sp=A.leopardSprite({pose,variant:mom.variant,night,scale:J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale),R,flip:r.chance(.5),cub:true,soft});
-      for(let attempt=0;attempt<16;attempt++){
-        const side=attempt%2?1:-1;
-        const x=mom.x+side*((mom.box.x1-mom.box.x0)*.5+r.range(38,100)),y=J.clamp(mom.y+r.range(-40,55),gMin,gMax);
-        const box=tryPlace(sp,x,y);if(!box)continue;
-        occ.push(box);const it=mk('leopard',{pose,variant:mom.variant,cub:true,onBranch:false,onTrunk:false},sp,x,y,box);it.label=labelFor(it);return it;
-      }
-      return null;
+      return placeLeopard(pose,mom.variant,index,true);
     }
 
     const nLeo=r.int(d.count[0],d.count[1]);
-    const distribution=r.pick(['scattered','clustered','mixed']);
-    const clusters=Array.from({length:nLeo>=4?r.int(1,2):1},()=>({x:r.range(390,W-390),y:r.range(gMin+30,gMax-30)}));
+    const distribution='scattered';
+    const lanes=r.shuffle(Array.from({length:nLeo},(_,i)=>i));
     const firstPose=r.pick(['crouch','sniff','stretch','groom','curl']);
     const deck=[firstPose,...r.shuffle(A.LEOPARD_STATIC_POSES.filter(p=>p!==firstPose))];
     let blackLeft=d.minBlack||0,wantCub=!!d.cub&&r.chance(d.cub),placed=0,guard=0;
@@ -251,7 +246,7 @@
       const it=placeLeopard(pose,black?'black':'spotted',placed);if(!it)continue;
       animals.push(it);placed++;if(black&&blackLeft>0)blackLeft--;
       if(wantCub&&placed<nLeo&&!it.onBranch&&!it.onTrunk&&pose!=='peek'){
-        const cub=placeCub(it);if(cub){animals.push(cub);placed++;wantCub=false;}
+        const cub=placeCub(it,placed);if(cub){animals.push(cub);placed++;wantCub=false;}
       }
     }
 
@@ -494,7 +489,7 @@
 
     animals.sort((a, b) => a.y - b.y);
     const scene={
-      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix, distribution,
+      seed, stage, diff: d, mode, night, comp, sky, items: animals, R, bonusCover, habitat, mix, distribution,
       targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
       forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
       clues: animals.filter(i => i.kind === "clue"),

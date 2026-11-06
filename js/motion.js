@@ -58,6 +58,16 @@
       }
       return null;
     }
+    cloudX(cloud) {
+      const span=J.W+cloud.width;
+      return ((cloud.x+this.clock*cloud.speed+cloud.width)%span+span)%span-cloud.width;
+    }
+    renderSky(ctx) {
+      const sc=this.scene;ctx.drawImage(sc.sky,0,0,J.W,J.H);
+      ctx.save();ctx.globalAlpha=sc.night?.14:.48;
+      for(const c of sc.clouds){const x=this.cloudX(c);ctx.drawImage(c.canvas,x,c.y,c.width,c.height);}
+      ctx.restore();
+    }
     render(ctx) {
       for(const it of this.items)ctx.drawImage(it.visibleCanvas,it.x+it.sp.ox,it.y+it.sp.oy,it.sp.lw,it.sp.lh);
       for(const w of this.scene.wind){
@@ -68,6 +78,19 @@
   }
   Motion.prepare=function(sc,objs,p,drawObj,trees) {
     const r=J.rng(sc.seed^0x71bc),R=sc.R;
+    const cr=J.rng(sc.seed^0x8c10);
+    sc.clouds=Array.from({length:4},(_,i)=>{
+      const width=cr.range(460,720),height=cr.range(100,160),canvas=J.makeCanvas(width*R,height*R),g=canvas.getContext('2d');
+      g.setTransform(R,0,0,R,0,0);
+      const shade=sc.mode==='senja'?'255,226,183':'250,255,245';
+      for(let j=0;j<6;j++){
+        const x=width*(.16+j*.13),y=height*cr.range(.42,.64),rx=width*cr.range(.16,.21),ry=height*cr.range(.26,.44);
+        g.save();g.translate(x,y);g.scale(1,ry/rx);
+        const local=g.createRadialGradient(0,0,rx*.16,0,0,rx);local.addColorStop(0,'rgba('+shade+',.85)');local.addColorStop(1,'rgba('+shade+',0)');
+        g.fillStyle=local;g.beginPath();g.arc(0,0,rx,0,TAU);g.fill();g.restore();
+      }
+      return {canvas,width,height,x:i*J.W/4-cr.range(100,300),y:cr.range(180,390),speed:cr.range(10,18)};
+    });
     for(const it of sc.items.filter(x=>x.moving)){
       const m=it.motion;
       m.x=it.x;m.y=it.y;m.phase=0;m.speed=m.kind==='fly'?.34:m.kind==='walk'?.60:.28;
