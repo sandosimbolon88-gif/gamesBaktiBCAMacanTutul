@@ -101,7 +101,7 @@
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
-    $('result-breakdown').textContent = res.baseFound + ' temuan utama + ' + res.bonusScore + ' poin bonus (' + res.bonusFound + ' lintasan)';
+    $('result-breakdown').textContent = res.baseFound + ' temuan + ' + res.bonusScore + ' bonus satwa + ' + res.clueScore + ' cakaran − ' + res.skipPenalty + ' penalti skip';
     $('result-stations').textContent = res.stages;
     $('result-mistakes').textContent = res.mistakes;
     $('result-rank').textContent = '#' + J.Leaderboard.wouldRank('today', res.score, res.mistakes);
@@ -113,7 +113,7 @@
   function saveResult(skip) {
     if (!pendingResult) return;
     const name = skip ? C.ui.defaultName : UI.cleanName(UI.getName());
-    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, rulesVersion: 3 });
+    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, cluesFound:pendingResult.cluesFound, clueScore:pendingResult.clueScore, skips:pendingResult.skips, skipPenalty:pendingResult.skipPenalty, rulesVersion:CFG.rulesVersion });
     lastEntryId = e.id;
     pendingResult = null;
     J.Audio.click();
@@ -314,7 +314,8 @@
     return {
       spotted: mk({ pose: 'sit', variant: 'spotted', scale: 0.6 }),
       black: mk({ pose: 'sit', variant: 'black', scale: 0.6 }),
-      moving: mk({ pose: 'walk', variant: 'spotted', scale: 0.6 }),
+      moving: mk({ pose: 'run', variant: 'spotted', scale: 0.6, gait:Math.PI*.5 }),
+      scratch: A.scratchSprite({scale:1,R:2}).canvas.toDataURL(),
       kuwuk: A.animalSprite('kuwuk', { scale: 1.3, R: 2, pose: 'sit' }).canvas.toDataURL()
     };
   }

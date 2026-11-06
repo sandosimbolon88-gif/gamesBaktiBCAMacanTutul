@@ -121,6 +121,7 @@
       this.duration = duration;
       this.timeLeft = duration;
       this.baseFound = 0; this.bonusFound = 0; this.bonusScore = 0;
+      this.cluesFound = 0; this.clueScore = 0; this.skips = 0; this.skipPenalty = 0;
       this.score = 0; this.stage = 0; this.stagesCleared = 0; this.mistakes = 0;
       this.effects = []; this.particles = [];
       this.paused = false; this.ending = false; this.active = true;
@@ -138,7 +139,7 @@
       if (J.resetCamera) J.resetCamera();
       this.scene = sc;
       this.bonus = new J.Bonus(sc);
-      UI().hud.bonus(false, this.bonusScore);
+      UI().hud.bonus(false, this.bonusScore, this.clueScore);
       const now = J.now();
       this.stageStart = now; this.lastFind = now; this.hintTarget = null; this.nextScene = null;
       UI().hud.station(this.stage + 1, sc.mode);
@@ -160,10 +161,19 @@
         this.bonusFound++; this.bonusScore += CFG.bonusPoints; this.score += CFG.bonusPoints;
         this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + CFG.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
         this.effects.push({ type: 'ring', x: bonus.cx, y: bonus.cy, r0: 20, r1: 140, t0: now, dur: 0.6 });
-        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore);
+        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore);
         return;
       }
       const it = J.Scene.hit(this.scene, lx, ly, tol);
+      if (it && it.kind === 'clue') {
+        if (it.found) return;
+        it.found=true; it.foundAt=now;
+        this.cluesFound++; this.clueScore+=CFG.cluePoints; this.score+=CFG.cluePoints;
+        this.effects.push({type:'text',x:it.cx,y:it.box.y0-10,text:'CAKARAN +'+CFG.cluePoints,t0:now,dur:1,color:'#ffe15a'});
+        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore);
+        UI().bubble(it.cx,it.box.y0,'Jejak di pohon!','Cakaran adalah salah satu tanda yang dipelajari peneliti. Di alam, temuan jejak perlu diperiksa bersama bukti lainnya.','+'+CFG.cluePoints+' poin');
+        return;
+      }
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
@@ -184,12 +194,14 @@
           it.penalized = true;
           this.mistakes++;
           this.timeLeft = Math.max(0, this.timeLeft - CFG.decoyPenaltySec);
+          UI().hud.time(this.timeLeft,this.duration);
           extra = J.tpl(C.ui.penalty, { s: CFG.decoyPenaltySec });
           this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 6, text: extra, t0: now, dur: 1.1, color: '#ff8a70' });
         }
         this.effects.push({ type: 'xbox', it, t0: now, dur: 1.2 });
         J.Audio.decoy();
         UI().bubble(it.cx, it.box.y0, it.info.name, it.info.text, extra);
+        if (this.timeLeft<=0) this.end();
         return;
       }
       // meleset
@@ -207,7 +219,10 @@
     skipStation() {
       if (!this.active || this.paused || this.ending) return;
       this.paused = true; UI().clearBubbles();
-      UI().banner('Stasiun dilewati<small>Mengganti kamera...</small>');
+      const deducted=Math.min(this.score,CFG.skipPenaltyPoints);
+      this.score-=deducted;this.skipPenalty+=deducted;this.skips++;
+      UI().hud.score(this.score,true);
+      UI().banner('Stasiun dilewati<small>−'+deducted+' poin · Mengganti kamera...</small>');
       const nextStage = this.stage + 1;
       this.later(() => { if (!this.active) return; this.stage = nextStage;
         const sc = J.Scene.generate(nextStage, { R: J.R });
@@ -251,7 +266,7 @@
         if (!this.active) return;
         this.active = false;
         UI().hud.show(false);
-        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, bonusFound: this.bonusFound, bonusScore: this.bonusScore });
+        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
       }, 2600);
     }
 
@@ -260,7 +275,7 @@
       if (!this.active) return;
       if (!this.paused && !this.ending) {
         this.bonus.update(dt);
-        UI().hud.bonus(!!this.bonus.current, this.bonusScore);
+        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore);
         this.timeLeft -= dt;
         const sec = Math.ceil(this.timeLeft);
         if (sec !== this.lastTickSec) {

@@ -140,12 +140,7 @@
       g.fillStyle = p.trunkDark; g.beginPath(); g.ellipse(kx, ky, w * 0.11, w * 0.15, 0, 0, TAU); g.fill();
       g.fillStyle = '#3a2615'; g.beginPath(); g.ellipse(kx, ky + 1, w * 0.06, w * 0.09, 0, 0, TAU); g.fill();
     }
-    // bekas cakaran macan tutul di batang (kadang-kadang)
-    if (r.chance(0.35)) {
-      const sx = x - w * 0.18, sy = baseY - r.range(120, 170);
-      g.strokeStyle = '#d9b98a'; g.lineWidth = 2.2;
-      for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(sx + k * 6, sy); g.quadraticCurveTo(sx + k * 6 + 2, sy + 18, sx + k * 6 - 1, sy + 34); g.stroke(); }
-    }
+    // Cakaran interaktif ditempatkan oleh generator adegan.
     g.restore();
     const slots = [];
     for (const b of branches) slots.push(F.branch(g, r, p, x, baseY, w, wTop, topY, b));

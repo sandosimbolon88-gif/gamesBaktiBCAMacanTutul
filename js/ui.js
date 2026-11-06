@@ -57,10 +57,11 @@
       $('hud-mode').textContent = C.ui.modes[mode] || '';
       $('hud').classList.toggle('night', mode === 'malam');
     },
-    bonus(active, score) {
-      const el = $('hud-bonus');
-      el.classList.toggle('live', active);
-      el.textContent = active ? '✦ Macan melintas! Klik untuk +' + CFG.bonusPoints + ' poin' : '✦ Bonus lintasan +' + CFG.bonusPoints + ' · terkumpul ' + score;
+    bonus(active, score, clueScore=0) {
+      const el=$('hud-bonus');
+      el.classList.toggle('live',!!active);
+      const cue=active ? (active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
+      el.textContent=cue+' · Satwa +'+CFG.bonusPoints+' / Cakaran +'+CFG.cluePoints+' · Bonus terkumpul '+(score+clueScore);
     },
     pips(leopards) {
       const box = $('hud-pips');

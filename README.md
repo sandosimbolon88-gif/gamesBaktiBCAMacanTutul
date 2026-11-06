@@ -1,8 +1,12 @@
-# Jejak Si Macan Tutul · V3 Expo
+# Jejak Si Macan Tutul · V4 Kompetisi Expo
 
 Game edukasi Bakti BCA: cari macan tutul jawa di hutan Bromo Tengger Semeru, kenali satwa lain, dan pelajari Java Wide Leopard Survey (JWLS).
 
 Versi ini melanjutkan **attachment Macan Tutul V2**, termasuk durasi awal tiga menit, hutan lebat, zoom, pergantian stasiun, dan kartu fakta yang dibaca tanpa mengurangi waktu permainan.
+
+![Demo bonus lari melompat, semak, dan kepala mengintip](docs/bonus-demo.gif)
+
+[Ilustrasi empat pengecoh terbaru](docs/pengecoh-baru.png)
 
 ## Menjalankan di booth
 
@@ -16,13 +20,14 @@ Bacaan siaran pers pada menu **Kenali JWLS** membutuhkan internet. Permainan dan
 ## Aturan
 
 - **Target utama: +1 poin** untuk tiap macan tutul atau macan kumbang. Temukan semuanya untuk menyelesaikan stasiun.
-- **Bonus lintasan: +3 poin** untuk macan bergerak bertanda BONUS. Gerak kaki memiliki delapan frame animasi. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
-- Bonus pertama muncul setelah empat detik waktu main aktif. Maksimal dua lintasan per stasiun, masing-masing sembilan detik. Kartu fakta dan jeda stasiun menghentikan jam bonus.
-- Ada **sepuluh jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, dan monyet ekor panjang. Stasiun awal memuat tujuh pengecoh; kesulitan selanjutnya menambah jumlahnya.
-- Salah memilih satwa mengurangi dua detik, sekali per satwa. Klik berulang pada satwa yang sama tidak menambah penalti.
+- **Bonus satwa: +3 poin** untuk macan yang berlari melompat, muncul dari semak, atau mengintip dari kiri/kanan. Gerak lari memiliki dua belas frame animasi dan fase tubuh melayang. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
+- Bonus pertama muncul setelah empat detik waktu main aktif. Maksimal tiga kemunculan per stasiun: lari melewati layar selama 3,2 detik, lintasan di antara semak selama 2,4 detik, dan kepala mengintip selama 1,8 detik. Ada jeda tujuh detik antarkemunculan. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
+- **Cakaran pohon: +1 poin** per kelompok bekas cakaran, sekali saja. Ada dua kelompok per stasiun; keduanya bonus opsional yang tidak masuk target utama. Semua cakaran terang yang digambar pada batang merupakan objek interaktif.
+- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Stasiun awal memuat sepuluh pengecoh; tingkat lanjut hingga delapan belas. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
+- Salah memilih satwa mengurangi lima detik, sekali per satwa. Klik berulang pada satwa yang sama tidak menambah penalti.
 - Scroll atau cubit untuk zoom, geser untuk menjelajah, dan pilih **Lihat Semua** untuk kembali ke tampilan penuh. Menggeser dan mencubit tidak dihitung sebagai jawaban.
-- **Menyerah & ganti stasiun** melewati kamera tanpa mengisi target yang belum ditemukan.
-- Hasil menampilkan temuan utama dan poin bonus secara terpisah. Skor total = temuan utama + poin bonus.
+- **Ganti stasiun (−1 poin)** melewati kamera tanpa mengisi target yang belum ditemukan. Skor berkurang satu, dengan minimum nol. Contoh: dari lima macan, tiga sudah ditemukan → skip → dua poin tersisa. Klik berulang pada tombol selama transisi tidak menggandakan penalti.
+- Hasil menampilkan temuan utama, bonus satwa, cakaran, dan penalti skip secara terpisah. Skor total = temuan utama + bonus satwa + poin cakaran − penalti skip yang benar-benar dipotong.
 
 Kepadatan satwa dan pertemuan dalam game merupakan simulasi edukasi, bukan gambaran jumlah satwa di satu lokasi.
 
@@ -36,9 +41,9 @@ Skor hanya tersimpan di browser/perangkat tersebut. Untuk pindah PC:
 
 1. Di PC lama, pilih **Simpan cadangan** dan salin berkas JSON bersama HTML game.
 2. Di PC baru, buka game, pilih **Muat cadangan**, lalu pilih JSON. Impor menggabungkan skor dan mengabaikan ID yang sudah ada.
-3. Ekspor CSV untuk rekap; kolom temuan utama, jumlah bonus, poin bonus, dan versi aturan disertakan.
+3. Ekspor CSV untuk rekap; kolom temuan utama, jumlah bonus satwa, poin bonus, cakaran, poin cakaran, jumlah skip, penalti skip, dan versi aturan disertakan.
 
-Skor versi lama tidak dihapus otomatis. Karena V3 menambahkan poin bonus, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
+Skor versi lama tidak dihapus otomatis. Karena V4 mengubah durasi kemunculan dan aturan penalti, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
 
 ## Mengembangkan
 
@@ -67,7 +72,7 @@ Gunakan `CHROMIUM_PATH` jika executable bukan `/usr/bin/chromium`; gunakan `JSMT
 Struktur utama:
 
 - `js/scene.js`: penempatan satwa, lapisan tanaman, mask tubuh yang terlihat.
-- `js/bonus.js`: lintasan opsional, waktu aktif, animasi dan deteksi bonus.
+- `js/bonus.js`: lompatan/lari, kemunculan semak, kepala mengintip, waktu aktif dan mask bonus.
 - `js/game.js`: skor, penalti, transisi, timer dan efek.
 - `js/content.js`: aturan dan kartu edukasi.
 - `js/art/`: ilustrasi vektor satwa dan hutan; `assets/forest-hero.webp`: ilustrasi pembuka.
@@ -77,6 +82,8 @@ Struktur utama:
 
 Laporan yang diberikan panitia berjudul **Kajian Struktur Populasi Macan Tutul Jawa serta Preferensi Satwa Mangsanya di Bentang Alam Bromo Tengger Semeru, Jawa Timur — Laporan Kemajuan Januari 2024–Agustus 2026**. Hanya materi kualitatif dipakai; PDF dan angka survei internal tidak dimasukkan ke repo.
 
-Sumber publik: [siaran pers BCA, 4 Mei 2026](https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul) dan [Konservasi Alam & Keanekaragaman Hayati BCA](https://www.bca.co.id/id/tentang-bca/sustainability/environment/upaya-pengurangan-emisi-grk-operasional/konservasi-alam-and-keanekaragaman-hayati).
+Sumber publik: [siaran pers BCA, 4 Mei 2026](https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul) [publikasi BBKSDA Jawa Timur tentang JWLS Gunung Wilis, 11 Agustus 2026](https://bbksdajawatimur.id/cari-jejak-macan-tutul-di-gunung-wilis-kamera-ungkap-cerita-lain), dan [Konservasi Alam & Keanekaragaman Hayati BCA](https://www.bca.co.id/id/tentang-bca/sustainability/environment/upaya-pengurangan-emisi-grk-operasional/konservasi-alam-and-keanekaragaman-hayati).
+
+Empat jenis pengecoh terbaru adalah contoh satwa hutan Jawa berdasarkan publikasi Gunung Wilis; bukan klaim bahwa semuanya terdeteksi pada survei Bromo Tengger Semeru dalam lampiran.
 
 Ilustrasi pembuka dibuat dengan bantuan AI; satwa permainan memakai ilustrasi programatis. Tulisan Bakti BCA merupakan teks identitas, bukan aset logo resmi. Gunakan master logo dari tim brand jika diperlukan untuk final produksi acara.

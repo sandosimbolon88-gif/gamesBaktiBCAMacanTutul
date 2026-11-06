@@ -23,8 +23,9 @@ window.JSMT_CONTENT = {
     rules: [
       { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul yang kamu temukan menambah satu skor.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
-      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Salah memilih satwa lain mengurangi waktu. Amati pola tubuhnya!' },
-      { icon: 'moving', title: 'Bonus macan melintas!', text: 'Macan bergerak bertanda BONUS memberi tiga poin ekstra. Boleh terlewat; target utama tetap sama.' }
+      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Salah memilih satwa lain mengurangi lima detik. Amati bentuk tubuh, ekor, dan pola bulunya!' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari melompat, keluar semak, atau mengintip memberi tiga poin. Tangkap momennya sebelum menghilang!' },
+      { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',
 
@@ -93,6 +94,10 @@ window.JSMT_CONTENT = {
 
   /* Satwa pengecoh — muncul saat pemain salah memilih. */
   decoys: {
+    musang: { name:'Musang luwak', text:'Bulu cokelatnya bisa menyatu dengan hutan. Kenali wajah bermasker dan ekor panjangnya; satwa ini bukan macan tutul.' },
+    garangan: { name:'Garangan jawa', text:'Tubuh cokelat keemasannya ramping dengan moncong panjang. Perhatikan bentuknya, bukan hanya warnanya.' },
+    kancil: { name:'Pelanduk kancil', text:'Satwa kecil ini berbulu cokelat dengan kaki ramping dan tanpa tanduk. Bukan anak macan tutul, ya!' },
+    bajing: { name:'Bajing kelapa', text:'Ekornya lebat dan panjang dengan garis pucat di sisi tubuh. Warna cokelatnya bisa mengecoh pengamat.' },
     trenggiling: { name: 'Trenggiling peusing', text: 'Tubuhnya bersisik dan moncongnya panjang. Satwa ini ikut tercatat dalam laporan JWLS, tetapi bukan macan tutul.' },
     binturong: { name: 'Binturong', text: 'Bulunya gelap, berkumis panjang, dan berekor kuat. Binturong termasuk satwa yang tercatat di bentang alam survei.' },
     linsang: { name: 'Linsang', text: 'Badannya ramping dengan ekor panjang bercincin. Perhatikan bentuk tubuhnya agar tidak tertukar dengan macan tutul.' },

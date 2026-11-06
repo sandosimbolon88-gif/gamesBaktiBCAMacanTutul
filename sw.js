@@ -1,5 +1,5 @@
 /* Cache offline sederhana: game tetap jalan tanpa internet setelah dibuka sekali. */
-const CACHE = 'jsmt-v3-expo-20261106';
+const CACHE = 'jsmt-v4-competition-20261106';
 const FILES = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './assets/icon.svg', './assets/forest-hero.webp',
   './js/config.js', './js/content.js', './js/util.js', './js/audio.js',

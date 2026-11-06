@@ -1,63 +1,122 @@
-/* Bonus lintasan terpisah dari target utama. Waktu bergerak hanya saat permainan aktif. */
+/* Kemunculan singkat: berlari melompat, masuk semak, atau kepala mengintip.
+   Sprite yang dirender dan yang bisa dipilih memakai mask vegetasi yang sama. */
 (function () {
   'use strict';
   const J = window.JSMT, A = J.Art, CFG = window.JSMT_CONFIG;
+  const cache = new Map();
+
+  function sprites(scene, type, flip, variant) {
+    const head = type.startsWith('peek');
+    const key = [scene.R,scene.night,head,flip,variant].join('|');
+    if (cache.has(key)) return cache.get(key);
+    const frames = [];
+    for (let i=0; i<(head ? 1 : 12); i++) {
+      const o = { pose:'run', variant, night:scene.night, scale:head ? 1.2 : .9,
+        R:scene.R, flip, gait:i/12*Math.PI*2 };
+      const sp = head ? A.leopardHeadSprite(o) : A.leopardSprite(o);
+      if (scene.night) A.toIR(sp.canvas,{level:1,gain:1.1,noise:0});
+      frames.push(sp);
+    }
+    // Batasi cache ketika ukuran jendela/densitas piksel berubah berulang kali.
+    if (cache.size >= 12) cache.delete(cache.keys().next().value);
+    cache.set(key,frames);
+    return frames;
+  }
+
   class Bonus {
     constructor(scene) {
       this.scene = scene;
-      this.clock = 0;
-      this.passes = 0;
-      this.current = null;
+      this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
       this.nextAt = CFG.bonusFirstSec;
+      this.sequence = ['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right'];
     }
     update(dt) {
       this.clock += dt;
       if (this.current) {
         const it = this.current;
-        const q = (this.clock - it.started) / CFG.bonusPassSec;
-        if (q >= 1) { this.current = null; this.nextAt = this.clock + CFG.bonusGapSec; return; }
-        const x = J.lerp(it.from, it.to, q), dx = x - it.x;
-        it.x = x; it.cx += dx; it.box.x0 += dx; it.box.x1 += dx;
-        const frame = Math.floor((this.clock - it.started) * 10) % it.frames.length;
-        it.sp = it.frames[frame];
-      } else if (this.passes < CFG.bonusMaxPasses && this.clock >= this.nextAt) this.spawn();
+        const q = (this.clock-it.started)/it.duration;
+        if (q >= 1) { this.current=null; this.nextAt=this.clock+CFG.bonusGapSec; return; }
+        this.place(it,Math.max(0,q));
+      } else if (this.passes<CFG.bonusMaxPasses && this.clock>=this.nextAt) this.spawn();
     }
-    spawn() {
-      const flip = this.rng.chance(0.5), black = this.passes % 2 === 1;
-      const frames = [];
-      for (let i = 0; i < 8; i++) {
-        const sp = A.leopardSprite({ pose: 'walk', variant: black ? 'black' : 'spotted',
-          night: this.scene.night, scale: 0.78, R: this.scene.R, flip, gait: i / 8 * Math.PI * 2 });
-        if (this.scene.night) A.toIR(sp.canvas, { level: 1, gain: 1.1, noise: 0 });
-        frames.push(sp);
+    spawn(type) {
+      if (this.current || this.passes>=CFG.bonusMaxPasses) return null;
+      type = type || this.sequence[this.passes % this.sequence.length];
+      const peek = type.startsWith('peek');
+      const flip = peek ? type==='peek-right' : this.rng.chance(.5);
+      const variant = (this.scene.stage+this.passes)%3===2 ? 'black' : 'spotted';
+      const frames = sprites(this.scene,type,flip,variant), sp=frames[0];
+      const center=this.scene.habitat.centerX;
+      let from=-350, to=J.W+350, baseY=J.H*.88;
+      let opening={x0:0,y0:0,x1:J.W,y1:J.H};
+      let duration=CFG.bonusPassSec;
+      if (type==='cover') {
+        from=center-650; to=center+650; baseY=this.scene.habitat.y;
+        opening={x0:center-360,y0:baseY-350,x1:center+360,y1:baseY+70};
+        duration=CFG.bonusCoverSec;
+      } else if (peek) {
+        from=-90; to=115; baseY=J.H*.61;
+        opening={x0:0,y0:0,x1:225,y1:J.H};
+        if (flip) { from=J.W-from; to=J.W-to; opening.x0=J.W-225; opening.x1=J.W; }
+        duration=CFG.bonusPeekSec;
       }
-      const sp = frames[0], from = flip ? J.W + 300 : -300, to = flip ? -300 : J.W + 300;
-      const y = J.H - 125 - this.rng.range(0, 30);
-      this.current = { kind: 'bonus', sp, frames, from, to, x: from, y,
-        cx: from + (sp.box.x0 + sp.box.x1) / 2, cy: y + (sp.box.y0 + sp.box.y1) / 2,
-        box: { x0: from + sp.box.x0, x1: from + sp.box.x1, y0: y + sp.box.y0, y1: y + sp.box.y1 },
-        started: this.clock, label: 'Bonus lintasan', found: false };
+      if (flip && !peek) [from,to]=[to,from];
+      this.current={kind:'bonus',type,sp,frames,from,to,baseY,opening,duration,
+        started:this.clock,label:peek ? 'Kepala mengintip' : 'Lari melompat',found:false,
+        visibleCanvas:J.makeCanvas(sp.canvas.width,sp.canvas.height)};
       this.passes++;
+      this.place(this.current,0);
+      return this.current;
     }
-    hit(x, y, tol) {
-      const it = this.current;
-      return it && A.spriteHit(it.sp, x - it.x, y - it.y, Math.min(tol, 32)) ? it : null;
+    place(it,q) {
+      const age=q*it.duration, peek=it.type.startsWith('peek');
+      const reveal=q<.22 ? J.ease.inOut(q/.22) : q<.65 ? 1 : 1-J.ease.inOut((q-.65)/.35);
+      const phase=age*Math.PI*2*3.3;
+      it.progress=q;
+      it.x=J.lerp(it.from,it.to,peek ? reveal : q);
+      it.y=it.baseY-(peek ? 0 : Math.max(0,Math.sin(phase))*48);
+      it.sp=it.frames[peek ? 0 : Math.floor(age*3.3*12)%it.frames.length];
+      const b=it.sp.box;
+      it.box={x0:it.x+b.x0,y0:it.y+b.y0,x1:it.x+b.x1,y1:it.y+b.y1};
+      it.cx=(it.box.x0+it.box.x1)/2;it.cy=(it.box.y0+it.box.y1)/2;
+      this.compose(it);
     }
-    capture() { const it = this.current; this.current = null; this.nextAt = this.clock + CFG.bonusGapSec; return it; }
+    compose(it) {
+      const sp=it.sp,R=sp.R,c=it.visibleCanvas;
+      if(c.width!==sp.canvas.width)c.width=sp.canvas.width;
+      if(c.height!==sp.canvas.height)c.height=sp.canvas.height;
+      const g=c.getContext('2d',{willReadFrequently:true});
+      g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
+      g.save();g.setTransform(R,0,0,R,-(it.x+sp.ox)*R,-(it.y+sp.oy)*R);
+      const o=it.opening;g.beginPath();g.rect(o.x0,o.y0,o.x1-o.x0,o.y1-o.y0);g.clip();
+      g.drawImage(sp.canvas,it.x+sp.ox,it.y+sp.oy,sp.lw,sp.lh);
+      g.globalCompositeOperation='destination-out';
+      g.drawImage(this.scene.bonusCover,0,0,J.W,J.H);
+      g.restore();
+      it.visibleMask=null;
+    }
+    hit(x,y,tol=0) {
+      const it=this.current;
+      if(!it)return null;
+      const t=Math.min(tol,24),o=it.opening,b=it.box;
+      // Toleransi sentuhan tidak boleh menjangkau menembus batas semak.
+      if(x<o.x0||x>o.x1||y<o.y0||y>o.y1||x<b.x0-t||x>b.x1+t||y<b.y0-t||y>b.y1+t)return null;
+      const R=it.sp.R;
+      const cx=Math.round(x*R),cy=Math.round(y*R);
+      if(cx>=0&&cy>=0&&cx<this.scene.bonusCover.width&&cy<this.scene.bonusCover.height &&
+        this.scene.bonusCover.getContext('2d').getImageData(cx,cy,1,1).data[3]>100)return null;
+      if(!it.visibleMask)it.visibleMask=it.visibleCanvas.getContext('2d').getImageData(0,0,it.visibleCanvas.width,it.visibleCanvas.height);
+      const visible=Object.assign({},it.sp,{mask:it.visibleMask});
+      return A.spriteHit(visible,x-it.x,y-it.y,t) ? it : null;
+    }
+    capture() {
+      const it=this.current;this.current=null;this.nextAt=this.clock+CFG.bonusGapSec;return it;
+    }
     render(ctx) {
-      const it = this.current;
-      if (!it) return;
-      ctx.save();
-      const glow = ctx.createRadialGradient(it.cx, it.cy, 5, it.cx, it.cy, 155);
-      glow.addColorStop(0, 'rgba(255,214,103,.26)'); glow.addColorStop(1, 'rgba(255,214,103,0)');
-      ctx.fillStyle = glow; ctx.fillRect(it.cx - 155, it.cy - 155, 310, 310);
-      ctx.drawImage(it.sp.canvas, it.x + it.sp.ox, it.y + it.sp.oy, it.sp.lw, it.sp.lh);
-      ctx.font = '800 22px Trebuchet MS, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffd76a'; ctx.shadowColor = '#051a1a'; ctx.shadowBlur = 8;
-      ctx.fillText('BONUS +' + CFG.bonusPoints, it.cx, it.box.y0 - 13);
-      ctx.restore();
+      const it=this.current;if(!it)return;
+      ctx.drawImage(it.visibleCanvas,it.x+it.sp.ox,it.y+it.sp.oy,it.sp.lw,it.sp.lh);
     }
   }
-  J.Bonus = Bonus;
+  J.Bonus=Bonus;
 })();

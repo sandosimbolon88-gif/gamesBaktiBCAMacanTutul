@@ -254,12 +254,12 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 .mute { right:1.2%; bottom:1.6%; background:#103a3b; color:#eaf4de; }
 .panel { border:1px solid #fff4cf; border-radius:calc(var(--u)*1.6); box-shadow:0 18px 80px #021c24a0; }
 .screen.dim { background:#031c25a6; backdrop-filter:blur(5px); }
-.rules { grid-template-columns:repeat(4,1fr); gap:calc(var(--u)*1); }
+.rules { grid-template-columns:repeat(5,1fr); gap:calc(var(--u)*1); }
 .rule { border:1px solid #e2dfcb; border-radius:calc(var(--u)*.9); padding:calc(var(--u)*1.1); }
 .rule b { font-size:calc(var(--u)*1.15); }
 .rule span { font-size:calc(var(--u)*1.05); }
 .rule img { height:calc(var(--u)*7); }
-.brief-panel { width:86%; }
+.brief-panel { width:92%; padding:calc(var(--u)*1.8) calc(var(--u)*2.4); max-height:94%; overflow:auto; touch-action:pan-y; }
 .lead { font-size:calc(var(--u)*1.35); }
 .source-note { font-size:calc(var(--u)*.83); line-height:1.5; opacity:.7; }
 .jwls-panel { width:72%; }
@@ -283,3 +283,6 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 .result-wrap .name-panel { width:52%; }
 .ir-tag { bottom:8%; }
 @media (prefers-reduced-motion:reduce) { .pulse,.rec .dot,.hud-time.low .val { animation:none; } }
+
+.competition-note { font-size:calc(var(--u)*1);color:#6c4d23;margin:calc(var(--u)*-.8) 0 calc(var(--u)*1.1);font-weight:700; }
+.hud-bonus { font-size:calc(var(--u)*.88); }

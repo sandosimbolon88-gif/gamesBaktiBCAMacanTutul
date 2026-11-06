@@ -222,6 +222,25 @@
 
   /* ---------- pose (koordinat lokal, menghadap kanan, tanah di y=0) ---------- */
   const POSES = {
+    run(o) {
+      const geom = POSES.walk(Object.assign({}, o, { gait: 0 }));
+      const ph = o.gait || 0, reach = Math.cos(ph), tuck = Math.sin(ph);
+      const fore = 93 + reach * 65, hind = -73 - reach * 61;
+      const fy = -8 - Math.max(0, tuck) * 47, hy = -8 - Math.max(0, -tuck) * 40;
+      geom.bounds = [-265, -180, 230, 30];
+      geom.parts[0].d = `M -86 -78 C -140 -90 -169 -51 -217 -60 Q -239 -68 -232 -86`;
+      geom.parts[0].tip = 'M -217 -60 Q -239 -68 -232 -86';
+      geom.parts[1].d = `M 58 -66 Q ${fore-25} -48 ${fore-17} ${fy-5}`;
+      geom.parts[2].e = [fore-14, fy-5, 12, 6.5, 0];
+      geom.parts[3].d = `M -74 -62 Q ${hind-12} -45 ${hind-15} ${hy-5}`;
+      geom.parts[4].e = [hind-12, hy-5, 12, 6.5, 0];
+      geom.parts[7].d = `M -60 -54 Q ${hind+13} -40 ${hind} ${hy}`;
+      geom.parts[8].e = [hind+5, hy, 13, 7, 0];
+      geom.parts[9].d = `M 74 -70 Q ${fore-24} -43 ${fore} ${fy}`;
+      geom.parts[10].e = [fore+6, fy, 13, 7, 0];
+      geom.head.tilt = -.08 + tuck * .04;
+      return geom;
+    },
     walk(o) {
       const kw = o.variant === 'kuwuk';
       const gait = o.gait == null ? 0 : Math.sin(o.gait) * 23;
@@ -511,5 +530,26 @@
     sp.variant = variant;
     sp.pose = o.pose;
     return sp;
+  };
+
+  // Kepala terpisah: bonus mengintip tidak pernah memiliki tubuh yang bisa diklik.
+  A.leopardHeadSprite = function (o) {
+    const key = o.variant === 'black' && o.night ? 'blackIR' : o.variant || 'spotted';
+    const pal = A.PAL[key];
+    return A.makeSprite(o, [-44, -46, 44, 40], g =>
+      drawHead(g, pal, getPatterns(g, key, pal), { x:0, y:0, s:1.1, turn:0, tilt:0 }, o, 2.6));
+  };
+
+  A.scratchSprite = function (o) {
+    return A.makeSprite(o, [-24, -55, 24, 55], g => {
+      g.lineCap = 'round';
+      for (let i = 0; i < 4; i++) {
+        const x = -17 + i * 10, y = -44 + (i % 2) * 6;
+        const cut = new Path2D(`M ${x+5} ${y} Q ${x-6} -6 ${x-1} ${43-i*3}`);
+        g.strokeStyle = '#372a1d'; g.lineWidth = 6; g.stroke(cut);
+        g.strokeStyle = '#e0b979'; g.lineWidth = 3; g.stroke(cut);
+        g.strokeStyle = '#f2d59a'; g.lineWidth = 1; g.stroke(cut);
+      }
+    });
   };
 })();

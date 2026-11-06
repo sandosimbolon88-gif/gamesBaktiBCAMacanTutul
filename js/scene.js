@@ -20,7 +20,7 @@
     return Object.assign({ stage: i }, e, {
       mode: e.modes[k % e.modes.length],
       count: [countMin, Math.max(countMin, countMax)],
-      decoys: Math.min(12, e.decoys + Math.floor(k / 4)),
+      decoys: Math.min(18, e.decoys + Math.floor(k / 4)),
       scale: Math.max(0.40, e.scale - tier * 0.01),
       occl: Math.min(0.88, e.occl + tier * 0.012),
       minVis: Math.max(0.19, e.minVis - tier * 0.006),
@@ -155,6 +155,14 @@
     }
 
     /* ================= satwa ================= */
+    const habitat = { centerX: W * .5 + r.range(-100, 100), y: H * .77 };
+    const gateSpecs = [
+      { x: habitat.centerX-360, y:habitat.y+20, w:340, h:215 },
+      { x: habitat.centerX+360, y:habitat.y+20, w:340, h:215 },
+      { x:-70, y:H*.70, w:260, h:185 },
+      { x:W+70, y:H*.70, w:260, h:185 }
+    ];
+    const gateBoxes = gateSpecs.map(a => vegBox('bush', a));
     const animals = [], occ = [];
     const gMin = groundY + 60, gMax = H - 16;
     const depth = (y) => J.lerp(0.78, 1.05, J.clamp((y - gMin) / (gMax - gMin), 0, 1));
@@ -164,6 +172,7 @@
     function tryPlace(sp, x, y, ignore) {
       const b = { x0: x + sp.box.x0, y0: y + sp.box.y0, x1: x + sp.box.x1, y1: y + sp.box.y1 };
       if (b.x0 < 16 || b.x1 > W - 16 || b.y0 < 112 || b.y1 > H - 4) return null;
+      if (gateBoxes.some(gate => J.overlapArea(b, gate) > 0)) return null;
       const area = J.boxArea(b);
       for (const o of occ) {
         if (o === ignore) continue;
@@ -260,7 +269,8 @@
     }
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
-    const dTypes = r.shuffle(A.DECOY_TYPES.slice());
+    const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
+    const dTypes = warm.concat(r.shuffle(A.DECOY_TYPES.filter(t => !warm.includes(t))));
     let placedDecoys = 0;
     for (let i = 0; i < (d.decoys || 0) * 4 && placedDecoys < d.decoys; i++) {
       let type = dTypes[i % dTypes.length], slot = null;
@@ -280,6 +290,19 @@
           animals.push(it); placedDecoys++;
           break;
         }
+      }
+    }
+
+    // Semua kelompok cakaran yang digambar merupakan petunjuk interaktif.
+    let cluesPlaced = 0;
+    for (const tree of r.shuffle(trees.slice())) {
+      if (cluesPlaced >= (CFG.cluesPerStation || 0)) break;
+      const sp = A.scratchSprite({ scale:Math.min(.82, tree.w/90), R });
+      for (const y of [H*.46, H*.40, H*.52]) {
+        const x = tree.x - tree.w*.03, b = tryPlace(sp,x,y);
+        if (!b) continue;
+        const it = mk('clue', { type:'scratch', pose:'trunk', label:'Cakaran pohon' }, sp,x,y,b);
+        animals.push(it); occ.push(b); cluesPlaced++; break;
       }
     }
 
@@ -338,6 +361,7 @@
 
     // penutup khusus tiap satwa
     for (const it of animals) {
+      if (it.kind === "clue") continue;
       const b = it.box, bw = b.x1 - b.x0, bh = b.y1 - b.y0;
       const isLeo = it.kind === 'leopard';
       const onBranch = it.pose === 'branch' || A.DECOY_ON_BRANCH[it.type];
@@ -386,7 +410,11 @@
     addV('spray', { x: W + 10, y: fr.range(560, 820), size: fr.range(120, 170), dir: Math.PI + 0.3 }, 5000);
     for (let i = 0, n = fr.int(1, 3); i < n; i++) addV('vine', { x: fr.range(60, W - 60), y: -10, len: fr.range(140, 300) }, 5000);
 
-    for (const it of animals) objs.push({ kind: 'animal', it, z: it.y, box: it.box });
+    // Semak bonus tetap menjadi bagian hutan, termasuk ketika tidak ada bonus.
+    for (const gate of gateSpecs) {
+      const v = addV('bush', gate, 5100, null, true); v.bonusGate = true;
+    }
+    for (const it of animals) objs.push({ kind:'animal', it, z:it.kind==='clue' ? -1000 : it.y, box:it.box });
     const order = () => objs.sort((a, b) => a.z - b.z);
     order();
 
@@ -394,7 +422,7 @@
     for (const it of animals) {
       const sp = it.sp, cw = sp.canvas.width, ch = sp.canvas.height;
       const lc = J.makeCanvas(cw, ch), lg = lc.getContext('2d', { willReadFrequently: true });
-      const need = it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
+      const need = it.kind === 'clue' ? .55 : it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
       const md = sp.mask.data, n = cw * ch;
       let vm = null;
       for (let iter = 0; iter < 64; iter++) {
@@ -416,9 +444,9 @@
         it.vis = tot ? vis / tot : 1;
         if (it.vis >= need) break;
         const byOverlap = (a, b) => J.overlapArea(b.box, it.box) - J.overlapArea(a.box, it.box);
-        let cands = front.filter((o) => o.kind === 'veg' && !o.essential).sort(byOverlap);
+        let cands = front.filter((o) => o.kind === 'veg' && !o.essential && !o.bonusGate).sort(byOverlap);
         // Penutup khusus juga dilepas bila batas visibilitas minimum belum terpenuhi.
-        if (!cands.length && it.vis < need) cands = front.filter((o) => o.kind === 'veg').sort(byOverlap);
+        if (!cands.length && it.vis < need) cands = front.filter((o) => o.kind === 'veg' && !o.bonusGate).sort(byOverlap);
         if (!cands.length) break;
         const drop = it.vis < need * 0.5 ? 2 : 1;
         for (const c of cands.slice(0, drop)) objs.splice(objs.indexOf(c), 1);
@@ -434,6 +462,11 @@
         return false;
       });
     }
+
+    // Mask tanaman depan dipakai bersama oleh gambar dan deteksi klik bonus.
+    const bonusCover = J.makeCanvas(W*R,H*R), coverG = bonusCover.getContext('2d');
+    coverG.setTransform(R,0,0,R,0,0);
+    for (const o of objs) if (o.kind==='veg' && o.z>=5000) drawObj(coverG,o,p);
 
     /* ================= gabungkan menjadi satu gambar ================= */
     const comp = J.makeCanvas(W * R, H * R);
@@ -459,7 +492,8 @@
 
     animals.sort((a, b) => a.y - b.y);
     return {
-      seed, stage, diff: d, mode, night, comp, items: animals, R,
+      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat,
+      clues: animals.filter(i => i.kind === "clue"),
       leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)
     };
@@ -489,7 +523,7 @@
     const list = scene.items.slice().sort((a, b) => b.y - a.y);
     const inBox = (it, t) => lx >= it.box.x0 - t && lx <= it.box.x1 + t && ly >= it.box.y0 - t && ly <= it.box.y1 + t;
     for (const it of list) if (inBox(it, 0) && visHit(it, lx, ly, 0)) return it;
-    for (const kind of ['leopard', 'decoy']) {
+    for (const kind of ['leopard', 'clue', 'decoy']) {
       for (const it of list) {
         if (it.kind === kind && inBox(it, tol) && visHit(it, lx, ly, tol)) return it;
       }

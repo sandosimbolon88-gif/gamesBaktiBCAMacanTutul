@@ -74,7 +74,11 @@
           baseFound: Math.max(0, Math.floor(Number(raw.baseFound) || 0)),
           bonusFound: Math.max(0, Math.floor(Number(raw.bonusFound) || 0)),
           bonusScore: Math.max(0, Math.floor(Number(raw.bonusScore) || 0)),
-          rulesVersion: Number(raw.rulesVersion) === 3 ? 3 : 1
+          cluesFound: Math.max(0, Math.floor(Number(raw.cluesFound) || 0)),
+          clueScore: Math.max(0, Math.floor(Number(raw.clueScore) || 0)),
+          skips: Math.max(0, Math.floor(Number(raw.skips) || 0)),
+          skipPenalty: Math.max(0, Math.floor(Number(raw.skipPenalty) || 0)),
+          rulesVersion: [3,4].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
@@ -87,10 +91,10 @@
       return { added, skipped };
     },
     csv() {
-      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih', 'temuan_utama', 'bonus_lintasan', 'poin_bonus', 'versi_aturan']];
+      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih', 'temuan_utama', 'bonus_lintasan', 'poin_bonus', 'cakaran', 'poin_cakaran', 'stasiun_dilewati', 'penalti_skip', 'versi_aturan']];
       for (const e of LB.load().sort((a, b) => a.ts - b.ts)) {
         const d = new Date(e.ts);
-        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0, e.baseFound ?? e.score, e.bonusFound || 0, e.bonusScore || 0, e.rulesVersion || 1]);
+        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0, e.baseFound ?? e.score, e.bonusFound || 0, e.bonusScore || 0, e.cluesFound || 0, e.clueScore || 0, e.skips || 0, e.skipPenalty || 0, e.rulesVersion || 1]);
       }
       return rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     }
