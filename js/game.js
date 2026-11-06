@@ -9,6 +9,7 @@
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
     ctx.drawImage(sc.comp,0,0,W,H);
+    if(sc.motion)sc.motion.render(ctx);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
@@ -138,8 +139,10 @@
     loadScene(sc) {
       if (J.resetCamera) J.resetCamera();
       this.scene = sc;
+      this.targetPoints=sc.night?CFG.nightTargetPoints:CFG.targetPoints;
+      this.bonusPoints=sc.night?CFG.nightBonusPoints:CFG.bonusPoints;
       this.bonus = new J.Bonus(sc);
-      UI().hud.bonus(false, this.bonusScore, this.clueScore);
+      UI().hud.bonus(false, this.bonusScore, this.clueScore,sc);
       const now = J.now();
       this.stageStart = now; this.lastFind = now; this.hintTarget = null; this.nextScene = null;
       UI().hud.station(this.stage + 1, sc.mode);
@@ -151,36 +154,36 @@
     stop() { this.clearTimers(); this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
 
     /* ---------- input ---------- */
-    pointer(lx, ly, tol, bonusAtDown) {
+    pointer(lx, ly, tol, bonusAtDown, movingAtDown) {
       if (!this.active || this.paused || this.ending) return;
       const now = J.now();
       if (now < this.lockUntil) return;
-      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : this.bonus.hit(lx, ly, tol);
+      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : movingAtDown ? null : this.bonus.hit(lx, ly, tol);
       if (bonus) {
         this.bonus.capture();
-        this.bonusFound++; this.bonusScore += CFG.bonusPoints; this.score += CFG.bonusPoints;
-        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + CFG.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
+        this.bonusFound++; this.bonusScore += this.bonusPoints; this.score += this.bonusPoints;
+        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + this.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
         this.effects.push({ type: 'ring', x: bonus.cx, y: bonus.cy, r0: 20, r1: 140, t0: now, dur: 0.6 });
-        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore);
+        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore,this.scene);
         return;
       }
-      const it = J.Scene.hit(this.scene, lx, ly, tol);
+      const it = movingAtDown&&this.scene.motion.items.includes(movingAtDown)?movingAtDown:J.Scene.hit(this.scene, lx, ly, tol);
       if (it && it.kind === 'clue') {
         if (it.found) return;
         it.found=true; it.foundAt=now;
         this.cluesFound++; this.clueScore+=CFG.cluePoints; this.score+=CFG.cluePoints;
         this.effects.push({type:'text',x:it.cx,y:it.box.y0-10,text:'CAKARAN +'+CFG.cluePoints,t0:now,dur:1,color:'#ffe15a'});
-        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore);
+        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore,this.scene);
         UI().bubble(it.cx,it.box.y0,'Jejak di pohon!','Cakaran adalah salah satu tanda yang dipelajari peneliti. Di alam, temuan jejak perlu diperiksa bersama bukti lainnya.','+'+CFG.cluePoints+' poin');
         return;
       }
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score+=CFG.targetPoints; this.baseFound++; this.baseScore+=CFG.targetPoints;
+        this.score+=this.targetPoints; this.baseFound++; this.baseScore+=this.targetPoints;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
-        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+CFG.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
+        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+this.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
         this.effects.push({ type: 'flash', t0: now, dur: 0.22 });
         J.Audio.found();
         UI().hud.score(this.score, true);
@@ -272,8 +275,9 @@
     update(dt, now) {
       if (!this.active) return;
       if (!this.paused && !this.ending) {
+        this.scene.motion.update(dt);
         this.bonus.update(dt);
-        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore);
+        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore,this.scene);
         this.timeLeft -= dt;
         const sec = Math.ceil(this.timeLeft);
         if (sec !== this.lastTickSec) {

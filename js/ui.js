@@ -54,14 +54,14 @@
     },
     station(n, mode) {
       $('hud-station').textContent = UI.t('ui.station', { n });
-      $('hud-mode').textContent = C.ui.modes[mode] || '';
+      $('hud-mode').textContent = (C.ui.modes[mode] || '')+' · Macan +'+(mode==='malam'?CFG.nightTargetPoints:CFG.targetPoints);
       $('hud').classList.toggle('night', mode === 'malam');
     },
-    bonus(active, score, clueScore=0) {
+    bonus(active, score, clueScore=0,scene) {
       const el=$('hud-bonus');
       el.classList.toggle('live',!!active);
       const cue=active ? (active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
-      el.textContent=cue+' · Satwa +'+CFG.bonusPoints+' / Cakaran +'+CFG.cluePoints+' · Bonus terkumpul '+(score+clueScore);
+      el.textContent=cue+' · Bonus macan +'+(scene?.night?CFG.nightBonusPoints:CFG.bonusPoints)+' / Cakaran +'+CFG.cluePoints+' · Terkumpul '+(score+clueScore);
     },
     pips(leopards) {
       const box = $('hud-pips');

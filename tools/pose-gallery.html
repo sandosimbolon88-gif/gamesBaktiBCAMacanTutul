@@ -8,7 +8,7 @@
 const A=JSMT.Art,decoys=new URLSearchParams(location.search).has('decoys');
 const titles={crouch:'Merunduk / mengendap',sniff:'Mengendus tanah',stretch:'Meregangkan tubuh',groom:'Merawat bulu',curl:'Meringkuk',scratch:'Mencakar batang',climb:'Memanjat',walk:'Berjalan',sit:'Duduk waspada',lie:'Berbaring',branch:'Bersantai di dahan',peek:'Mengintip'};
 const names={kijang:'Kijang muncak',kancil:'Pelanduk kancil',musang:'Musang luwak',linsang:'Linsang',garangan:'Garangan jawa',binturong:'Binturong',landak:'Landak jawa',trenggiling:'Trenggiling',kuwuk:'Kucing kuwuk',lutung:'Lutung jawa',monyet:'Monyet ekor panjang',bajing:'Bajing kelapa',ayam:'Ayam hutan',elang:'Elang jawa'};
-const poseNames={stand:'Berdiri',walk:'Berjalan',graze:'Merumput',alert:'Waspada',sniff:'Mengendus',crouch:'Merunduk',rest:'Beristirahat',curl:'Meringkuk',defend:'Mengembangkan duri',forage:'Mencari makan',reach:'Meraih dahan',sit:'Duduk',perch:'Bertengger',wings:'Membuka sayap',lookback:'Menoleh'};
+const poseNames={stand:'Berdiri',walk:'Berjalan',graze:'Merumput',alert:'Waspada',sniff:'Mengendus',crouch:'Merunduk',rest:'Beristirahat',curl:'Meringkuk',defend:'Mengembangkan duri',forage:'Mencari makan',reach:'Meraih dahan',sit:'Duduk',perch:'Bertengger',wings:'Membuka sayap',lookback:'Menoleh',climb:'Memanjat batang',hang:'Bergelantungan',fly:'Terbang'};
 const entries=decoys?A.DECOY_TYPES.flatMap(type=>A.DECOY_POSES[type].map(pose=>({type,pose}))):A.LEOPARD_STATIC_POSES.map(pose=>({type:'spotted',pose}));
 const columns=decoys?6:4,cw=decoys?248:373,ch=decoys?230:310;
 const c=document.getElementById('atlas');c.width=1600;c.height=130+Math.ceil(entries.length/columns)*ch;

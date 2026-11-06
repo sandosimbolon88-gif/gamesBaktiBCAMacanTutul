@@ -152,7 +152,7 @@
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
       const p=screenToWorld(e.clientX,e.clientY), tol=e.pointerType==='mouse'?CFG.tolMouse:CFG.tolTouch;
-      drag = { id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false, bonusTarget:game.bonus.hit(p.x,p.y,tol*p.scale) };
+      drag = { id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false, bonusTarget:game.bonus.hit(p.x,p.y,tol*p.scale),movingTarget:game.scene.motion.hit(p.x,p.y,tol*p.scale) };
     }
     else if (pointers.size === 2) { const a = [...pointers.values()]; pinch = { d: Math.hypot(a[1].x-a[0].x, a[1].y-a[0].y), z: camera.zoom }; drag = null; }
   });
@@ -174,7 +174,7 @@
     if (!pointers.has(e.pointerId)) return;
     if (e.type === 'pointerup' && pointers.size === 1 && drag && !drag.moved && state === 'play') {
       const p = screenToWorld(e.clientX,e.clientY), tol = e.pointerType === 'mouse' ? CFG.tolMouse : CFG.tolTouch;
-      game.pointer(p.x,p.y,tol*p.scale,drag.bonusTarget);
+      game.pointer(p.x,p.y,tol*p.scale,drag.bonusTarget,drag.movingTarget);
     }
     pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; drag = null;
   }

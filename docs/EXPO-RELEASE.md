@@ -1,4 +1,4 @@
-# Catatan V6 Kompetisi Expo · 6 November 2026
+# Catatan V7 Kompetisi Expo · 6 November 2026
 
 ## Dasar versi
 
@@ -6,14 +6,20 @@ Implementasi mengambil modul dari HTML attachment Macan Tutul V2, kemudian menge
 
 ## Perubahan
 
+- Nilai macan utama saat malam +5, bonus macan malam +7; pagi/siang/senja tetap +3/+5. Nilai aktif ditampilkan pada HUD. Rincian hasil dan cadangan memakai poin aktual untuk sesi dengan beberapa pencahayaan.
+- Pengecoh bergerak: kuwuk dan landak berjalan, monyet bergelantungan pada dahan, serta elang terbang dan mengepakkan sayap pada stasiun pagi. Gerakan dihitung dari waktu permainan aktif dan berhenti saat jeda. Tiap klik salah tetap −2 poin/−5 detik, termasuk klik berulang dan skor nol.
+- Musang dan bajing mendapat pose memanjat batang yang mengikuti posisi pohon. Jalur gerak mengambil bagian dari jumlah pengecoh yang sudah ada dan diberi ruang agar tidak menutupi target utama/cakaran.
+- Lapisan vegetasi depan dirasterisasi sekali untuk tiap lintasan. Komposisi sprite dan mask klik memakai gambar tertutup yang sama. Sentuhan pendek menyimpan satwa yang terlihat pada awal tap; drag dan pinch tetap tidak dihitung sebagai jawaban.
+- Rumpun daun bergoyang pelan di pohon, ditempatkan di luar area interaksi satwa/petunjuk; geraknya ikut berhenti saat jeda.
+
 - Macan utama kini memiliki 12 pose statis; tujuh tambahan menggambar ulang kepala, tubuh, tungkai dan ekor untuk mengendap, mengendus, meregangkan tubuh, merawat bulu, meringkuk, mencakar, dan memanjat. Prioritas wajib di dahan dihapus. Pemilihan pose memakai daftar acak tanpa mengulang sebelum daftar habis; anak dapat memakai pose berbeda.
-- Empat belas jenis pengecoh mendukung 51 variasi pose. `js/art/animal-poses.js` menggambar postur menurut kelompok anatomi, dengan penempatan sesuai tanah atau dahan. Sprite yang sama dipakai untuk render dan mask klik.
+- Empat belas jenis pengecoh mendukung 57 variasi pose. `js/art/animal-poses.js` menggambar postur menurut kelompok anatomi, dengan penempatan sesuai tanah atau dahan. Sprite yang sama dipakai untuk render dan mask klik.
 - Penempatan macan mengacak pola tersebar, berkelompok, atau campuran. Pose batang dipasang pada koordinat pohon sebenarnya; penutup batang/pakis menyesuaikan posisi dan pose. Jumlah satwa dan batas ukuran tetap dipertahankan.
 
 - Macan utama diperbesar dengan skala minimum 0,60 untuk dewasa dan 0,48 untuk anak, dibanding minimum sebelumnya 0,40. Posisi mengintip diperbesar lagi agar kepala tetap terbaca. Pengecoh tetap memakai ukuran sebelumnya; bonus lari dan kepala juga disesuaikan.
 - Tombol Menu utama berada di atas kartu edukasi dan tersedia selama sesi. Konfirmasi menghentikan permainan dan membatalkan timer sesi; batal melanjutkan sesi yang sama. Skor sementara tidak disimpan ketika keluar. Ctrl+Shift+A dari permainan dapat langsung melanjutkan ke PIN dan pengaturan admin setelah konfirmasi keluar.
 
-- Bonus satwa +5: lari melompat 12 frame melewati layar (3,2 detik), masuk/keluar semak tengah (2,4 detik), atau hanya kepala mengintip dari kiri/kanan (1,8 detik). Mask vegetasi yang sama dipakai untuk rendering dan deteksi klik. Target utama memberi +3 dan menentukan penyelesaian stasiun. Urutan pola bonus diacak; jeda pertama tiga hingga lima detik, jeda berikutnya enam hingga delapan detik.
+- Bonus satwa +5 (malam +7): lari melompat 12 frame melewati layar (3,2 detik), masuk/keluar semak tengah (2,4 detik), atau hanya kepala mengintip dari kiri/kanan (1,8 detik). Mask vegetasi yang sama dipakai untuk rendering dan deteksi klik. Target utama memberi +3 (malam +5) dan menentukan penyelesaian stasiun. Urutan pola bonus diacak; jeda pertama tiga hingga lima detik, jeda berikutnya enam hingga delapan detik.
 - Empat belas jenis pengecoh, sembilan hingga enam belas per stasiun; jenis cokelat keemasan diprioritaskan. Tambahan baru: musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa.
 - Komposisi stasiun diacak: 2–3 macan dengan 12–16 pengecoh; 3–4 dengan 10–14; atau 4–6 dengan 9–13. Jumlah target tidak terus meningkat di tingkat lanjut. Hutan memakai seed baru, dengan kepadatan konfigurasi minimal 0,94 serta ukuran minimum macan yang tetap terbaca.
 - Setiap klik pengecoh mengurangi dua poin dan lima detik, termasuk klik ulang. Skor tidak menjadi negatif; potongan poin aktual tercatat terpisah dari jumlah klik salah. Sisa waktu di bawah lima detik langsung menjadi nol dan memicu akhir sesi.
@@ -24,7 +30,7 @@ Implementasi mengambil modul dari HTML attachment Macan Tutul V2, kemudian menge
 - Seleksi pada akhir tap, bukan awal sentuhan. Drag/pinch tidak memberi jawaban atau penalti.
 - Klik mengikuti mask bagian tubuh yang terlihat; fallback kotak tak terlihat di V2 dihapus. Penutup tanaman dilepas jika menghalangi batas visibilitas minimum.
 - Bonus dan waktu permainan berhenti saat jeda. Callback transisi dibatalkan saat sesi dihentikan agar tidak masuk ke sesi baru.
-- Ekspor dan impor mempertahankan rincian bonus satwa, cakaran, jumlah skip, penalti skip, poin temuan utama, penalti pengecoh, dan aturan versi enam. Skor lama dipertahankan; kompetisi dengan aturan berbeda perlu dipisah oleh panitia.
+- Ekspor dan impor mempertahankan rincian bonus satwa, cakaran, jumlah skip, penalti skip, poin temuan utama, penalti pengecoh, dan aturan versi tujuh. Skor lama dipertahankan; kompetisi dengan aturan berbeda perlu dipisah oleh panitia.
 
 ## Pemetaan sumber
 
@@ -47,7 +53,9 @@ Tautan publik:
 
 ## Verifikasi
 
-Hasil QA terakhir: **LULUS**. Katalog 75 sprite (24 variasi pose/warna macan dan 51 pose pengecoh) diperiksa agar siluet tiap pose berbeda, mata memiliki koordinat valid, dan gambar tidak terpotong batas canvas. Seluruh 12 pose macan serta 51 variasi pengecoh muncul dalam 48 kombinasi stasiun; pola dekat dan tersebar teramati. Semua 48 kombinasi seed/stasiun memenuhi jumlah minimum target, jumlah pengecoh, visibilitas minimum, dan keterpilihan target. Bonus diuji dalam delapan kombinasi pola/siang-malam: muncul dan hilang sepenuhnya, terbuka di tengah gerakan, menolak klik pada bagian tertutup, durasi pendek, serta kepala tanpa tubuh. Contoh skip tiga-dari-lima menjadi delapan poin, batas nol, cakaran sekali per kelompok, temuan +3, penalti −2 poin/−5 detik per klik, serta rekonsiliasi nilai dalam CSV/cadangan juga diuji. Ukuran minimum target, kembali ke menu dari permainan/kartu fakta, pembatalan konfirmasi, tidak menyimpan sesi yang dibatalkan, shortcut admin, perubahan durasi dan sesi baru juga lulus. Cache offline, zoom/pan, klik/touch, backup, dan alur hasil turut dicakup.
+Pengujian gerak memeriksa lintasan, perubahan frame, keterpilihan bagian tubuh yang terlihat, penolakan klik bagian tertutup dengan toleransi sentuh, penghentian gerak saat jeda, penalti berulang untuk empat jenis pengecoh bergerak, tap yang ditahan dan drag. Sesi campuran satu temuan siang dan dua temuan malam menghasilkan tiga belas poin temuan; bonus malam menambah tujuh. Rincian aktual tetap utuh melalui hasil, CSV dan cadangan.
+
+Hasil QA terakhir: **LULUS**. Katalog 81 sprite (24 variasi pose/warna macan dan 57 pose pengecoh) diperiksa agar siluet tiap pose berbeda, mata memiliki koordinat valid, dan gambar tidak terpotong batas canvas. Variasi pose macan dan pengecoh diperiksa dalam 48 kombinasi stasiun; pola dekat dan tersebar teramati. Semua 48 kombinasi seed/stasiun memenuhi jumlah minimum target, jumlah pengecoh, visibilitas minimum, dan keterpilihan target. Bonus diuji dalam delapan kombinasi pola/siang-malam: muncul dan hilang sepenuhnya, terbuka di tengah gerakan, menolak klik pada bagian tertutup, durasi pendek, serta kepala tanpa tubuh. Contoh skip tiga-dari-lima menjadi delapan poin, batas nol, cakaran sekali per kelompok, temuan +3, penalti −2 poin/−5 detik per klik, serta rekonsiliasi nilai dalam CSV/cadangan juga diuji. Ukuran minimum target, kembali ke menu dari permainan/kartu fakta, pembatalan konfirmasi, tidak menyimpan sesi yang dibatalkan, shortcut admin, perubahan durasi dan sesi baru juga lulus. Cache offline, zoom/pan, klik/touch, backup, dan alur hasil turut dicakup.
 
 `node tools/build-single.mjs` memeriksa konten dan membuat HTML mandiri. `python tools/test-game.py` menguji klik/touch, drag, pemisahan bonus, jeda, penalti per klik, penyelesaian stasiun, kartu fakta, hasil, penyimpanan/cadangan, aset standalone, storage yang tidak tersedia, ukuran layar, dan 48 kombinasi stasiun/seed di semua mode pencahayaan.
 

@@ -10,8 +10,10 @@ window.JSMT_CONFIG = {
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   targetPoints: 3,
+  nightTargetPoints: 5,
   decoyPenaltyPoints: 2,
   bonusPoints: 5,
+  nightBonusPoints: 7,
   bonusFirstSec: 4,
   bonusPassSec: 3.2,
   bonusCoverSec: 2.4,
@@ -21,7 +23,7 @@ window.JSMT_CONFIG = {
   cluePoints: 1,
   cluesPerStation: 2,
   skipPenaltyPoints: 1,
-  rulesVersion: 6,
+  rulesVersion: 7,
   clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 5,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk

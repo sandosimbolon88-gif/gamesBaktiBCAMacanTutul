@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 -->
+<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · aee9a18 -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -370,7 +370,7 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
           <h2 data-t="ui.briefTitle"></h2>
           <p class="lead" data-t="ui.briefText"></p>
           <div class="rules" id="rules"></div>
-          <p class="competition-note">Macan utama +3 · Pengecoh −2 poin &amp; −5 detik · Skip −1 · Bonus satwa +5 · Cakaran +1 · Skor minimum nol</p>
+          <p class="competition-note">Macan +3 / malam +5 · Bonus macan +5 / malam +7 · Semua pengecoh −2 poin &amp; −5 detik · Skip −1 · Cakaran +1 · Skor minimum nol</p>
           <button class="btn btn-primary btn-big" id="btn-go" data-t="ui.go"></button>
         </div>
       </section>
@@ -493,8 +493,10 @@ window.JSMT_CONFIG = {
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   targetPoints: 3,
+  nightTargetPoints: 5,
   decoyPenaltyPoints: 2,
   bonusPoints: 5,
+  nightBonusPoints: 7,
   bonusFirstSec: 4,
   bonusPassSec: 3.2,
   bonusCoverSec: 2.4,
@@ -504,7 +506,7 @@ window.JSMT_CONFIG = {
   cluePoints: 1,
   cluesPerStation: 2,
   skipPenaltyPoints: 1,
-  rulesVersion: 6,
+  rulesVersion: 7,
   clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 5,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk
@@ -574,10 +576,10 @@ window.JSMT_CONTENT = {
     briefTitle: 'Kamu adalah peneliti macan tutul!',
     briefText: 'Kamera pengintai sudah dipasang di hutan Bromo Tengger Semeru. Periksa setiap rekaman dan temukan semua macan tutul jawa sebelum waktu habis.',
     rules: [
-      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul utama yang kamu temukan menambah tiga poin.' },
+      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Macan utama memberi tiga poin. Saat malam lebih sulit: setiap temuan memberi lima poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
-      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Setiap klik pengecoh mengurangi dua poin dan lima detik. Skor minimum nol. Amati bentuk dan pola bulunya!' },
-      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari melompat, keluar semak, atau mengintip memberi lima poin. Tangkap momennya sebelum menghilang!' },
+      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Pengecoh bisa berjalan, terbang, memanjat atau bergelantungan. Setiap klik salah mengurangi dua poin dan lima detik, termasuk satwa bergerak. Skor minimum nol.' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Bonus macan berlari, keluar semak, atau mengintip memberi lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',
@@ -1934,10 +1936,10 @@ window.JSMT_CONTENT = {
     g.strokeStyle='#e6d9b1';g.lineWidth=.9;for(const y of [9,14]){g.beginPath();g.moveTo(25,y);g.lineTo(49,y-5);g.stroke();}g.restore();
     return faceInfo(hx,hy,pose==='sniff'?.24:0,7,-5,25);
   }
-  function armored(g,type,pose,ol){
+  function armored(g,type,pose,ol,gait=.7){
     const o='#372b20',curl=pose==='curl'||pose==='defend',pangolin=type==='trenggiling';
     if(pangolin&&!curl)part(g,new Path2D('M -43 -44 Q -96 -34 -145 -3 Q -81 11 -37 -13 Z'),'#a28b5e',ol,o);
-    if(!curl||!pangolin)for(const x of [-29,30])line(g,`M ${x} -22 L ${x+7} -2`,9,'#6f6249',ol,o);
+    if(!curl||!pangolin)for(const [x,s] of [[-29,1],[-19,-1],[23,-1],[33,1]]){const step=pose==='walk'?Math.sin(gait)*11*s:0;line(g,`M ${x} -22 L ${x+7+step} -2`,7,'#6f6249',ol,o);}
     const body=ell(-5,curl?-37:-29,curl?43:pangolin?57:44,curl?36:28,-.1);
     if(!pangolin){for(let i=0;i<32;i++){const a=-Math.PI+.14+i/31*(Math.PI-.28),x=-5+Math.cos(a)*31,y=-30+Math.sin(a)*22;line(g,`M ${x} ${y} L ${x+Math.cos(a)*35} ${y+Math.sin(a)*35}`,2.2,i%2?'#eadfbe':'#342c22',ol*.4,o);}}
     part(g,body,pangolin?'#aa956a':'#5f4c3a',ol,o);
@@ -1976,11 +1978,11 @@ window.JSMT_CONTENT = {
     part(g,ell(hx+21,hy+10,16,9),'#d4ba82',ol*.5,o);eye(g,hx+9,hy-4,'#251c12',3.2);g.fillStyle='#251c12';g.fill(ell(hx+36,hy+10,3,2.5));
     return {eyes:[{x:hx+9,y:hy-4}],head:{x:hx+7,y:hy,r:23}};
   }
-  function bird(g,type,pose,ol){
-    const eagle=type==='elang',o='#332416',wing=eagle?'#6f4827':'#aa5129',spread=pose==='wings';
+  function bird(g,type,pose,ol,gait=0){
+    const eagle=type==='elang',o='#332416',wing=eagle?'#6f4827':'#aa5129',spread=pose==='wings'||pose==='fly';
     const body=ell(0,eagle?-56:-39,eagle?23:29,eagle?38:21,eagle?0:.1);
     part(g,new Path2D(eagle?'M -9 -24 L -16 23 L 17 23 L 10 -24 Z':'M -17 -40 Q -62 -104 -87 -53 L -54 -26 Z'),eagle?'#745332':'#244b3b',ol,o);
-    if(spread){for(const sd of [-1,1]){g.save();g.scale(sd,1);part(g,new Path2D('M 11 -70 Q 76 -129 135 -64 L 145 -31 L 119 -45 L 123 -20 L 98 -38 L 99 -14 L 78 -36 L 76 -16 L 51 -37 L 45 -22 L 21 -40 Z'),wing,ol,o);g.strokeStyle=eagle?'#c2a47b':'#df9a4e';g.lineWidth=2;for(let i=0;i<6;i++){g.beginPath();g.moveTo(33+i*13,-69-i*2);g.lineTo(46+i*13,-42+i*2);g.stroke();}g.restore();}}
+    if(spread){for(const sd of [-1,1]){g.save();g.scale(sd,1);if(pose==='fly'){g.translate(0,-59);g.rotate(Math.sin(gait)*.48);g.translate(0,59);}part(g,new Path2D('M 11 -70 Q 76 -129 135 -64 L 145 -31 L 119 -45 L 123 -20 L 98 -38 L 99 -14 L 78 -36 L 76 -16 L 51 -37 L 45 -22 L 21 -40 Z'),wing,ol,o);g.strokeStyle=eagle?'#c2a47b':'#df9a4e';g.lineWidth=2;for(let i=0;i<6;i++){g.beginPath();g.moveTo(33+i*13,-69-i*2);g.lineTo(46+i*13,-42+i*2);g.stroke();}g.restore();}}
     part(g,body,eagle?'#e7d4ae':'#32251b',ol,o);
     if(!spread)part(g,ell(-6,eagle?-58:-40,eagle?13:22,eagle?33:14,.15),wing,ol,o);
     g.strokeStyle=eagle?'#9b733f':'#c0803c';g.lineWidth=2;for(let i=0;i<8;i++){g.beginPath();g.moveTo(-14+i*4,eagle?-71:-39);g.lineTo(-13+i*4,eagle?-61:-31);g.stroke();}
@@ -1995,14 +1997,45 @@ window.JSMT_CONTENT = {
     eye(g,eagle?4:3,-3,eagle?'#f0cf56':'#e8a84a',eagle?3.5:2.6);g.restore();
     return {eyes:[{x:hx+(pose==='lookback'?-4:4),y:hy-3}],head:{x:hx,y:hy,r:eagle?17:12}};
   }
+  function hanging(g,type,ol,gait=0){
+    const fur=type==='lutung'?'#303033':'#9a8d6f',skin=type==='lutung'?'#716c65':'#cfb493',o='#292b20';
+    g.save();g.rotate(Math.sin(gait)*.27);
+    line(g,'M 0 3 L -12 54 L -29 94',9,fur,ol,o);
+    part(g,ell(0,1,7,8),skin,ol*.6,o);
+    line(g,'M -27 151 Q -50 203 -14 242 Q 5 260 -12 275',8,fur,ol,o);
+    for(const [x,s] of [[-39,-1],[-15,1]]){line(g,`M ${x} 153 Q ${x+s*26} 180 ${x+s*28} 204`,10,fur,ol,o);part(g,ell(x+s*28,205,11,6),skin,ol*.6,o);}
+    part(g,ell(-27,126,27,41,-.12),fur,ol,o);
+    line(g,'M -6 110 Q 31 113 27 78',9,fur,ol,o);part(g,ell(27,76,6,8),skin,ol*.6,o);
+    for(const x of [-38,-2])part(g,ell(x,76,6,8),skin,ol*.6,o);
+    part(g,ell(-20,75,23,23),fur,ol,o);part(g,ell(-17,79,16,15),skin,ol*.5,o);
+    for(const x of [-24,-10])eye(g,x,74,'#d9c174',3);
+    g.restore();
+    const a=Math.sin(gait)*.27,c=Math.cos(a),s=Math.sin(a),pt=(x,y)=>({x:x*c-y*s,y:x*s+y*c});
+    return {eyes:[pt(-24,74),pt(-10,74)],head:Object.assign(pt(-20,75),{r:23})};
+  }
+  function climbing(g,type,ol){
+    const squirrelType=type==='bajing',pangolin=type==='trenggiling',fur=squirrelType?'#bd8b47':pangolin?'#ad986c':'#ac905b',o='#4b3925';
+    line(g,'M -35 -19 Q -98 28 -95 79 Q -79 94 -76 66',squirrelType?27:13,fur,ol,o);
+    const body=ell(-20,-69,27,58,.23);part(g,body,fur,ol,o);
+    g.save();g.clip(body);g.strokeStyle=pangolin?'#706044':'#6a5637';g.lineWidth=2;
+    for(let i=0;i<9;i++){g.beginPath();g.moveTo(-47,-118+i*13);g.quadraticCurveTo(-20,-100+i*13,9,-120+i*13);g.stroke();}g.restore();
+    for(const [x,y,px,py] of [[-30,-32,45,-15],[-22,-54,46,-66],[-9,-94,49,-139],[0,-99,49,-110]]){line(g,`M ${x} ${y} Q 13 ${y-6} ${px} ${py}`,squirrelType?8:10,fur,ol,o);part(g,ell(px,py,9,6,-.3),fur,ol*.7,o);}
+    part(g,ell(6,-142,23,23),fur,ol,o);for(const x of [-7,20])part(g,ell(x,-164,6,10),fur,ol*.7,o);
+    if(type==='musang')part(g,ell(12,-144,18,8),'#493f30',ol*.3,o);
+    part(g,ell(27,-134,17,9),'#dfc99b',ol*.5,o);eye(g,14,-148,'#e2c471',3);g.fillStyle=o;g.fill(ell(42,-134,3,2.5));
+    return {eyes:[{x:14,y:-148}],head:{x:11,y:-142,r:23}};
+  }
   A.DECOY_POSES={
     kijang:['stand','walk','graze','alert'],kancil:['stand','walk','graze','alert'],
-    linsang:['stand','walk','sniff','crouch'],musang:['stand','walk','sniff','crouch'],garangan:['stand','walk','sniff','crouch'],binturong:['stand','walk','sniff','rest'],
-    kuwuk:['walk','crouch','sniff','sit','curl'],landak:['stand','forage','defend'],trenggiling:['stand','forage','curl'],
-    lutung:['sit','walk','reach'],monyet:['sit','walk','reach'],bajing:['sit','walk','forage','reach'],
-    ayam:['stand','forage','wings'],elang:['perch','wings','lookback']
+    linsang:['stand','walk','sniff','crouch'],musang:['stand','walk','sniff','crouch','climb'],garangan:['stand','walk','sniff','crouch'],binturong:['stand','walk','sniff','rest'],
+    kuwuk:['walk','crouch','sniff','sit','curl'],landak:['stand','forage','defend','walk'],trenggiling:['stand','forage','curl'],
+    lutung:['sit','walk','reach','hang'],monyet:['sit','walk','reach','hang'],bajing:['sit','walk','forage','reach','climb'],
+    ayam:['stand','forage','wings'],elang:['perch','wings','lookback','fly']
   };
   A.decoyHabitats=function(type,pose){
+    if(pose==='climb')return ['trunk'];
+    if(pose==='hang')return ['branch'];
+    if(pose==='fly')return ['air'];
     if(type==='elang')return ['branch'];
     if((type==='lutung'||type==='monyet')&&pose==='reach')return ['branch'];
     if(['lutung','monyet','bajing','musang','binturong'].includes(type)&&!['walk','forage','sniff'].includes(pose))return ['ground','branch'];
@@ -2014,12 +2047,14 @@ window.JSMT_CONTENT = {
     const original=(A.DECOY_POSES[type]||['stand'])[0];
     if(pose===original){const sp=baseSprite(type,o);sp.pose=pose;return sp;}
     let draw,bounds;
-    if(type==='kijang'||type==='kancil'){draw=g=>ungulate(g,type,pose,ol);bounds=[-112,-202,152,18];}
+    if(pose==='hang'){draw=g=>hanging(g,type,ol,o.gait);bounds=[-160,-20,120,300];}
+    else if(pose==='climb'){draw=g=>climbing(g,type,ol);bounds=[-126,-190,74,110];}
+    else if(type==='kijang'||type==='kancil'){draw=g=>ungulate(g,type,pose,ol);bounds=[-112,-202,152,18];}
     else if(coats[type]){draw=g=>carnivore(g,type,pose,ol);bounds=[-202,-137,156,45];}
-    else if(type==='landak'||type==='trenggiling'){draw=g=>armored(g,type,pose,ol);bounds=[-162,-125,113,20];}
+    else if(type==='landak'||type==='trenggiling'){draw=g=>armored(g,type,pose,ol,o.gait);bounds=[-162,-125,113,20];}
     else if(type==='lutung'||type==='monyet'){draw=g=>primate(g,type,pose,ol);bounds=[-126,-218,115,132];}
     else if(type==='bajing'){draw=g=>squirrel(g,pose,ol);bounds=[-156,-153,107,18];}
-    else {draw=g=>bird(g,type,pose,ol);bounds=[-160,-164,160,35];}
+    else {draw=g=>bird(g,type,pose,ol,o.gait);bounds=pose==='fly'?[-190,-210,190,70]:[-160,-164,160,35];}
     const ol=J.clamp(2/o.scale,2,5);
     const sp=A.makeSprite(o,bounds,draw);sp.type=type;sp.pose=pose;return sp;
   };
@@ -2575,6 +2610,112 @@ window.JSMT_CONTENT = {
 })();
 
 </script>
+  <script>/* js/motion.js */
+/* Gerak pengecoh dan angin. Gambar dan area klik memakai mask vegetasi yang sama. */
+(function () {
+  'use strict';
+  const J=window.JSMT,A=J.Art,TAU=Math.PI*2;
+  const intersects=(a,b)=>J.overlapArea(a,b)>0;
+  class Motion {
+    constructor(scene) {
+      this.scene=scene;this.clock=0;this.frame=-1;
+      this.items=scene.items.filter(it=>it.moving);
+      this.update(0);
+    }
+    update(dt) {
+      this.clock+=dt;
+      const frame=Math.floor(this.clock*12);
+      if(frame===this.frame)return;
+      this.frame=frame;
+      for(const it of this.items){
+        const m=it.motion,phase=this.clock*m.speed+m.phase;
+        const walk=m.kind==='walk',fly=m.kind==='fly';
+        const flip=(walk||fly)?Math.cos(phase)<0:m.flip;
+        it.x=m.x+(walk||fly?Math.sin(phase)*m.amplitude:0);
+        it.y=m.y+(fly?Math.sin(phase*1.7)*12:0);
+        const n=Math.floor(this.clock*(fly?2.3:walk?1.4:.28)*12)%12;
+        it.sp=m.frames[flip?1:0][n];
+        const b=it.sp.box;it.box={x0:it.x+b.x0,y0:it.y+b.y0,x1:it.x+b.x1,y1:it.y+b.y1};
+        it.cx=(it.box.x0+it.box.x1)/2;it.cy=(it.box.y0+it.box.y1)/2;
+        it.eyes=it.sp.eyes.map(e=>({x:it.x+e.x,y:it.y+e.y}));
+        this.compose(it);
+      }
+    }
+    compose(it) {
+      const sp=it.sp,m=it.motion,R=sp.R,c=it.visibleCanvas;
+      if(c.width!==sp.canvas.width)c.width=sp.canvas.width;
+      if(c.height!==sp.canvas.height)c.height=sp.canvas.height;
+      const g=c.getContext('2d',{willReadFrequently:true});
+      g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
+      g.drawImage(sp.canvas,0,0);
+      g.globalCompositeOperation='destination-out';
+      g.drawImage(m.cover,(m.coverBox.x0-it.x-sp.ox)*R,(m.coverBox.y0-it.y-sp.oy)*R);
+      g.globalCompositeOperation='source-over';
+      it.visibleMask=g.getImageData(0,0,c.width,c.height);it.vmask=null;
+      // Tidak ada mata mengambang di lokasi sprite sebelumnya pada mode IR.
+      it.eyesVis=it.eyes.filter(e=>this.visibleAt(it,e.x,e.y));
+    }
+    visibleAt(it,x,y) {
+      const sp=it.sp,m=it.visibleMask,px=Math.round((x-it.x-sp.ox)*sp.R),py=Math.round((y-it.y-sp.oy)*sp.R);
+      return px>=0&&py>=0&&px<m.width&&py<m.height&&m.data[(py*m.width+px)*4+3]>100;
+    }
+    hit(x,y,tol=0) {
+      for(const it of this.items.slice().reverse()){
+        const b=it.box,sp=it.sp,m=it.motion,t=Math.min(tol,24);
+        // Metadata batas sprite disampel tiap dua piksel; mask tetap menentukan hit akhir.
+        const edge=t+2/sp.R;
+        if(x<b.x0-edge||x>b.x1+edge||y<b.y0-edge||y>b.y1+edge)continue;
+        const cx=Math.round((x-m.coverBox.x0)*sp.R),cy=Math.round((y-m.coverBox.y0)*sp.R),cover=m.coverMask;
+        if(cx>=0&&cy>=0&&cx<cover.width&&cy<cover.height&&cover.data[(cy*cover.width+cx)*4+3]>100&&!this.visibleAt(it,x,y))continue;
+        if(A.spriteHit(Object.assign({},sp,{mask:it.visibleMask}),x-it.x,y-it.y,t))return it;
+      }
+      return null;
+    }
+    render(ctx) {
+      for(const it of this.items)ctx.drawImage(it.visibleCanvas,it.x+it.sp.ox,it.y+it.sp.oy,it.sp.lw,it.sp.lh);
+      for(const w of this.scene.wind){
+        const a=Math.sin(this.clock*w.speed+w.phase)*.045;
+        ctx.save();ctx.translate(w.x,w.y);ctx.rotate(a);ctx.drawImage(w.canvas,-w.size,-w.size,w.size*2,w.size*2);ctx.restore();
+      }
+    }
+  }
+  Motion.prepare=function(sc,objs,p,drawObj,trees) {
+    const r=J.rng(sc.seed^0x71bc),R=sc.R;
+    for(const it of sc.items.filter(x=>x.moving)){
+      const m=it.motion;
+      m.x=it.x;m.y=it.y;m.phase=0;m.speed=m.kind==='fly'?.34:m.kind==='walk'?.60:.28;
+      m.flip=it.renderOptions.flip;m.frames=[[],[]];
+      for(const flip of [false,true])for(let i=0;i<12;i++){
+        const sp=A.animalSprite(it.type,Object.assign({},it.renderOptions,{flip,gait:i/12*TAU}));
+        if(sc.night)A.toIR(sp.canvas,{level:.85,gain:1.12,noise:0});
+        m.frames[flip?1:0].push(sp);
+      }
+      const area=it.motionArea;
+      const box={x0:Math.floor(area.x0-24),y0:Math.floor(area.y0-24),x1:Math.ceil(area.x1+24),y1:Math.ceil(area.y1+24)};
+      const c=J.makeCanvas((box.x1-box.x0)*R,(box.y1-box.y0)*R),g=c.getContext('2d',{willReadFrequently:true});
+      g.setTransform(R,0,0,R,-box.x0*R,-box.y0*R);
+      for(const o of objs)if(o.z>it.y&&!o.it?.moving&&intersects(o.box,box))drawObj(g,o,p);
+      m.cover=c;m.coverBox=box;m.coverMask=g.getImageData(0,0,c.width,c.height);
+      it.visibleCanvas=J.makeCanvas(it.sp.canvas.width,it.sp.canvas.height);
+    }
+    sc.wind=[];
+    const forbidden=sc.items.map(it=>it.motionArea||it.box);
+    for(const tree of trees)for(let k=0;k<12;k++){
+      const size=r.range(34,50),x=J.clamp(tree.x+r.range(-105,105),size,J.W-size),y=r.range(210,530);
+      const box={x0:x-size-8,y0:y-size-8,x1:x+size+8,y1:y+size+8};
+      if(forbidden.some(b=>intersects(b,box)))continue;
+      const canvas=J.makeCanvas(size*2*R,size*2*R),g=canvas.getContext('2d');
+      g.setTransform(R,0,0,R,size*R,size*R);
+      A.Forest.leafSpray(g,J.rng(r.seed()),0,0,size*.72,p,-Math.PI/2);
+      if(sc.night)A.toIR(canvas,{level:.8,foliage:.72,gain:.95,noise:0});
+      sc.wind.push({canvas,size,x,y,phase:r.range(0,TAU),speed:r.range(.8,1.3)});break;
+    }
+    sc.motion=new Motion(sc);
+  };
+  J.Motion=Motion;
+})();
+
+</script>
   <script>/* js/scene.js */
 /* Generator "Stasiun Kamera": merakit hutan lebat acak dengan lapisan kedalaman,
    menyembunyikan macan tutul & satwa pengecoh di antara tanaman, memberi cahaya belang-belang
@@ -2664,7 +2805,7 @@ window.JSMT_CONTENT = {
     }
   }
   function drawObj(g, o, p) {
-    if (o.kind === 'animal') { const it = o.it, sp = it.sp; g.drawImage(sp.canvas, it.x + sp.ox, it.y + sp.oy, sp.lw, sp.lh); }
+    if (o.kind === 'animal') { const it = o.it, sp = it.sp; if(!it.moving)g.drawImage(sp.canvas, it.x + sp.ox, it.y + sp.oy, sp.lw, sp.lh); }
     else drawVeg(g, o, p);
   }
 
@@ -2835,22 +2976,37 @@ window.JSMT_CONTENT = {
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
     const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
-    const dTypes = warm.concat(r.shuffle(A.DECOY_TYPES.filter(t => !warm.includes(t))));
+    const priority=['kuwuk','landak','monyet','musang','bajing'];
+    if(mode==='pagi')priority.push('elang');
+    const dTypes=priority.concat(warm.filter(t=>!priority.includes(t)),r.shuffle(A.DECOY_TYPES.filter(t=>!warm.includes(t)&&!priority.includes(t))));
     let placedDecoys=0;
     for(let i=0;i<(d.decoys||0)*4&&placedDecoys<d.decoys;i++){
-      const type=dTypes[i%dTypes.length],pose=r.pick(A.DECOY_POSES[type]);
+      const type=dTypes[i%dTypes.length];
+      const animate=i<dTypes.length&&['kuwuk','landak','monyet'].includes(type)||i<dTypes.length&&type==='elang'&&mode==='pagi';
+      const forced=i<dTypes.length&&['musang','bajing'].includes(type);
+      const pose=animate?(type==='monyet'?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
       for(let k=0;k<64;k++){
         const habitatType=r.pick(A.decoyHabitats(type,pose));
-        let slot=null,x,y,ds=.94;
+        let slot=null,tree=null,x,y,ds=.94,flip=r.chance(.5);
         if(habitatType==='branch'){
           slot=pickSlot(70);if(!slot)continue;x=r.range(slot.x0+30,slot.x1-30);y=slot.y(x);
+        }else if(habitatType==='trunk'){
+          tree=r.pick(trees);x=tree.x+(flip?1:-1)*(tree.w*.40+49*d.scale*.94);y=tree.base-r.range(90,230);
+        }else if(habitatType==='air'){
+          x=r.range(350,W-350);y=r.range(370,640);ds=1.1;
         }else{
           y=r.range(gMin,gMax);ds=depth(y);x=r.range(40,W-40);
         }
-        const sp=A.animalSprite(type,{scale:d.scale*ds*r.range(.93,1.07),R,flip:r.chance(.5),night,pose,soft});
+        const renderOptions={scale:d.scale*ds*r.range(.93,1.07),R,flip,night,pose,soft};
+        if(tree)x=tree.x+(flip?1:-1)*(tree.w*.40+49*renderOptions.scale);
+        const sp=A.animalSprite(type,renderOptions);
         const box=tryPlace(sp,x,y);if(!box)continue;
-        occ.push(box);if(slot)slot.used=true;
-        const it=mk('decoy',{type,variant:type,pose,onBranch:!!slot,onTrunk:false},sp,x,y,box);
+        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(130,210):pose==='hang'?0:r.range(50,95)}:null;
+        const padx=motion?(motion.kind==='swing'?55:motion.amplitude+48):0,pady=motion?(motion.kind==='swing'?22:motion.kind==='fly'?65:12):0;
+        const area={x0:box.x0-padx,y0:box.y0-pady,x1:box.x1+padx,y1:box.y1+pady};
+        if(motion&&(area.x0<16||area.x1>W-16||area.y0<112||area.y1>H-4||occ.some(b=>J.overlapArea(area,b)>0)))continue;
+        occ.push(motion?area:box);if(slot)slot.used=true;
+        const it=mk('decoy',{type,variant:type,pose,onBranch:!!slot,onTrunk:!!tree,tree,moving:!!motion,motion,motionArea:motion?area:null,renderOptions},sp,x,y,box);
         it.info=C.decoys[type];it.label=it.info.name;animals.push(it);placedDecoys++;break;
       }
     }
@@ -3056,7 +3212,7 @@ window.JSMT_CONTENT = {
     }
 
     animals.sort((a, b) => a.y - b.y);
-    return {
+    const scene={
       seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix, distribution,
       targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
       forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
@@ -3064,6 +3220,9 @@ window.JSMT_CONTENT = {
       leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)
     };
+    J.Motion.prepare(scene,objs,p,drawObj,trees);
+    scene.genMs=Math.round(performance.now()-t0);
+    return scene;
   }
 
   /* Hanya bagian tubuh yang terlihat yang bisa diklik. */
@@ -3087,9 +3246,11 @@ window.JSMT_CONTENT = {
 
   /* Cari satwa di titik (lx, ly). Prioritas: kena tepat > macan tutul dalam toleransi > pengecoh. */
   S.hit = function (scene, lx, ly, tol) {
-    const list = scene.items.slice().sort((a, b) => b.y - a.y);
+    const moving=scene.motion?.hit(lx,ly,0);if(moving)return moving;
+    const list = scene.items.filter(it=>!it.moving).sort((a, b) => b.y - a.y);
     const inBox = (it, t) => lx >= it.box.x0 - t && lx <= it.box.x1 + t && ly >= it.box.y0 - t && ly <= it.box.y1 + t;
     for (const it of list) if (inBox(it, 0) && visHit(it, lx, ly, 0)) return it;
+    const nearby=scene.motion?.hit(lx,ly,tol);if(nearby)return nearby;
     for (const kind of ['leopard', 'clue', 'decoy']) {
       for (const it of list) {
         if (it.kind === kind && inBox(it, tol) && visHit(it, lx, ly, tol)) return it;
@@ -3183,7 +3344,7 @@ window.JSMT_CONTENT = {
           clueScore: Math.max(0, Math.floor(Number(raw.clueScore) || 0)),
           skips: Math.max(0, Math.floor(Number(raw.skips) || 0)),
           skipPenalty: Math.max(0, Math.floor(Number(raw.skipPenalty) || 0)),
-          rulesVersion: [3,4,5,6].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
+          rulesVersion: [3,4,5,6,7].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
@@ -3264,14 +3425,14 @@ window.JSMT_CONTENT = {
     },
     station(n, mode) {
       $('hud-station').textContent = UI.t('ui.station', { n });
-      $('hud-mode').textContent = C.ui.modes[mode] || '';
+      $('hud-mode').textContent = (C.ui.modes[mode] || '')+' · Macan +'+(mode==='malam'?CFG.nightTargetPoints:CFG.targetPoints);
       $('hud').classList.toggle('night', mode === 'malam');
     },
-    bonus(active, score, clueScore=0) {
+    bonus(active, score, clueScore=0,scene) {
       const el=$('hud-bonus');
       el.classList.toggle('live',!!active);
       const cue=active ? (active.type && active.type.startsWith('peek') ? 'Kepala mengintip!' : 'Macan melesat!') : 'Amati jejaknya';
-      el.textContent=cue+' · Satwa +'+CFG.bonusPoints+' / Cakaran +'+CFG.cluePoints+' · Bonus terkumpul '+(score+clueScore);
+      el.textContent=cue+' · Bonus macan +'+(scene?.night?CFG.nightBonusPoints:CFG.bonusPoints)+' / Cakaran +'+CFG.cluePoints+' · Terkumpul '+(score+clueScore);
     },
     pips(leopards) {
       const box = $('hud-pips');
@@ -3587,6 +3748,7 @@ window.JSMT_CONTENT = {
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
     ctx.drawImage(sc.comp,0,0,W,H);
+    if(sc.motion)sc.motion.render(ctx);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
@@ -3716,8 +3878,10 @@ window.JSMT_CONTENT = {
     loadScene(sc) {
       if (J.resetCamera) J.resetCamera();
       this.scene = sc;
+      this.targetPoints=sc.night?CFG.nightTargetPoints:CFG.targetPoints;
+      this.bonusPoints=sc.night?CFG.nightBonusPoints:CFG.bonusPoints;
       this.bonus = new J.Bonus(sc);
-      UI().hud.bonus(false, this.bonusScore, this.clueScore);
+      UI().hud.bonus(false, this.bonusScore, this.clueScore,sc);
       const now = J.now();
       this.stageStart = now; this.lastFind = now; this.hintTarget = null; this.nextScene = null;
       UI().hud.station(this.stage + 1, sc.mode);
@@ -3729,36 +3893,36 @@ window.JSMT_CONTENT = {
     stop() { this.clearTimers(); this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
 
     /* ---------- input ---------- */
-    pointer(lx, ly, tol, bonusAtDown) {
+    pointer(lx, ly, tol, bonusAtDown, movingAtDown) {
       if (!this.active || this.paused || this.ending) return;
       const now = J.now();
       if (now < this.lockUntil) return;
-      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : this.bonus.hit(lx, ly, tol);
+      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : movingAtDown ? null : this.bonus.hit(lx, ly, tol);
       if (bonus) {
         this.bonus.capture();
-        this.bonusFound++; this.bonusScore += CFG.bonusPoints; this.score += CFG.bonusPoints;
-        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + CFG.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
+        this.bonusFound++; this.bonusScore += this.bonusPoints; this.score += this.bonusPoints;
+        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + this.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
         this.effects.push({ type: 'ring', x: bonus.cx, y: bonus.cy, r0: 20, r1: 140, t0: now, dur: 0.6 });
-        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore);
+        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore,this.scene);
         return;
       }
-      const it = J.Scene.hit(this.scene, lx, ly, tol);
+      const it = movingAtDown&&this.scene.motion.items.includes(movingAtDown)?movingAtDown:J.Scene.hit(this.scene, lx, ly, tol);
       if (it && it.kind === 'clue') {
         if (it.found) return;
         it.found=true; it.foundAt=now;
         this.cluesFound++; this.clueScore+=CFG.cluePoints; this.score+=CFG.cluePoints;
         this.effects.push({type:'text',x:it.cx,y:it.box.y0-10,text:'CAKARAN +'+CFG.cluePoints,t0:now,dur:1,color:'#ffe15a'});
-        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore);
+        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore,this.scene);
         UI().bubble(it.cx,it.box.y0,'Jejak di pohon!','Cakaran adalah salah satu tanda yang dipelajari peneliti. Di alam, temuan jejak perlu diperiksa bersama bukti lainnya.','+'+CFG.cluePoints+' poin');
         return;
       }
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score+=CFG.targetPoints; this.baseFound++; this.baseScore+=CFG.targetPoints;
+        this.score+=this.targetPoints; this.baseFound++; this.baseScore+=this.targetPoints;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
-        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+CFG.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
+        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+this.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
         this.effects.push({ type: 'flash', t0: now, dur: 0.22 });
         J.Audio.found();
         UI().hud.score(this.score, true);
@@ -3850,8 +4014,9 @@ window.JSMT_CONTENT = {
     update(dt, now) {
       if (!this.active) return;
       if (!this.paused && !this.ending) {
+        this.scene.motion.update(dt);
         this.bonus.update(dt);
-        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore);
+        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore,this.scene);
         this.timeLeft -= dt;
         const sec = Math.ceil(this.timeLeft);
         if (sec !== this.lastTickSec) {
@@ -4111,7 +4276,7 @@ window.JSMT_CONTENT = {
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
       const p=screenToWorld(e.clientX,e.clientY), tol=e.pointerType==='mouse'?CFG.tolMouse:CFG.tolTouch;
-      drag = { id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false, bonusTarget:game.bonus.hit(p.x,p.y,tol*p.scale) };
+      drag = { id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false, bonusTarget:game.bonus.hit(p.x,p.y,tol*p.scale),movingTarget:game.scene.motion.hit(p.x,p.y,tol*p.scale) };
     }
     else if (pointers.size === 2) { const a = [...pointers.values()]; pinch = { d: Math.hypot(a[1].x-a[0].x, a[1].y-a[0].y), z: camera.zoom }; drag = null; }
   });
@@ -4133,7 +4298,7 @@ window.JSMT_CONTENT = {
     if (!pointers.has(e.pointerId)) return;
     if (e.type === 'pointerup' && pointers.size === 1 && drag && !drag.moved && state === 'play') {
       const p = screenToWorld(e.clientX,e.clientY), tol = e.pointerType === 'mouse' ? CFG.tolMouse : CFG.tolTouch;
-      game.pointer(p.x,p.y,tol*p.scale,drag.bonusTarget);
+      game.pointer(p.x,p.y,tol*p.scale,drag.bonusTarget,drag.movingTarget);
     }
     pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; drag = null;
   }

@@ -1,10 +1,10 @@
 /* Cache offline sederhana: game tetap jalan tanpa internet setelah dibuka sekali. */
-const CACHE = 'jsmt-v6-poses-20261106';
+const CACHE = 'jsmt-v7-living-forest-20261106';
 const FILES = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './assets/icon.svg', './assets/forest-hero.webp',
   './js/config.js', './js/content.js', './js/util.js', './js/audio.js',
   './js/art/leopard.js', './js/art/animals.js', './js/art/animal-poses.js', './js/art/forest.js',
-  './js/scene.js', './js/leaderboard.js', './js/ui.js', './js/bonus.js', './js/game.js', './js/main.js'
+  './js/motion.js', './js/scene.js', './js/leaderboard.js', './js/ui.js', './js/bonus.js', './js/game.js', './js/main.js'
 ];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));

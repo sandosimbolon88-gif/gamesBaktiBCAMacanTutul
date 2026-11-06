@@ -86,7 +86,7 @@
     }
   }
   function drawObj(g, o, p) {
-    if (o.kind === 'animal') { const it = o.it, sp = it.sp; g.drawImage(sp.canvas, it.x + sp.ox, it.y + sp.oy, sp.lw, sp.lh); }
+    if (o.kind === 'animal') { const it = o.it, sp = it.sp; if(!it.moving)g.drawImage(sp.canvas, it.x + sp.ox, it.y + sp.oy, sp.lw, sp.lh); }
     else drawVeg(g, o, p);
   }
 
@@ -257,22 +257,37 @@
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
     const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
-    const dTypes = warm.concat(r.shuffle(A.DECOY_TYPES.filter(t => !warm.includes(t))));
+    const priority=['kuwuk','landak','monyet','musang','bajing'];
+    if(mode==='pagi')priority.push('elang');
+    const dTypes=priority.concat(warm.filter(t=>!priority.includes(t)),r.shuffle(A.DECOY_TYPES.filter(t=>!warm.includes(t)&&!priority.includes(t))));
     let placedDecoys=0;
     for(let i=0;i<(d.decoys||0)*4&&placedDecoys<d.decoys;i++){
-      const type=dTypes[i%dTypes.length],pose=r.pick(A.DECOY_POSES[type]);
+      const type=dTypes[i%dTypes.length];
+      const animate=i<dTypes.length&&['kuwuk','landak','monyet'].includes(type)||i<dTypes.length&&type==='elang'&&mode==='pagi';
+      const forced=i<dTypes.length&&['musang','bajing'].includes(type);
+      const pose=animate?(type==='monyet'?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
       for(let k=0;k<64;k++){
         const habitatType=r.pick(A.decoyHabitats(type,pose));
-        let slot=null,x,y,ds=.94;
+        let slot=null,tree=null,x,y,ds=.94,flip=r.chance(.5);
         if(habitatType==='branch'){
           slot=pickSlot(70);if(!slot)continue;x=r.range(slot.x0+30,slot.x1-30);y=slot.y(x);
+        }else if(habitatType==='trunk'){
+          tree=r.pick(trees);x=tree.x+(flip?1:-1)*(tree.w*.40+49*d.scale*.94);y=tree.base-r.range(90,230);
+        }else if(habitatType==='air'){
+          x=r.range(350,W-350);y=r.range(370,640);ds=1.1;
         }else{
           y=r.range(gMin,gMax);ds=depth(y);x=r.range(40,W-40);
         }
-        const sp=A.animalSprite(type,{scale:d.scale*ds*r.range(.93,1.07),R,flip:r.chance(.5),night,pose,soft});
+        const renderOptions={scale:d.scale*ds*r.range(.93,1.07),R,flip,night,pose,soft};
+        if(tree)x=tree.x+(flip?1:-1)*(tree.w*.40+49*renderOptions.scale);
+        const sp=A.animalSprite(type,renderOptions);
         const box=tryPlace(sp,x,y);if(!box)continue;
-        occ.push(box);if(slot)slot.used=true;
-        const it=mk('decoy',{type,variant:type,pose,onBranch:!!slot,onTrunk:false},sp,x,y,box);
+        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(130,210):pose==='hang'?0:r.range(50,95)}:null;
+        const padx=motion?(motion.kind==='swing'?55:motion.amplitude+48):0,pady=motion?(motion.kind==='swing'?22:motion.kind==='fly'?65:12):0;
+        const area={x0:box.x0-padx,y0:box.y0-pady,x1:box.x1+padx,y1:box.y1+pady};
+        if(motion&&(area.x0<16||area.x1>W-16||area.y0<112||area.y1>H-4||occ.some(b=>J.overlapArea(area,b)>0)))continue;
+        occ.push(motion?area:box);if(slot)slot.used=true;
+        const it=mk('decoy',{type,variant:type,pose,onBranch:!!slot,onTrunk:!!tree,tree,moving:!!motion,motion,motionArea:motion?area:null,renderOptions},sp,x,y,box);
         it.info=C.decoys[type];it.label=it.info.name;animals.push(it);placedDecoys++;break;
       }
     }
@@ -478,7 +493,7 @@
     }
 
     animals.sort((a, b) => a.y - b.y);
-    return {
+    const scene={
       seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix, distribution,
       targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
       forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
@@ -486,6 +501,9 @@
       leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)
     };
+    J.Motion.prepare(scene,objs,p,drawObj,trees);
+    scene.genMs=Math.round(performance.now()-t0);
+    return scene;
   }
 
   /* Hanya bagian tubuh yang terlihat yang bisa diklik. */
@@ -509,9 +527,11 @@
 
   /* Cari satwa di titik (lx, ly). Prioritas: kena tepat > macan tutul dalam toleransi > pengecoh. */
   S.hit = function (scene, lx, ly, tol) {
-    const list = scene.items.slice().sort((a, b) => b.y - a.y);
+    const moving=scene.motion?.hit(lx,ly,0);if(moving)return moving;
+    const list = scene.items.filter(it=>!it.moving).sort((a, b) => b.y - a.y);
     const inBox = (it, t) => lx >= it.box.x0 - t && lx <= it.box.x1 + t && ly >= it.box.y0 - t && ly <= it.box.y1 + t;
     for (const it of list) if (inBox(it, 0) && visHit(it, lx, ly, 0)) return it;
+    const nearby=scene.motion?.hit(lx,ly,tol);if(nearby)return nearby;
     for (const kind of ['leopard', 'clue', 'decoy']) {
       for (const it of list) {
         if (it.kind === kind && inBox(it, tol) && visHit(it, lx, ly, tol)) return it;
