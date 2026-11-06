@@ -28,15 +28,15 @@
       this.scene = scene;
       this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
-      this.nextAt = CFG.bonusFirstSec;
-      this.sequence = ['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right'];
+      this.nextAt = CFG.bonusFirstSec+this.rng.range(-1,1);
+      this.sequence = this.rng.shuffle(['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right']);
     }
     update(dt) {
       this.clock += dt;
       if (this.current) {
         const it = this.current;
         const q = (this.clock-it.started)/it.duration;
-        if (q >= 1) { this.current=null; this.nextAt=this.clock+CFG.bonusGapSec; return; }
+        if (q >= 1) { this.current=null; this.nextAt=this.clock+CFG.bonusGapSec+this.rng.range(-1,1); return; }
         this.place(it,Math.max(0,q));
       } else if (this.passes<CFG.bonusMaxPasses && this.clock>=this.nextAt) this.spawn();
     }
@@ -111,7 +111,7 @@
       return A.spriteHit(visible,x-it.x,y-it.y,t) ? it : null;
     }
     capture() {
-      const it=this.current;this.current=null;this.nextAt=this.clock+CFG.bonusGapSec;return it;
+      const it=this.current;this.current=null;this.nextAt=this.clock+CFG.bonusGapSec+this.rng.range(-1,1);return it;
     }
     render(ctx) {
       const it=this.current;if(!it)return;

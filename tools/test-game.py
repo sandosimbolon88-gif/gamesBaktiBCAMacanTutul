@@ -71,6 +71,7 @@ try:
         page.screenshot(path=str(OUT / 'briefing.png'))
         page.evaluate('JSMT.randomSeed=()=>424242')
         page.locator('#btn-go').click()
+        page.evaluate('JSMT.debug.game.loadScene(JSMT.Scene.generate(0,{seed:424242,R:JSMT.R,diff:{...JSMT_CONFIG.stages[0],count:[5,5]}}))')
         page.wait_for_timeout(600)
         assert page.evaluate('JSMT.debug.game.duration') == 180
 
@@ -84,9 +85,9 @@ try:
         page.mouse.up()
         assert page.evaluate('({score:JSMT.debug.game.score,mistakes:JSMT.debug.game.mistakes})') == before
         page.mouse.click(screen['x'], screen['y'])
-        assert page.evaluate('JSMT.debug.game.score') == 1
+        assert page.evaluate('JSMT.debug.game.score') == 2
         page.mouse.click(screen['x'], screen['y'])
-        assert page.evaluate('JSMT.debug.game.score') == 1
+        assert page.evaluate('JSMT.debug.game.score') == 2
 
         # A real zoom/pan gesture keeps selection coordinates aligned.
         page.mouse.wheel(0,-600)
@@ -109,8 +110,8 @@ try:
         page.evaluate('const b=JSMT.debug.game.bonus;b.spawn("dash");b.update(JSMT_CONFIG.bonusPassSec*.5)')
         page.screenshot(path=str(OUT / 'bonus.png'))
         bonus = page.evaluate(f'() => {{const p=({FIND_POINT})(JSMT.debug.game.bonus.current);JSMT.debug.game.pointer(p.x,p.y,0);return p;}}')
-        assert page.evaluate('({score:JSMT.debug.game.score,base:JSMT.debug.game.baseFound,bonus:JSMT.debug.game.bonusScore})') == {'score': 5, 'base': 2, 'bonus': 3}
-        page.evaluate('(p)=>JSMT.debug.game.pointer(p.x,p.y,0)', bonus)
+        assert page.evaluate('({score:JSMT.debug.game.score,base:JSMT.debug.game.baseFound,bonus:JSMT.debug.game.bonusScore})') == {'score': 7, 'base': 2, 'bonus': 3}
+        assert page.evaluate('(p)=>JSMT.debug.game.bonus.hit(p.x,p.y,0)===null',bonus)
         assert page.evaluate('JSMT.debug.game.bonusScore') == 3
         page.evaluate('JSMT.debug.game.paused=true')
         paused = page.evaluate('[JSMT.debug.game.timeLeft,JSMT.debug.game.bonus.clock]')
@@ -118,12 +119,15 @@ try:
         assert page.evaluate('[JSMT.debug.game.timeLeft,JSMT.debug.game.bonus.clock]') == paused
         page.evaluate('JSMT.debug.game.paused=false; JSMT.debug.game.bonus.current=null; JSMT.debug.game.bonus.passes=JSMT_CONFIG.bonusMaxPasses')
 
-        # Wrong-species penalty occurs once per animal, even after repeated taps.
+        # Every wrong-species click deducts one point and five seconds, including repeated taps.
         decoy = page.evaluate(f'({FIND_POINT})(JSMT.debug.game.scene.items.find(x=>x.kind==="decoy"))')
         time_before = page.evaluate('JSMT.debug.game.timeLeft')
+        points_before = page.evaluate('JSMT.debug.game.score')
         page.evaluate('(p)=>{JSMT.debug.game.pointer(p.x,p.y,0);JSMT.debug.game.pointer(p.x,p.y,0)}', decoy)
-        assert page.evaluate('JSMT.debug.game.mistakes') == 1
-        assert 4.9 <= time_before - page.evaluate('JSMT.debug.game.timeLeft') <= 5.4
+        assert page.evaluate('JSMT.debug.game.mistakes') == 2
+        assert 9.9 <= time_before - page.evaluate('JSMT.debug.game.timeLeft') <= 10.4
+        assert page.evaluate('JSMT.debug.game.score') == points_before-2
+        assert page.evaluate('JSMT.debug.game.decoyPenalty') == 2
 
         clue=page.evaluate(f'({FIND_POINT})(JSMT.debug.game.scene.clues[0])')
         page.evaluate('(p)=>{JSMT.debug.game.pointer(p.x,p.y,0);JSMT.debug.game.pointer(p.x,p.y,0)}',clue)
@@ -134,7 +138,7 @@ try:
         expected = page.evaluate('JSMT.debug.game.scene.leopards.length')
         page.evaluate(f'() => {{ const find={FIND_POINT}; for(const it of JSMT.debug.game.scene.leopards)if(!it.found){{const p=find(it);JSMT.debug.game.pointer(p.x,p.y,0);}} }}')
         assert page.evaluate('JSMT.debug.game.stagesCleared') == 1
-        assert page.evaluate('JSMT.debug.game.score') == expected + 4
+        assert page.evaluate('JSMT.debug.game.score') == expected*2 + 2
         page.wait_for_function('document.getElementById("overlay-fact").classList.contains("active")')
         remaining = page.evaluate('JSMT.debug.game.timeLeft')
         page.wait_for_timeout(300)
@@ -145,17 +149,20 @@ try:
         # At multiple difficulties, generation must retain enough targets and decoys.
         scenes = page.evaluate(f'''() => {{
           const out=[]; const old=JSMT.debug.game.scene; const find={FIND_POINT};
-          for(const stage of [0,1,2,3,4,5,12,30])for(const seed of [123,87654,91029]){{
-            const sc=JSMT.Scene.generate(stage,{{seed,R:.65}});JSMT.debug.game.scene=sc;
+          for(const stage of [0,1,2,3,4,5,12,30])for(const seed of [1,2,7,123,87654,91029]){{
+            const stationSeed=seed+stage*7919;
+            const sc=JSMT.Scene.generate(stage,{{seed:stationSeed,R:.65}});JSMT.debug.game.scene=sc;
             const decoys=sc.items.filter(x=>x.kind==='decoy');
-            out.push({{stage,seed,count:sc.leopards.length,wanted:sc.diff.count[0],decoys:decoys.length,expectedDecoys:sc.diff.decoys,
+            out.push({{stage,seed:stationSeed,count:sc.leopards.length,wanted:sc.diff.count[0],max:sc.diff.count[1],requested:sc.targetCount,mix:sc.mix,density:sc.diff.density,vegetation:sc.vegetationCount,signature:JSON.stringify([sc.forestLayout,sc.items.map(x=>[x.kind,x.type,x.pose,x.x,x.y])]),decoys:decoys.length,expectedDecoys:sc.diff.decoys,
               types:new Set(decoys.map(x=>x.type)).size,warm:decoys.filter(x=>JSMT.Art.DECOY_WARM_TYPES.includes(x.type)).length,minAdultScale:Math.min(...sc.leopards.filter(x=>!x.cub).map(x=>x.scale)),minCubScale:Math.min(...sc.leopards.filter(x=>x.cub).map(x=>x.scale),1),clues:sc.clues.length,cluesSelectable:sc.clues.every(it=>!!find(it)),minVis:Math.min(...sc.leopards.map(x=>x.vis)),requiredVis:sc.diff.minVis,
               allSelectable:sc.leopards.every(it=>!!find(it)),ms:sc.genMs}});
           }}JSMT.debug.game.scene=old;return out;
         }}''')
         (OUT / 'scene-checks.json').write_text(json.dumps(scenes, indent=2))
         for sc in scenes:
-            assert sc['count'] >= sc['wanted'], sc
+            assert 2<=sc['count']<=6 and sc['wanted']<=sc['count']<=sc['max'] and sc['count']==sc['requested'],sc
+            assert 9<=sc['decoys']<=16 and sc['decoys']>sc['count'],sc
+            assert sc['density']>=.94 and sc['vegetation']>=250,sc
             assert sc['minAdultScale']>=.60 and sc['minCubScale']>=.48,sc
             assert sc['decoys'] >= sc['expectedDecoys'], sc
             assert sc['types'] >= 8, sc
@@ -164,6 +171,13 @@ try:
             assert sc['minVis'] >= sc['requiredVis'] - .01, sc
             assert sc['allSelectable'], sc
         (OUT / 'scene-checks.json').write_text(json.dumps(scenes, indent=2))
+
+        repeatable=page.evaluate('''() => {const a=JSMT.Scene.generate(0,{seed:123,R:.65}),b=JSMT.Scene.generate(0,{seed:123,R:.65});const signature=s=>JSON.stringify([s.mix,s.forestLayout,s.items.map(x=>[x.kind,x.type,x.pose,x.x,x.y])]);return signature(a)===signature(b);}''')
+        assert repeatable
+        assert len(set(x['mix'] for x in scenes))==3
+        assert len(set(x['count'] for x in scenes))>=4
+        assert len(set(x['decoys'] for x in scenes))>=4
+        assert len(set(x['signature'] for x in scenes))==len(scenes)
 
         # Round-end rendering, names, saving, backup and CSV retain bonus details.
         page.evaluate('JSMT.debug.game.timeLeft=.01')
@@ -176,12 +190,15 @@ try:
         assert page.evaluate('JSMT.debug.state') == 'board'
         record = page.evaluate('JSMT.Leaderboard.load()[0]')
         assert record['bonusScore'] == 3 and record['bonusFound'] == 1
-        assert record['score'] == record['baseFound'] + record['bonusScore'] + record['clueScore'] - record['skipPenalty']
-        assert record['clueScore'] == 1 and record['rulesVersion'] == 4
-        assert 'penalti_skip' in page.evaluate('JSMT.Leaderboard.csv()')
+        assert record['score'] == record['baseScore'] + record['bonusScore'] + record['clueScore'] - record['skipPenalty'] - record['decoyPenalty']
+        assert record['clueScore'] == 1 and record['rulesVersion'] == 5
+        assert record['baseScore']==record['baseFound']*2 and record['decoyPenalty']==2
+        assert 'penalti_pengecoh' in page.evaluate('JSMT.Leaderboard.csv()')
         assert page.evaluate('JSMT.Leaderboard.importBackup(JSMT.Leaderboard.backup({})).added') == 0
         page.evaluate('''() => { const backup=JSMT.Leaderboard.backup({}); JSMT.Leaderboard.resetAll(); JSMT.Leaderboard.importBackup(backup); }''')
         assert page.evaluate('JSMT.Leaderboard.load()[0].bonusScore') == 3
+        assert page.evaluate('JSMT.Leaderboard.load()[0].baseScore') == expected*2
+        assert page.evaluate('JSMT.Leaderboard.load()[0].decoyPenalty') == 2
 
         # Different bonus silhouettes must emerge, be occluded and expire quickly.
         patterns=page.evaluate(f'''() => {{
@@ -213,7 +230,7 @@ try:
             if x['type']!='dash': assert x['hiddenPixels']>0,x
         (OUT/'bonus-patterns.json').write_text(json.dumps(patterns,indent=2))
 
-        # Requested example: three of five main targets, then skip => two retained points.
+        # Three main targets now yield six points; skipping deducts one and retains five.
         page.evaluate('JSMT.debug.goto("play")')
         page.wait_for_timeout(400)
         skip=page.evaluate(f'''() => {{
@@ -221,15 +238,15 @@ try:
           const find={FIND_POINT};for(const it of g.scene.leopards.slice(0,3)){{const p=find(it);g.pointer(p.x,p.y,0);}}
           const before=g.score;g.skipStation();g.skipStation();return {{before,after:g.score,penalty:g.skipPenalty,skips:g.skips}};
         }}''')
-        assert skip == {'before':3,'after':2,'penalty':1,'skips':1}
+        assert skip == {'before':6,'after':5,'penalty':1,'skips':1}
         page.wait_for_function('JSMT.debug.game.stage===1&&!JSMT.debug.game.paused')
-        assert page.evaluate('JSMT.debug.game.score') == 2
+        assert page.evaluate('JSMT.debug.game.score') == 5
         # Persist nonzero claw and skip details through the real result/save flow.
         page.evaluate('JSMT.debug.game.timeLeft=.01')
         page.wait_for_function('JSMT.debug.state==="result"')
         page.locator('#btn-save').click()
         skipped_record=page.evaluate('JSMT.Leaderboard.load().slice(-1)[0]')
-        assert skipped_record['score']==2 and skipped_record['skipPenalty']==1 and skipped_record['skips']==1
+        assert skipped_record['score']==5 and skipped_record['skipPenalty']==1 and skipped_record['skips']==1
         page.evaluate('''() => {const data=JSMT.Leaderboard.backup({});JSMT.Leaderboard.resetAll();JSMT.Leaderboard.importBackup(data);}''')
         assert page.evaluate('JSMT.Leaderboard.load().slice(-1)[0].skipPenalty')==1
         # Five-second penalty ends the round immediately if less than five seconds remain.
@@ -240,6 +257,11 @@ try:
         page.evaluate('JSMT.debug.goto("play");JSMT.debug.game.skipStation()')
         assert page.evaluate('JSMT.debug.game.score') == 0
         assert page.evaluate('JSMT.debug.game.skipPenalty') == 0
+
+        # Wrong clicks at zero must still lose time but cannot create negative points.
+        page.evaluate('JSMT.debug.goto("play")')
+        zero=page.evaluate(f'''() => {{const g=JSMT.debug.game,p=({FIND_POINT})(g.scene.items.find(x=>x.kind==='decoy'));const before=g.timeLeft;g.pointer(p.x,p.y,0);g.pointer(p.x,p.y,0);return {{score:g.score,penalty:g.decoyPenalty,lost:before-g.timeLeft,mistakes:g.mistakes}};}}''')
+        assert zero=={'score':0,'penalty':0,'lost':10,'mistakes':2}
 
         # Delayed transitions from an old session must not open over the next one.
         page.evaluate('JSMT.debug.goto("play");JSMT.debug.game.stageClear();JSMT.debug.goto("attract");JSMT.debug.goto("play")')
@@ -319,7 +341,7 @@ try:
             single.evaluate('JSMT.debug.goto("briefing")')
             check_layout(single,'.brief-panel')
         assert not errors, errors
-        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','one-time decoy penalty','target size floor','target visibility','return to menu and cancel','admin settings from play','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
+        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','per-click point and time penalty','weighted main score','random population balance','dense randomized forest','target size floor','target visibility','return to menu and cancel','admin settings from play','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
         browser.close()
 finally:
     server.shutdown()

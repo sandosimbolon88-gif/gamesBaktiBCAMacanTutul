@@ -110,7 +110,7 @@
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
-    $('result-breakdown').textContent = res.baseFound + ' temuan + ' + res.bonusScore + ' bonus satwa + ' + res.clueScore + ' cakaran − ' + res.skipPenalty + ' penalti skip';
+    $('result-breakdown').textContent = res.baseFound + ' temuan ('+res.baseScore+' poin) + ' + res.bonusScore + ' bonus satwa + ' + res.clueScore + ' cakaran − ' + res.skipPenalty + ' skip − '+res.decoyPenalty+' pengecoh';
     $('result-stations').textContent = res.stages;
     $('result-mistakes').textContent = res.mistakes;
     $('result-rank').textContent = '#' + J.Leaderboard.wouldRank('today', res.score, res.mistakes);
@@ -122,7 +122,7 @@
   function saveResult(skip) {
     if (!pendingResult) return;
     const name = skip ? C.ui.defaultName : UI.cleanName(UI.getName());
-    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, cluesFound:pendingResult.cluesFound, clueScore:pendingResult.clueScore, skips:pendingResult.skips, skipPenalty:pendingResult.skipPenalty, rulesVersion:CFG.rulesVersion });
+    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, baseScore:pendingResult.baseScore, decoyPenalty:pendingResult.decoyPenalty, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, cluesFound:pendingResult.cluesFound, clueScore:pendingResult.clueScore, skips:pendingResult.skips, skipPenalty:pendingResult.skipPenalty, rulesVersion:CFG.rulesVersion });
     lastEntryId = e.id;
     pendingResult = null;
     J.Audio.click();

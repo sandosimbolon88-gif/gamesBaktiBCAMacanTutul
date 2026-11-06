@@ -13,14 +13,12 @@
     const st = CFG.stages;
     if (i < st.length) return Object.assign({ stage: i }, st[i]);
     const e = CFG.endless, k = i - st.length;
-    // Level tak terbatas: jumlah target dan pengecoh naik perlahan, sedangkan ukuran/visibilitas punya batas aman.
+    // Level lanjut memperkuat kamuflase; populasi tetap mengikuti komposisi acak yang dibatasi.
     const tier = Math.floor(k / 3);
-    const countMin = Math.min(14, e.count[0] + Math.floor(k / 5));
-    const countMax = Math.min(16, e.count[1] + Math.floor(k / 4));
     return Object.assign({ stage: i }, e, {
       mode: e.modes[k % e.modes.length],
-      count: [countMin, Math.max(countMin, countMax)],
-      decoys: Math.min(18, e.decoys + Math.floor(k / 4)),
+      count: e.count.slice(),
+      decoys: e.decoys,
       scale: Math.max(0.40, e.scale - tier * 0.01),
       occl: Math.min(0.88, e.occl + tier * 0.012),
       minVis: Math.max(0.19, e.minVis - tier * 0.006),
@@ -41,7 +39,7 @@
     let sc = null;
     for (let i = 0; i < 6; i++) {
       sc = generateOnce(stage, opts);
-      const need = Math.min(2, (opts.diff || S.difficulty(stage)).count[0]);
+      const need = sc.diff.count[0];
       if (sc.leopards.length >= need) return sc;
       opts.seed = J.rng(sc.seed + 7919 * (i + 1)).seed();
     }
@@ -98,6 +96,14 @@
     const seed = (opts.seed >>> 0) || J.randomSeed();
     const r = J.rng(seed);
     const d = Object.assign({ density: 0.6, light: 0.5, camo: 0.4, hide: 0, occl: 0.3, minVis: 0.5 }, opts.diff || S.difficulty(stage));
+    let mix='custom';
+    if (!opts.diff) {
+      const composition=r.pick(CFG.stationMixes);
+      mix=composition.id;
+      d.count=composition.count.slice();
+      d.decoys=r.int(composition.decoys[0],composition.decoys[1]);
+      d.density=Math.max(.94,d.density);
+    }
     const mode = opts.mode || d.mode;
     const night = mode === 'malam';
     const p = F.palette(mode);
@@ -493,7 +499,9 @@
 
     animals.sort((a, b) => a.y - b.y);
     return {
-      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat,
+      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix,
+      targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
+      forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
       clues: animals.filter(i => i.kind === "clue"),
       leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · 5b9468b -->
+<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -370,7 +370,7 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
           <h2 data-t="ui.briefTitle"></h2>
           <p class="lead" data-t="ui.briefText"></p>
           <div class="rules" id="rules"></div>
-          <p class="competition-note">Pengecoh: −5 detik · Skip: −1 poin (minimum nol) · Bonus satwa +3 · Cakaran +1</p>
+          <p class="competition-note">Macan utama +2 · Pengecoh −1 poin &amp; −5 detik · Skip −1 · Bonus satwa +3 · Cakaran +1 · Skor minimum nol</p>
           <button class="btn btn-primary btn-big" id="btn-go" data-t="ui.go"></button>
         </div>
       </section>
@@ -492,6 +492,8 @@ window.JSMT_CONFIG = {
   bonusHeadScale: 1.35,
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
+  targetPoints: 2,
+  decoyPenaltyPoints: 1,
   bonusPoints: 3,
   bonusFirstSec: 4,
   bonusPassSec: 3.2,
@@ -502,7 +504,7 @@ window.JSMT_CONFIG = {
   cluePoints: 1,
   cluesPerStation: 2,
   skipPenaltyPoints: 1,
-  rulesVersion: 4,
+  rulesVersion: 5,
   clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 5,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk
@@ -527,15 +529,21 @@ window.JSMT_CONFIG = {
      camo: kamuflase alami (daun kering, pakis kering, bunga oranye) 0-1,
      hide: peluang bersembunyi total (badan di balik daun / batang pohon, hanya sebagian terlihat),
      mode: siang | pagi | senja | malam */
-  stages: [
-    { count: [8, 9], scale: 0.50,  occl: 0.68, minVis: 0.30, black: 0.25, minBlack: 0, decoys: 10, cub: 0.45, density: 1.00, light: 0.86, camo: 0.90, hide: 0.32, mode: 'siang' },
-    { count: [9, 10], scale: 0.54, occl: 0.56, minVis: 0.37, black: 0.35, minBlack: 1, decoys: 12, cub: 0.40, density: 0.94, light: 0.74, camo: 0.77, hide: 0.20, mode: 'pagi' },
-    { count: [10, 11], scale: 0.50, occl: 0.62, minVis: 0.32, black: 0.3,  minBlack: 0, decoys: 12, cub: 0.60, density: 0.97, light: 0.82, camo: 0.85, hide: 0.26,  mode: 'siang' },
-    { count: [10, 12], scale: 0.48, occl: 0.66, minVis: 0.30, black: 0.45, minBlack: 1, decoys: 12, cub: 0.35, density: 0.98, light: 0.52, camo: 0.88, hide: 0.30,  mode: 'malam' },
-    { count: [11, 13], scale: 0.46, occl: 0.72, minVis: 0.27, black: 0.4,  minBlack: 0, decoys: 14, cub: 0.55, density: 1.00, light: 0.92, camo: 0.96, hide: 0.36,  mode: 'senja' },
-    { count: [11, 13], scale: 0.44, occl: 0.78, minVis: 0.24, black: 0.4,  minBlack: 0, decoys: 14, cub: 0.65, density: 1,    light: 1,    camo: 1,    hide: 0.42,  mode: 'siang' }
+  // Komposisi dipilih ulang dari seed setiap stasiun; angka sudah termasuk anak macan.
+  stationMixes: [
+    { id:'langka', count:[2,3], decoys:[12,16] },
+    { id:'beragam', count:[3,4], decoys:[10,14] },
+    { id:'ramai', count:[4,6], decoys:[9,13] }
   ],
-  endless: { count: [10, 12], scale: 0.44, minScale: 0.40, occl: 0.80, minVis: 0.22, black: 0.45, minBlack: 0, decoys: 16, cub: 0.65,
+  stages: [
+    { count: [2, 6], scale: 0.50,  occl: 0.68, minVis: 0.30, black: 0.25, minBlack: 0, decoys: 12, cub: 0.45, density: 1.00, light: 0.86, camo: 0.90, hide: 0.32, mode: 'siang' },
+    { count: [2, 6], scale: 0.54, occl: 0.56, minVis: 0.37, black: 0.35, minBlack: 1, decoys: 12, cub: 0.40, density: 0.94, light: 0.74, camo: 0.77, hide: 0.20, mode: 'pagi' },
+    { count: [2, 6], scale: 0.50, occl: 0.62, minVis: 0.32, black: 0.3,  minBlack: 0, decoys: 12, cub: 0.60, density: 0.97, light: 0.82, camo: 0.85, hide: 0.26,  mode: 'siang' },
+    { count: [2, 6], scale: 0.48, occl: 0.66, minVis: 0.30, black: 0.45, minBlack: 1, decoys: 12, cub: 0.35, density: 0.98, light: 0.52, camo: 0.88, hide: 0.30,  mode: 'malam' },
+    { count: [2, 6], scale: 0.46, occl: 0.72, minVis: 0.27, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.55, density: 1.00, light: 0.92, camo: 0.96, hide: 0.36,  mode: 'senja' },
+    { count: [2, 6], scale: 0.44, occl: 0.78, minVis: 0.24, black: 0.4,  minBlack: 0, decoys: 12, cub: 0.65, density: 1,    light: 1,    camo: 1,    hide: 0.42,  mode: 'siang' }
+  ],
+  endless: { count: [2, 6], scale: 0.44, minScale: 0.40, occl: 0.80, minVis: 0.22, black: 0.45, minBlack: 0, decoys: 12, cub: 0.65,
     density: 1, light: 1, camo: 1, hide: 0.46, modes: ['pagi', 'malam', 'senja', 'siang'] }
 };
 
@@ -566,9 +574,9 @@ window.JSMT_CONTENT = {
     briefTitle: 'Kamu adalah peneliti macan tutul!',
     briefText: 'Kamera pengintai sudah dipasang di hutan Bromo Tengger Semeru. Periksa setiap rekaman dan temukan semua macan tutul jawa sebelum waktu habis.',
     rules: [
-      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul yang kamu temukan menambah satu skor.' },
+      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul utama yang kamu temukan menambah dua poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
-      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Salah memilih satwa lain mengurangi lima detik. Amati bentuk tubuh, ekor, dan pola bulunya!' },
+      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Setiap klik pengecoh mengurangi satu poin dan lima detik. Skor minimum nol. Amati bentuk dan pola bulunya!' },
       { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari melompat, keluar semak, atau mengintip memberi tiga poin. Tangkap momennya sebelum menghilang!' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
@@ -2362,14 +2370,12 @@ window.JSMT_CONTENT = {
     const st = CFG.stages;
     if (i < st.length) return Object.assign({ stage: i }, st[i]);
     const e = CFG.endless, k = i - st.length;
-    // Level tak terbatas: jumlah target dan pengecoh naik perlahan, sedangkan ukuran/visibilitas punya batas aman.
+    // Level lanjut memperkuat kamuflase; populasi tetap mengikuti komposisi acak yang dibatasi.
     const tier = Math.floor(k / 3);
-    const countMin = Math.min(14, e.count[0] + Math.floor(k / 5));
-    const countMax = Math.min(16, e.count[1] + Math.floor(k / 4));
     return Object.assign({ stage: i }, e, {
       mode: e.modes[k % e.modes.length],
-      count: [countMin, Math.max(countMin, countMax)],
-      decoys: Math.min(18, e.decoys + Math.floor(k / 4)),
+      count: e.count.slice(),
+      decoys: e.decoys,
       scale: Math.max(0.40, e.scale - tier * 0.01),
       occl: Math.min(0.88, e.occl + tier * 0.012),
       minVis: Math.max(0.19, e.minVis - tier * 0.006),
@@ -2390,7 +2396,7 @@ window.JSMT_CONTENT = {
     let sc = null;
     for (let i = 0; i < 6; i++) {
       sc = generateOnce(stage, opts);
-      const need = Math.min(2, (opts.diff || S.difficulty(stage)).count[0]);
+      const need = sc.diff.count[0];
       if (sc.leopards.length >= need) return sc;
       opts.seed = J.rng(sc.seed + 7919 * (i + 1)).seed();
     }
@@ -2447,6 +2453,14 @@ window.JSMT_CONTENT = {
     const seed = (opts.seed >>> 0) || J.randomSeed();
     const r = J.rng(seed);
     const d = Object.assign({ density: 0.6, light: 0.5, camo: 0.4, hide: 0, occl: 0.3, minVis: 0.5 }, opts.diff || S.difficulty(stage));
+    let mix='custom';
+    if (!opts.diff) {
+      const composition=r.pick(CFG.stationMixes);
+      mix=composition.id;
+      d.count=composition.count.slice();
+      d.decoys=r.int(composition.decoys[0],composition.decoys[1]);
+      d.density=Math.max(.94,d.density);
+    }
     const mode = opts.mode || d.mode;
     const night = mode === 'malam';
     const p = F.palette(mode);
@@ -2842,7 +2856,9 @@ window.JSMT_CONTENT = {
 
     animals.sort((a, b) => a.y - b.y);
     return {
-      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat,
+      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix,
+      targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
+      forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
       clues: animals.filter(i => i.kind === "clue"),
       leopards: animals.filter((i) => i.kind === 'leopard'),
       genMs: Math.round(performance.now() - t0)
@@ -2958,13 +2974,15 @@ window.JSMT_CONTENT = {
           stages: Math.max(0, Math.floor(Number(raw.stages) || 0)),
           mistakes: Math.max(0, Math.floor(Number(raw.mistakes) || 0)),
           baseFound: Math.max(0, Math.floor(Number(raw.baseFound) || 0)),
+          baseScore: Math.max(0, Math.floor(Number(raw.baseScore ?? raw.baseFound ?? raw.score) || 0)),
+          decoyPenalty: Math.max(0, Math.floor(Number(raw.decoyPenalty) || 0)),
           bonusFound: Math.max(0, Math.floor(Number(raw.bonusFound) || 0)),
           bonusScore: Math.max(0, Math.floor(Number(raw.bonusScore) || 0)),
           cluesFound: Math.max(0, Math.floor(Number(raw.cluesFound) || 0)),
           clueScore: Math.max(0, Math.floor(Number(raw.clueScore) || 0)),
           skips: Math.max(0, Math.floor(Number(raw.skips) || 0)),
           skipPenalty: Math.max(0, Math.floor(Number(raw.skipPenalty) || 0)),
-          rulesVersion: [3,4].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
+          rulesVersion: [3,4,5].includes(Number(raw.rulesVersion)) ? Number(raw.rulesVersion) : 1
         };
         const key = e.id;
         if (seen.has(key) || seen.has(e.ts + '|' + e.name)) { skipped++; continue; }
@@ -2977,10 +2995,10 @@ window.JSMT_CONTENT = {
       return { added, skipped };
     },
     csv() {
-      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih', 'temuan_utama', 'bonus_lintasan', 'poin_bonus', 'cakaran', 'poin_cakaran', 'stasiun_dilewati', 'penalti_skip', 'versi_aturan']];
+      const rows = [['tanggal', 'waktu', 'nama', 'skor', 'stasiun_bersih', 'salah_pilih', 'temuan_utama', 'poin_temuan', 'penalti_pengecoh', 'bonus_lintasan', 'poin_bonus', 'cakaran', 'poin_cakaran', 'stasiun_dilewati', 'penalti_skip', 'versi_aturan']];
       for (const e of LB.load().sort((a, b) => a.ts - b.ts)) {
         const d = new Date(e.ts);
-        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0, e.baseFound ?? e.score, e.bonusFound || 0, e.bonusScore || 0, e.cluesFound || 0, e.clueScore || 0, e.skips || 0, e.skipPenalty || 0, e.rulesVersion || 1]);
+        rows.push([e.day, d.toLocaleTimeString('id-ID'), e.name, e.score, e.stages || 0, e.mistakes || 0, e.baseFound ?? e.score, e.baseScore ?? e.baseFound ?? e.score, e.decoyPenalty || 0, e.bonusFound || 0, e.bonusScore || 0, e.cluesFound || 0, e.clueScore || 0, e.skips || 0, e.skipPenalty || 0, e.rulesVersion || 1]);
       }
       return rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     }
@@ -3262,15 +3280,15 @@ window.JSMT_CONTENT = {
       this.scene = scene;
       this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
-      this.nextAt = CFG.bonusFirstSec;
-      this.sequence = ['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right'];
+      this.nextAt = CFG.bonusFirstSec+this.rng.range(-1,1);
+      this.sequence = this.rng.shuffle(['dash','cover',this.rng.chance(.5) ? 'peek-left' : 'peek-right']);
     }
     update(dt) {
       this.clock += dt;
       if (this.current) {
         const it = this.current;
         const q = (this.clock-it.started)/it.duration;
-        if (q >= 1) { this.current=null; this.nextAt=this.clock+CFG.bonusGapSec; return; }
+        if (q >= 1) { this.current=null; this.nextAt=this.clock+CFG.bonusGapSec+this.rng.range(-1,1); return; }
         this.place(it,Math.max(0,q));
       } else if (this.passes<CFG.bonusMaxPasses && this.clock>=this.nextAt) this.spawn();
     }
@@ -3345,7 +3363,7 @@ window.JSMT_CONTENT = {
       return A.spriteHit(visible,x-it.x,y-it.y,t) ? it : null;
     }
     capture() {
-      const it=this.current;this.current=null;this.nextAt=this.clock+CFG.bonusGapSec;return it;
+      const it=this.current;this.current=null;this.nextAt=this.clock+CFG.bonusGapSec+this.rng.range(-1,1);return it;
     }
     render(ctx) {
       const it=this.current;if(!it)return;
@@ -3479,7 +3497,7 @@ window.JSMT_CONTENT = {
       this.clearTimers();
       this.duration = duration;
       this.timeLeft = duration;
-      this.baseFound = 0; this.bonusFound = 0; this.bonusScore = 0;
+      this.baseFound = 0; this.baseScore = 0; this.bonusFound = 0; this.bonusScore = 0; this.decoyPenalty = 0;
       this.cluesFound = 0; this.clueScore = 0; this.skips = 0; this.skipPenalty = 0;
       this.score = 0; this.stage = 0; this.stagesCleared = 0; this.mistakes = 0;
       this.effects = []; this.particles = [];
@@ -3536,10 +3554,10 @@ window.JSMT_CONTENT = {
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score++; this.baseFound++;
+        this.score+=CFG.targetPoints; this.baseFound++; this.baseScore+=CFG.targetPoints;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
-        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+1', t0: now, dur: 0.9, color: '#ffe15a' });
+        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+CFG.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
         this.effects.push({ type: 'flash', t0: now, dur: 0.22 });
         J.Audio.found();
         UI().hud.score(this.score, true);
@@ -3548,15 +3566,13 @@ window.JSMT_CONTENT = {
         return;
       }
       if (it && it.kind === 'decoy') {
-        let extra = '';
-        if (!it.penalized) {
-          it.penalized = true;
-          this.mistakes++;
-          this.timeLeft = Math.max(0, this.timeLeft - CFG.decoyPenaltySec);
-          UI().hud.time(this.timeLeft,this.duration);
-          extra = J.tpl(C.ui.penalty, { s: CFG.decoyPenaltySec });
-          this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 6, text: extra, t0: now, dur: 1.1, color: '#ff8a70' });
-        }
+        this.mistakes++;
+        const deducted=Math.min(this.score,CFG.decoyPenaltyPoints);
+        this.score-=deducted; this.decoyPenalty+=deducted;
+        this.timeLeft=Math.max(0,this.timeLeft-CFG.decoyPenaltySec);
+        UI().hud.time(this.timeLeft,this.duration); UI().hud.score(this.score,true);
+        const extra='−'+CFG.decoyPenaltyPoints+' poin · '+J.tpl(C.ui.penalty,{s:CFG.decoyPenaltySec});
+        this.effects.push({type:'text',x:it.cx,y:it.box.y0-6,text:extra,t0:now,dur:1.1,color:'#ff8a70'});
         this.effects.push({ type: 'xbox', it, t0: now, dur: 1.2 });
         J.Audio.decoy();
         UI().bubble(it.cx, it.box.y0, it.info.name, it.info.text, extra);
@@ -3625,7 +3641,7 @@ window.JSMT_CONTENT = {
         if (!this.active) return;
         this.active = false;
         UI().hud.show(false);
-        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
+        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, baseScore:this.baseScore, decoyPenalty:this.decoyPenalty, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
       }, 2600);
     }
 
@@ -3852,7 +3868,7 @@ window.JSMT_CONTENT = {
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
-    $('result-breakdown').textContent = res.baseFound + ' temuan + ' + res.bonusScore + ' bonus satwa + ' + res.clueScore + ' cakaran − ' + res.skipPenalty + ' penalti skip';
+    $('result-breakdown').textContent = res.baseFound + ' temuan ('+res.baseScore+' poin) + ' + res.bonusScore + ' bonus satwa + ' + res.clueScore + ' cakaran − ' + res.skipPenalty + ' skip − '+res.decoyPenalty+' pengecoh';
     $('result-stations').textContent = res.stages;
     $('result-mistakes').textContent = res.mistakes;
     $('result-rank').textContent = '#' + J.Leaderboard.wouldRank('today', res.score, res.mistakes);
@@ -3864,7 +3880,7 @@ window.JSMT_CONTENT = {
   function saveResult(skip) {
     if (!pendingResult) return;
     const name = skip ? C.ui.defaultName : UI.cleanName(UI.getName());
-    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, cluesFound:pendingResult.cluesFound, clueScore:pendingResult.clueScore, skips:pendingResult.skips, skipPenalty:pendingResult.skipPenalty, rulesVersion:CFG.rulesVersion });
+    const e = J.Leaderboard.add({ name, score: pendingResult.score, stages: pendingResult.stages, mistakes: pendingResult.mistakes, baseFound: pendingResult.baseFound, baseScore:pendingResult.baseScore, decoyPenalty:pendingResult.decoyPenalty, bonusFound: pendingResult.bonusFound, bonusScore: pendingResult.bonusScore, cluesFound:pendingResult.cluesFound, clueScore:pendingResult.clueScore, skips:pendingResult.skips, skipPenalty:pendingResult.skipPenalty, rulesVersion:CFG.rulesVersion });
     lastEntryId = e.id;
     pendingResult = null;
     J.Audio.click();

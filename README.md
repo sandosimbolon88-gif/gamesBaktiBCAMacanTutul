@@ -1,4 +1,4 @@
-# Jejak Si Macan Tutul · V4.1 Kompetisi Expo
+# Jejak Si Macan Tutul · V5 Kompetisi Expo
 
 Game edukasi Bakti BCA: cari macan tutul jawa di hutan Bromo Tengger Semeru, kenali satwa lain, dan pelajari Java Wide Leopard Survey (JWLS).
 
@@ -23,17 +23,31 @@ Macan utama diperbesar dengan batas minimum yang tetap berlaku pada level lanjut
 
 Tombol **Menu utama** di kanan atas layar permainan tetap tersedia ketika kartu edukasi terbuka. Konfirmasi membatalkan sesi tanpa menyimpan skor sementara; batal melanjutkan sesi yang sama. Skor yang sudah tersimpan tidak diubah. **Esc** dapat membuka konfirmasi yang sama. **Ctrl+Shift+A** saat bermain membuka konfirmasi keluar lalu panel PIN admin, sehingga panitia bisa mengubah durasi dan suara sebelum memulai sesi baru.
 
+## Komposisi acak dan hutan rimbun
+
+Setiap stasiun memilih salah satu komposisi, lalu mengacak jumlah, jenis, posisi, pose, dan warna varian satwa. Angka target sudah termasuk anak macan.
+
+| Variasi | Macan utama | Pengecoh |
+| --- | --- | --- |
+| Jejak langka | 2–3 | 12–16 |
+| Satwa beragam | 3–4 | 10–14 |
+| Lebih banyak target | 4–6 | 9–13 |
+
+Jumlah macan tidak terus bertambah pada level lanjut. Tantangan berasal dari kamuflase, tutupan hutan, mode pencahayaan, dan pilihan pengecoh. Batas ukuran macan tetap dipertahankan. Hutan diacak dari seed baru pada setiap stasiun dan sesi; kepadatan konfigurasi permainan dijaga pada 0,94–1,00. Seed yang sama mereproduksi susunan hutan dan satwa yang sama; noise inframerah bersifat dekoratif.
+
+Urutan bonus lari, semak dan kepala mengintip, arah gerakan, lokasi, serta jeda kemunculannya juga diacak dalam batas waktu yang ditentukan.
+
 ## Aturan
 
-- **Target utama: +1 poin** untuk tiap macan tutul atau macan kumbang. Temukan semuanya untuk menyelesaikan stasiun.
+- **Target utama: +2 poin** untuk tiap macan tutul atau macan kumbang. Temukan semuanya untuk menyelesaikan stasiun.
 - **Bonus satwa: +3 poin** untuk macan yang berlari melompat, muncul dari semak, atau mengintip dari kiri/kanan. Gerak lari memiliki dua belas frame animasi dan fase tubuh melayang. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
-- Bonus pertama muncul setelah empat detik waktu main aktif. Maksimal tiga kemunculan per stasiun: lari melewati layar selama 3,2 detik, lintasan di antara semak selama 2,4 detik, dan kepala mengintip selama 1,8 detik. Ada jeda tujuh detik antarkemunculan. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
+- Bonus pertama muncul setelah tiga hingga lima detik waktu main aktif. Maksimal tiga kemunculan per stasiun: lari melewati layar selama 3,2 detik, lintasan di antara semak selama 2,4 detik, dan kepala mengintip selama 1,8 detik. Ada jeda enam hingga delapan detik antarkemunculan; urutan ketiga pola diacak. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
 - **Cakaran pohon: +1 poin** per kelompok bekas cakaran, sekali saja. Ada dua kelompok per stasiun; keduanya bonus opsional yang tidak masuk target utama. Semua cakaran terang yang digambar pada batang merupakan objek interaktif.
-- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Stasiun awal memuat sepuluh pengecoh; tingkat lanjut hingga delapan belas. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
-- Salah memilih satwa mengurangi lima detik, sekali per satwa. Klik berulang pada satwa yang sama tidak menambah penalti.
+- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Setiap stasiun memuat sembilan hingga enam belas pengecoh dan dua hingga enam macan utama, sesuai komposisi acak. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
+- Setiap klik pada pengecoh mengurangi satu poin dan lima detik, termasuk klik ulang pada satwa yang sama. Skor minimum nol; waktu dan jumlah kesalahan tetap dipotong/dicatat ketika skor sudah nol.
 - Scroll atau cubit untuk zoom, geser untuk menjelajah, dan pilih **Lihat Semua** untuk kembali ke tampilan penuh. Menggeser dan mencubit tidak dihitung sebagai jawaban.
-- **Ganti stasiun (−1 poin)** melewati kamera tanpa mengisi target yang belum ditemukan. Skor berkurang satu, dengan minimum nol. Contoh: dari lima macan, tiga sudah ditemukan → skip → dua poin tersisa. Klik berulang pada tombol selama transisi tidak menggandakan penalti.
-- Hasil menampilkan temuan utama, bonus satwa, cakaran, dan penalti skip secara terpisah. Skor total = temuan utama + bonus satwa + poin cakaran − penalti skip yang benar-benar dipotong.
+- **Ganti stasiun (−1 poin)** melewati kamera tanpa mengisi target yang belum ditemukan. Skor berkurang satu, dengan minimum nol. Contoh: dari lima macan, tiga sudah ditemukan = enam poin → skip → lima poin tersisa. Klik berulang pada tombol selama transisi tidak menggandakan penalti.
+- Hasil menampilkan jumlah temuan, poin temuan, bonus satwa, cakaran, serta penalti skip dan pengecoh secara terpisah. Skor total = poin temuan + bonus satwa + poin cakaran − penalti skip aktual − penalti pengecoh aktual. Potongan aktual menjaga rekonsiliasi ketika skor sudah nol.
 
 Kepadatan satwa dan pertemuan dalam game merupakan simulasi edukasi, bukan gambaran jumlah satwa di satu lokasi.
 
@@ -47,13 +61,13 @@ Skor hanya tersimpan di browser/perangkat tersebut. Untuk pindah PC:
 
 1. Di PC lama, pilih **Simpan cadangan** dan salin berkas JSON bersama HTML game.
 2. Di PC baru, buka game, pilih **Muat cadangan**, lalu pilih JSON. Impor menggabungkan skor dan mengabaikan ID yang sudah ada.
-3. Ekspor CSV untuk rekap; kolom temuan utama, jumlah bonus satwa, poin bonus, cakaran, poin cakaran, jumlah skip, penalti skip, dan versi aturan disertakan.
+3. Ekspor CSV untuk rekap; kolom temuan utama, poin temuan, penalti poin pengecoh, jumlah bonus satwa, poin bonus, cakaran, poin cakaran, jumlah skip, penalti skip, dan versi aturan disertakan.
 
-Skor versi lama tidak dihapus otomatis. Karena V4 mengubah durasi kemunculan dan aturan penalti, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
+Skor versi lama tidak dihapus otomatis. Karena V5 mengubah nilai temuan dan penalti poin, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
 
 ## Mengembangkan
 
-Tidak ada dependency runtime atau build framework. Untuk versi multi-file:
+Tidak ada dependency runtime atau build framework. Ubah `stationMixes` di `js/config.js` untuk mengatur jumlah satwa; `stages` mengatur habitat dan pencahayaan. Untuk versi multi-file:
 
 ```sh
 python -m http.server 8080

@@ -120,7 +120,7 @@
       this.clearTimers();
       this.duration = duration;
       this.timeLeft = duration;
-      this.baseFound = 0; this.bonusFound = 0; this.bonusScore = 0;
+      this.baseFound = 0; this.baseScore = 0; this.bonusFound = 0; this.bonusScore = 0; this.decoyPenalty = 0;
       this.cluesFound = 0; this.clueScore = 0; this.skips = 0; this.skipPenalty = 0;
       this.score = 0; this.stage = 0; this.stagesCleared = 0; this.mistakes = 0;
       this.effects = []; this.particles = [];
@@ -177,10 +177,10 @@
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score++; this.baseFound++;
+        this.score+=CFG.targetPoints; this.baseFound++; this.baseScore+=CFG.targetPoints;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
-        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+1', t0: now, dur: 0.9, color: '#ffe15a' });
+        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+CFG.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
         this.effects.push({ type: 'flash', t0: now, dur: 0.22 });
         J.Audio.found();
         UI().hud.score(this.score, true);
@@ -189,15 +189,13 @@
         return;
       }
       if (it && it.kind === 'decoy') {
-        let extra = '';
-        if (!it.penalized) {
-          it.penalized = true;
-          this.mistakes++;
-          this.timeLeft = Math.max(0, this.timeLeft - CFG.decoyPenaltySec);
-          UI().hud.time(this.timeLeft,this.duration);
-          extra = J.tpl(C.ui.penalty, { s: CFG.decoyPenaltySec });
-          this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 6, text: extra, t0: now, dur: 1.1, color: '#ff8a70' });
-        }
+        this.mistakes++;
+        const deducted=Math.min(this.score,CFG.decoyPenaltyPoints);
+        this.score-=deducted; this.decoyPenalty+=deducted;
+        this.timeLeft=Math.max(0,this.timeLeft-CFG.decoyPenaltySec);
+        UI().hud.time(this.timeLeft,this.duration); UI().hud.score(this.score,true);
+        const extra='−'+CFG.decoyPenaltyPoints+' poin · '+J.tpl(C.ui.penalty,{s:CFG.decoyPenaltySec});
+        this.effects.push({type:'text',x:it.cx,y:it.box.y0-6,text:extra,t0:now,dur:1.1,color:'#ff8a70'});
         this.effects.push({ type: 'xbox', it, t0: now, dur: 1.2 });
         J.Audio.decoy();
         UI().bubble(it.cx, it.box.y0, it.info.name, it.info.text, extra);
@@ -266,7 +264,7 @@
         if (!this.active) return;
         this.active = false;
         UI().hud.show(false);
-        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
+        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, baseScore:this.baseScore, decoyPenalty:this.decoyPenalty, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
       }, 2600);
     }
 
