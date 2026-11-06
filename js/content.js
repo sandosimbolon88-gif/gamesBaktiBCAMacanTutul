@@ -26,7 +26,7 @@ window.JSMT_CONTENT = {
       { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Macan utama memberi tiga poin. Saat malam lebih sulit: setiap temuan memberi lima poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
       { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Pengecoh bisa berjalan, terbang, memanjat atau bergelantungan. Setiap klik salah mengurangi dua poin dan lima detik, termasuk satwa bergerak. Skor minimum nol.' },
-      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau hanya kepala dan ekornya muncul dari semak. Bonus lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau mengintip. Ekor juga bisa muncul sendiri pada siang hari. Bonus lima poin, atau tujuh saat malam.' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',

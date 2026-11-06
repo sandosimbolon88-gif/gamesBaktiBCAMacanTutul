@@ -8,8 +8,8 @@ window.JSMT_CONFIG = {
   bonusRunScale: 1.0,
   bonusHeadScale: 1.35,
   bonusTailScale: 1.05,
-  targetMinDistance: 380,     // jarak antarpusat semua macan, termasuk anak (satuan dunia)
-  targetMinGap: 120,          // jarak minimum antarsiluet
+  targetMinDistance: 440,     // jarak antarpusat semua macan, termasuk anak (satuan dunia)
+  targetMinGap: 150,          // jarak minimum antarsiluet
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   targetPoints: 3,

@@ -11,27 +11,12 @@
     if(sc.motion)sc.motion.renderSky(ctx);
     ctx.drawImage(sc.comp,0,0,W,H);
     if(sc.motion)sc.motion.render(ctx);
-    if (sc.night) { // mata memantulkan cahaya kamera inframerah
+    if (sc.night) {
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
         if (it.found || !eyes.length) continue;
-        const blink = Math.sin(now * 1.3 + it.x * 0.01) > 0.965 ? 0.15 : 1;
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        for (const e of eyes) {
-          const rad = Math.max(3.5, 6 * it.scale);
-          const gr = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, rad * 3.6);
-          gr.addColorStop(0, 'rgba(255,255,255,' + blink + ')');
-          gr.addColorStop(0.25, 'rgba(230,250,255,' + 0.75 * blink + ')');
-          gr.addColorStop(1, 'rgba(200,235,255,0)');
-          ctx.fillStyle = gr;
-          ctx.beginPath(); ctx.arc(e.x, e.y, rad * 3.6, 0, TAU); ctx.fill();
-        }
-        ctx.restore();
-        for (const e of eyes) {
-          ctx.fillStyle = 'rgba(255,255,255,' + blink + ')';
-          ctx.beginPath(); ctx.arc(e.x, e.y, Math.max(2.2, 3.4 * it.scale), 0, TAU); ctx.fill();
-        }
+        const intensity = it.kind === 'leopard' ? 1 : .55;
+        A.eyeShine(ctx, eyes, it.scale, intensity);
       }
     }
     if (opt.found !== false) {

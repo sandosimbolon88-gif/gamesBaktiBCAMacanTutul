@@ -609,6 +609,23 @@
     return sp;
   };
 
+  // Cahaya berpusat pada iris, dengan halo kecil agar kedua mata tetap terpisah.
+  A.eyeShine = function (ctx, eyes, scale, intensity = 1) {
+    ctx.save();
+    const radius = Math.max(5, 13 * scale);
+    for (const { x, y } of eyes) {
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, 'rgba(255,255,255,' + intensity + ')');
+      glow.addColorStop(.36, 'rgba(228,247,255,' + .76 * intensity + ')');
+      glow.addColorStop(1, 'rgba(208,236,255,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(x, y, radius, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,' + intensity + ')';
+      ctx.beginPath(); ctx.arc(x, y, Math.max(2, 3.6 * scale), 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+  };
+
   // Kepala terpisah: bonus mengintip tidak pernah memiliki tubuh yang bisa diklik.
   A.leopardHeadSprite = function (o) {
     const key = o.variant === 'black' && o.night ? 'blackIR' : o.variant || 'spotted';

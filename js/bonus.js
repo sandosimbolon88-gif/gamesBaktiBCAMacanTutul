@@ -30,7 +30,9 @@
       this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
       this.nextAt = CFG.bonusFirstSec+this.rng.range(-1,1);
-      this.sequence = this.rng.shuffle([this.rng.pick(['dash','cover']),this.rng.chance(.5) ? 'peek-left' : 'peek-right','tail','rise']);
+      const peek = this.rng.chance(.5) ? 'peek-left' : 'peek-right';
+      const extra = scene.night ? (peek === 'peek-left' ? 'peek-right' : 'peek-left') : 'tail';
+      this.sequence = this.rng.shuffle([this.rng.pick(['dash','cover']), peek, extra, 'rise']);
     }
     update(dt) {
       this.clock += dt;
@@ -103,6 +105,14 @@
       g.drawImage(this.scene.bonusCover,0,0,J.W,J.H);
       g.restore();
       it.visibleMask=null;
+      if (this.scene.night && sp.eyes.length) {
+        const eyes = sp.eyes.filter(e => this.hit(it.x+e.x,it.y+e.y) === it)
+          .map(e => ({x:(e.x-sp.ox)*R,y:(e.y-sp.oy)*R}));
+        // Source-atop keeps the glow within the same silhouette as the hit mask.
+        g.save();g.globalCompositeOperation='source-atop';
+        A.eyeShine(g,eyes,sp.scale*R);
+        g.restore();
+      }
     }
     hit(x,y,tol=0) {
       const it=this.current;

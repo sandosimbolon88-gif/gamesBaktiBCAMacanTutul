@@ -187,6 +187,8 @@
         if (o === ignore) continue;
         if (J.overlapArea(b, o) > 0.1 * Math.min(area, J.boxArea(o))) return null;
       }
+      if (night && animals.some(it => it.kind === 'leopard' &&
+        it.eyes.some(e => e.x >= b.x0 && e.x <= b.x1 && e.y >= b.y0 && e.y <= b.y1))) return null;
       return b;
     }
     function mk(kind, extra, sp, x, y, b) {
@@ -201,9 +203,14 @@
       if(nearX!=null)cand.sort((a,b)=>Math.abs((a.x0+a.x1)/2-nearX)-Math.abs((b.x0+b.x1)/2-nearX));
       return cand.length ? r.pick(nearX==null ? cand : cand.slice(0,Math.min(3,cand.length))) : null;
     }
-    function desiredLocation(index,attempt) {
-      const width=W/nLeo,center=(lanes[index]+.5)*width;
-      return {x:J.clamp(center+r.range(-width*.12,width*.12),160,W-160),y:r.range(gMin,gMax)};
+    function desiredLocation(index, attempt) {
+      const lane = lanes[index], width = W / nLeo, center = (lane + .5) * width;
+      const x = J.clamp(center + r.range(-width * .12, width * .12), 160, W - 160);
+      // Selang-seling kedalaman menjaga jarak saat enam macan mengisi enam lajur.
+      const y = attempt < 40
+        ? r.range(lane % 2 ? gMax - 115 : gMin, lane % 2 ? gMax : gMin + 115)
+        : r.range(gMin, gMax);
+      return {x, y};
     }
     function placeLeopard(pose,variant,index,cub=false) {
       const onBranch=pose==='branch',onTrunk=pose==='scratch'||pose==='climb';
@@ -222,7 +229,7 @@
         const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft,cub});
         const box=tryPlace(sp,x,y);if(!box)continue;
         const cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2;
-        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.40)continue;
+        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.30)continue;
         if(animals.some(a=>a.kind==='leopard'&&(Math.hypot(a.cx-cx,a.cy-cy)<CFG.targetMinDistance||Math.hypot(Math.max(0,a.box.x0-box.x1,box.x0-a.box.x1),Math.max(0,a.box.y0-box.y1,box.y0-a.box.y1))<CFG.targetMinGap)))continue;
         occ.push(box);if(slot)slot.used=true;
         const it=mk('leopard',{pose,variant,cub,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
@@ -252,15 +259,16 @@
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
     const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
-    const priority=['kuwuk','landak','monyet','musang','bajing'];
-    if(mode==='pagi')priority.push('elang');
+    const priority=['monyet','lutung','kuwuk','landak','musang','bajing'];
+    if (!night) priority.splice(2, 0, 'elang');
     const dTypes=priority.concat(warm.filter(t=>!priority.includes(t)),r.shuffle(A.DECOY_TYPES.filter(t=>!warm.includes(t)&&!priority.includes(t))));
     let placedDecoys=0;
     for(let i=0;i<(d.decoys||0)*4&&placedDecoys<d.decoys;i++){
       const type=dTypes[i%dTypes.length];
-      const animate=i<dTypes.length&&['kuwuk','landak','monyet'].includes(type)||i<dTypes.length&&type==='elang'&&mode==='pagi';
+      const swings = type === 'monyet' || type === 'lutung';
+      const animate = i < dTypes.length && (swings || type === 'kuwuk' || type === 'landak' || type === 'elang' && !night);
       const forced=i<dTypes.length&&['musang','bajing'].includes(type);
-      const pose=animate?(type==='monyet'?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
+      const pose=animate?(swings?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
       for(let k=0;k<64;k++){
         const habitatType=r.pick(A.decoyHabitats(type,pose));
         let slot=null,tree=null,x,y,ds=.94,flip=r.chance(.5);
@@ -269,7 +277,7 @@
         }else if(habitatType==='trunk'){
           tree=r.pick(trees);x=tree.x+(flip?1:-1)*(tree.w*.40+49*d.scale*.94);y=tree.base-r.range(90,230);
         }else if(habitatType==='air'){
-          x=r.range(350,W-350);y=r.range(370,640);ds=1.1;
+          x=r.range(350,W-350);y=r.range(290,600);ds=1.1;
         }else{
           y=r.range(gMin,gMax);ds=depth(y);x=r.range(40,W-40);
         }
@@ -277,7 +285,7 @@
         if(tree)x=tree.x+(flip?1:-1)*(tree.w*.40+49*renderOptions.scale);
         const sp=A.animalSprite(type,renderOptions);
         const box=tryPlace(sp,x,y);if(!box)continue;
-        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(130,210):pose==='hang'?0:r.range(50,95)}:null;
+        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(190,250):pose==='hang'?0:r.range(50,95)}:null;
         const padx=motion?(motion.kind==='swing'?55:motion.amplitude+48):0,pady=motion?(motion.kind==='swing'?22:motion.kind==='fly'?65:12):0;
         const area={x0:box.x0-padx,y0:box.y0-pady,x1:box.x1+padx,y1:box.y1+pady};
         if(motion&&(area.x0<16||area.x1>W-16||area.y0<112||area.y1>H-4||occ.some(b=>J.overlapArea(area,b)>0)))continue;
@@ -422,6 +430,12 @@
       const need = it.kind === 'clue' ? .55 : it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
       const md = sp.mask.data, n = cw * ch;
       let vm = null;
+      const eyePixels = it.eyes.map(e => ({
+        x: Math.round((e.x - it.x - sp.ox) * R),
+        y: Math.round((e.y - it.y - sp.oy) * R)
+      }));
+      const pixelVisible = (x, y) => x >= 0 && y >= 0 && x < cw && y < ch && vm[y * cw + x] === 1;
+      const keepEyes = night && it.kind === 'leopard';
       for (let iter = 0; iter < 64; iter++) {
         const idx = objs.findIndex((o) => o.kind === 'animal' && o.it === it);
         const front = [];
@@ -439,25 +453,27 @@
           if (cov[i * 4 + 3] < 110) { vm[i] = 1; vis++; }
         }
         it.vis = tot ? vis / tot : 1;
-        if (it.vis >= need) break;
+        const hiddenEyes = keepEyes ? eyePixels.filter(e => !pixelVisible(e.x, e.y)) : [];
+        if (it.vis >= need && !hiddenEyes.length) break;
         const byOverlap = (a, b) => J.overlapArea(b.box, it.box) - J.overlapArea(a.box, it.box);
         let cands = front.filter((o) => o.kind === 'veg' && !o.essential && !o.bonusGate).sort(byOverlap);
         // Penutup khusus juga dilepas bila batas visibilitas minimum belum terpenuhi.
-        if (!cands.length && it.vis < need) cands = front.filter((o) => o.kind === 'veg' && !o.bonusGate).sort(byOverlap);
+        if (hiddenEyes.length) {
+          const coversEye = o => o.kind === 'veg' && !o.bonusGate && hiddenEyes.some(e => {
+            const x = it.x + sp.ox + e.x / R, y = it.y + sp.oy + e.y / R;
+            return x >= o.box.x0 && x <= o.box.x1 && y >= o.box.y0 && y <= o.box.y1;
+          });
+          const blockers = front.filter(coversEye).sort(byOverlap);
+          if (blockers.length) cands = blockers;
+        }
+        if (!cands.length) cands = front.filter((o) => o.kind === 'veg' && !o.bonusGate).sort(byOverlap);
         if (!cands.length) break;
         const drop = it.vis < need * 0.5 ? 2 : 1;
         for (const c of cands.slice(0, drop)) objs.splice(objs.indexOf(c), 1);
       }
       it.vmask = vm;
       // mata hanya menyala jika tidak tertutup
-      it.eyesVis = it.eyes.filter((e) => {
-        const ex = Math.round((e.x - it.x - sp.ox) * R), ey = Math.round((e.y - it.y - sp.oy) * R);
-        for (let dy = -3; dy <= 3; dy += 3) for (let dx = -3; dx <= 3; dx += 3) {
-          const x = ex + dx, y = ey + dy;
-          if (x >= 0 && y >= 0 && x < cw && y < ch && vm[y * cw + x]) return true;
-        }
-        return false;
-      });
+      it.eyesVis = it.eyes.filter((e, i) => pixelVisible(eyePixels[i].x, eyePixels[i].y));
     }
 
     // Mask tanaman depan dipakai bersama oleh gambar dan deteksi klik bonus.

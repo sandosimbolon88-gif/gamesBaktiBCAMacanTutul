@@ -259,6 +259,12 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 .rule b { font-size:calc(var(--u)*1.15); }
 .rule span { font-size:calc(var(--u)*1.05); }
 .rule img { height:calc(var(--u)*7); }
+.guide-panel { width:92%; max-height:92%; overflow:auto; touch-action:pan-y; text-align:center; }
+.guide-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(var(--u)*1.4); margin:calc(var(--u)*1.6) 0; text-align:left; }
+.guide-grid section { border:1px solid #e2dfcb; border-radius:calc(var(--u)*.9); padding:calc(var(--u)*1.4); }
+.guide-grid h3 { margin:0 0 calc(var(--u)*.7); font-size:calc(var(--u)*1.6); }
+.guide-grid p { margin:0 0 calc(var(--u)*.8); font-size:calc(var(--u)*1.18); line-height:1.45; }
+.guide-grid p:last-child { margin-bottom:0; font-weight:700; }
 .brief-panel { width:92%; padding:calc(var(--u)*1.8) calc(var(--u)*2.4); max-height:94%; overflow:auto; touch-action:pan-y; }
 .lead { font-size:calc(var(--u)*1.35); }
 .source-note { font-size:calc(var(--u)*.83); line-height:1.5; opacity:.7; }

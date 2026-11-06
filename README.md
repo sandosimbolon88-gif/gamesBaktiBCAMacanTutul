@@ -45,11 +45,15 @@ Macan utama memiliki **12 pose**: merunduk/mengendap, mengendus tanah, meregangk
 
 Keempat belas jenis pengecoh memiliki **3–5 pose per jenis** (57 variasi total), sesuai perilaku: kijang/kancil berdiri, berjalan, merumput dan waspada; mamalia kecil mengendus atau merunduk; primata berjalan atau meraih dahan; burung mencari makan, menoleh, dan membuka sayap; trenggiling meringkuk dan landak mengembangkan duri.
 
-Semua stasiun memakai pola **tersebar**. Posisi diacak dalam zona horizontal yang berbeda: minimal 380 satuan dunia antarpusat, minimal 120 antarbatas siluet, serta bentang target meliputi sekurangnya enam puluh persen lebar hutan. Batas yang sama berlaku untuk anak macan; anak tidak lagi otomatis ditempatkan dekat induknya. Pola berkelompok/campuran dihapus. Pose memanjat/mencakar dipasang pada batang; pose bertengger/meraih dahan memakai lokasi dahan; pose tanah berbaur dengan pakis dan serasah. Tanaman penutup dan mask klik dihitung dari pose sebenarnya. Satwa dalam permainan adalah simulasi gabungan rekaman pengamatan, bukan gambaran populasi pada satu titik.
+Semua stasiun memakai pola **tersebar**. Posisi diacak dalam zona horizontal yang berbeda: minimal 440 satuan dunia antarpusat, minimal 150 antarbatas siluet, serta bentang target meliputi sekurangnya enam puluh persen lebar hutan. Batas yang sama berlaku untuk anak macan; anak tidak lagi otomatis ditempatkan dekat induknya. Pola berkelompok/campuran dihapus. Pose memanjat/mencakar dipasang pada batang; pose bertengger/meraih dahan memakai lokasi dahan; pose tanah berbaur dengan pakis dan serasah. Tanaman penutup dan mask klik dihitung dari pose sebenarnya. Satwa dalam permainan adalah simulasi gabungan rekaman pengamatan, bukan gambaran populasi pada satu titik.
 
 ## Hutan bergerak dan stasiun malam
 
-Sebagian pengecoh memakai animasi: kucing kuwuk dan landak berjalan bolak-balik pada lintasan pendek, monyet bergelantungan dari titik dahan, dan elang terbang sambil mengepakkan sayap pada stasiun pagi. Musang dan bajing juga dapat memanjat batang pohon. Semua termasuk populasi pengecoh yang sama, bukan penambahan target. Warna kuwuk dan musang tetap dekat dengan warna macan, dengan pola dan anatomi pembeda.
+Pada stasiun malam, kedua mata setiap macan utama tetap terlihat pada pose apa pun. Mata bonus menyala ketika bagian mata terlihat. Urutan malam memakai dua kemunculan kepala dari sisi berbeda sebagai ganti kemunculan ekor saja.
+
+Buka **Panduan Bermain** dari menu utama untuk melihat kontrol, daftar satwa pengecoh, skor, dan cara menangkap bonus.
+
+Sebagian pengecoh memakai animasi: kucing kuwuk dan landak berjalan bolak-balik pada lintasan pendek, monyet ekor panjang dan lutung bergelantungan dari dahan yang berbeda, dan elang mengepakkan sayap di stasiun pagi, siang, dan senja. Musang dan bajing juga dapat memanjat batang pohon. Semua termasuk populasi pengecoh yang sama, bukan penambahan target. Warna kuwuk dan musang tetap dekat dengan warna macan, dengan pola dan anatomi pembeda.
 
 Lintasan dibatasi agar tidak menutupi target utama atau cakaran. Tanaman dan objek di depan memotong gambar serta area klik dengan mask yang sama. Pengecoh dapat tertutup sementara selama bergerak; klik pada bagian yang tertutup tidak dihukum. Menekan satwa yang terlihat lalu melepas ketika ia bergerak tetap mencatat satwa yang disentuh; drag/pinch tetap menjadi navigasi. Gerak satwa dan daun berhenti selama jeda/kartu fakta.
 

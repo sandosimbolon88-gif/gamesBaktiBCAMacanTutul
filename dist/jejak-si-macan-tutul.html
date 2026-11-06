@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · e6a04a6 -->
+<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -270,6 +270,12 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 .rule b { font-size:calc(var(--u)*1.15); }
 .rule span { font-size:calc(var(--u)*1.05); }
 .rule img { height:calc(var(--u)*7); }
+.guide-panel { width:92%; max-height:92%; overflow:auto; touch-action:pan-y; text-align:center; }
+.guide-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(var(--u)*1.4); margin:calc(var(--u)*1.6) 0; text-align:left; }
+.guide-grid section { border:1px solid #e2dfcb; border-radius:calc(var(--u)*.9); padding:calc(var(--u)*1.4); }
+.guide-grid h3 { margin:0 0 calc(var(--u)*.7); font-size:calc(var(--u)*1.6); }
+.guide-grid p { margin:0 0 calc(var(--u)*.8); font-size:calc(var(--u)*1.18); line-height:1.45; }
+.guide-grid p:last-child { margin-bottom:0; font-weight:700; }
 .brief-panel { width:92%; padding:calc(var(--u)*1.8) calc(var(--u)*2.4); max-height:94%; overflow:auto; touch-action:pan-y; }
 .lead { font-size:calc(var(--u)*1.35); }
 .source-note { font-size:calc(var(--u)*.83); line-height:1.5; opacity:.7; }
@@ -354,6 +360,7 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
           </div>
         </div>
         <div class="attract-tools">
+          <button class="btn btn-small" id="btn-guide">Panduan Bermain</button>
           <button class="btn btn-small" id="btn-jwls">Kenali JWLS ↗</button>
           <button class="btn btn-small" id="btn-board" data-t="ui.boardButton"></button>
           <button class="btn btn-small btn-icon" id="btn-fullscreen" aria-label="Layar penuh" title="Layar penuh">
@@ -361,6 +368,35 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
           </button>
         </div>
         <div id="admin-hotspot" aria-hidden="true"></div>
+      </section>
+
+      <!-- Panduan dari menu utama -->
+      <section id="screen-guide" class="screen dim">
+        <div class="panel guide-panel" aria-labelledby="guide-title">
+          <div class="card-kicker">EKSPEDISI HUTAN JAWA</div>
+          <h2 id="guide-title">Panduan Bermain</h2>
+          <div class="guide-grid">
+            <section>
+              <h3>Cari macan tutul</h3>
+              <p>Klik atau sentuh bagian macan yang terlihat. Geser untuk melihat sekitar saat diperbesar. Gunakan roda mouse atau cubit layar untuk zoom.</p>
+              <p>Macan tutul berbintik, macan kumbang, dan anak macan dihitung. Temukan semuanya untuk lanjut ke stasiun berikutnya. Saat malam, amati pantulan mata dan bentuk tubuh.</p>
+              <p id="guide-target-score"></p>
+            </section>
+            <section>
+              <h3>Kenali satwa pengecoh</h3>
+              <p>Perhatikan bentuk dan pola tubuh. Kucing kuwuk berbintik kecil. Monyet dan lutung bergelantungan, sedangkan elang melintas di antara pepohonan.</p>
+              <p id="guide-decoys"></p>
+              <p id="guide-penalty"></p>
+            </section>
+            <section>
+              <h3>Tangkap bonus</h3>
+              <p>Macan bonus bisa melintas, merunduk keluar dari semak, atau mengintip dari tepi layar. Pada siang hari, ekornya juga bisa muncul sendiri. Pada malam hari, mata bersinar saat kepalanya terlihat.</p>
+              <p>Klik bagian yang tampak sebelum macan menghilang. Bonus bersifat opsional dan terpisah dari target stasiun.</p>
+              <p id="guide-bonus-score"></p>
+            </section>
+          </div>
+          <button class="btn btn-primary" id="btn-guide-back">Kembali ke Menu</button>
+        </div>
       </section>
 
       <!-- Briefing -->
@@ -491,8 +527,8 @@ window.JSMT_CONFIG = {
   bonusRunScale: 1.0,
   bonusHeadScale: 1.35,
   bonusTailScale: 1.05,
-  targetMinDistance: 380,     // jarak antarpusat semua macan, termasuk anak (satuan dunia)
-  targetMinGap: 120,          // jarak minimum antarsiluet
+  targetMinDistance: 440,     // jarak antarpusat semua macan, termasuk anak (satuan dunia)
+  targetMinGap: 150,          // jarak minimum antarsiluet
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   targetPoints: 3,
@@ -584,7 +620,7 @@ window.JSMT_CONTENT = {
       { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Macan utama memberi tiga poin. Saat malam lebih sulit: setiap temuan memberi lima poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
       { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Pengecoh bisa berjalan, terbang, memanjat atau bergelantungan. Setiap klik salah mengurangi dua poin dan lima detik, termasuk satwa bergerak. Skor minimum nol.' },
-      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau hanya kepala dan ekornya muncul dari semak. Bonus lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau mengintip. Ekor juga bisa muncul sendiri pada siang hari. Bonus lima poin, atau tujuh saat malam.' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',
@@ -1489,6 +1525,23 @@ window.JSMT_CONTENT = {
     sp.variant = variant;
     sp.pose = o.pose;
     return sp;
+  };
+
+  // Cahaya berpusat pada iris, dengan halo kecil agar kedua mata tetap terpisah.
+  A.eyeShine = function (ctx, eyes, scale, intensity = 1) {
+    ctx.save();
+    const radius = Math.max(5, 13 * scale);
+    for (const { x, y } of eyes) {
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, 'rgba(255,255,255,' + intensity + ')');
+      glow.addColorStop(.36, 'rgba(228,247,255,' + .76 * intensity + ')');
+      glow.addColorStop(1, 'rgba(208,236,255,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(x, y, radius, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,' + intensity + ')';
+      ctx.beginPath(); ctx.arc(x, y, Math.max(2, 3.6 * scale), 0, TAU); ctx.fill();
+    }
+    ctx.restore();
   };
 
   // Kepala terpisah: bonus mengintip tidak pernah memiliki tubuh yang bisa diklik.
@@ -2947,6 +3000,8 @@ window.JSMT_CONTENT = {
         if (o === ignore) continue;
         if (J.overlapArea(b, o) > 0.1 * Math.min(area, J.boxArea(o))) return null;
       }
+      if (night && animals.some(it => it.kind === 'leopard' &&
+        it.eyes.some(e => e.x >= b.x0 && e.x <= b.x1 && e.y >= b.y0 && e.y <= b.y1))) return null;
       return b;
     }
     function mk(kind, extra, sp, x, y, b) {
@@ -2961,9 +3016,14 @@ window.JSMT_CONTENT = {
       if(nearX!=null)cand.sort((a,b)=>Math.abs((a.x0+a.x1)/2-nearX)-Math.abs((b.x0+b.x1)/2-nearX));
       return cand.length ? r.pick(nearX==null ? cand : cand.slice(0,Math.min(3,cand.length))) : null;
     }
-    function desiredLocation(index,attempt) {
-      const width=W/nLeo,center=(lanes[index]+.5)*width;
-      return {x:J.clamp(center+r.range(-width*.12,width*.12),160,W-160),y:r.range(gMin,gMax)};
+    function desiredLocation(index, attempt) {
+      const lane = lanes[index], width = W / nLeo, center = (lane + .5) * width;
+      const x = J.clamp(center + r.range(-width * .12, width * .12), 160, W - 160);
+      // Selang-seling kedalaman menjaga jarak saat enam macan mengisi enam lajur.
+      const y = attempt < 40
+        ? r.range(lane % 2 ? gMax - 115 : gMin, lane % 2 ? gMax : gMin + 115)
+        : r.range(gMin, gMax);
+      return {x, y};
     }
     function placeLeopard(pose,variant,index,cub=false) {
       const onBranch=pose==='branch',onTrunk=pose==='scratch'||pose==='climb';
@@ -2982,7 +3042,7 @@ window.JSMT_CONTENT = {
         const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft,cub});
         const box=tryPlace(sp,x,y);if(!box)continue;
         const cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2;
-        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.40)continue;
+        if(Math.abs(cx-(lanes[index]+.5)*W/nLeo)>W/nLeo*.30)continue;
         if(animals.some(a=>a.kind==='leopard'&&(Math.hypot(a.cx-cx,a.cy-cy)<CFG.targetMinDistance||Math.hypot(Math.max(0,a.box.x0-box.x1,box.x0-a.box.x1),Math.max(0,a.box.y0-box.y1,box.y0-a.box.y1))<CFG.targetMinGap)))continue;
         occ.push(box);if(slot)slot.used=true;
         const it=mk('leopard',{pose,variant,cub,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
@@ -3012,15 +3072,16 @@ window.JSMT_CONTENT = {
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
     const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
-    const priority=['kuwuk','landak','monyet','musang','bajing'];
-    if(mode==='pagi')priority.push('elang');
+    const priority=['monyet','lutung','kuwuk','landak','musang','bajing'];
+    if (!night) priority.splice(2, 0, 'elang');
     const dTypes=priority.concat(warm.filter(t=>!priority.includes(t)),r.shuffle(A.DECOY_TYPES.filter(t=>!warm.includes(t)&&!priority.includes(t))));
     let placedDecoys=0;
     for(let i=0;i<(d.decoys||0)*4&&placedDecoys<d.decoys;i++){
       const type=dTypes[i%dTypes.length];
-      const animate=i<dTypes.length&&['kuwuk','landak','monyet'].includes(type)||i<dTypes.length&&type==='elang'&&mode==='pagi';
+      const swings = type === 'monyet' || type === 'lutung';
+      const animate = i < dTypes.length && (swings || type === 'kuwuk' || type === 'landak' || type === 'elang' && !night);
       const forced=i<dTypes.length&&['musang','bajing'].includes(type);
-      const pose=animate?(type==='monyet'?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
+      const pose=animate?(swings?'hang':type==='elang'?'fly':'walk'):forced?'climb':r.pick(A.DECOY_POSES[type].filter(p=>!['hang','fly'].includes(p)));
       for(let k=0;k<64;k++){
         const habitatType=r.pick(A.decoyHabitats(type,pose));
         let slot=null,tree=null,x,y,ds=.94,flip=r.chance(.5);
@@ -3029,7 +3090,7 @@ window.JSMT_CONTENT = {
         }else if(habitatType==='trunk'){
           tree=r.pick(trees);x=tree.x+(flip?1:-1)*(tree.w*.40+49*d.scale*.94);y=tree.base-r.range(90,230);
         }else if(habitatType==='air'){
-          x=r.range(350,W-350);y=r.range(370,640);ds=1.1;
+          x=r.range(350,W-350);y=r.range(290,600);ds=1.1;
         }else{
           y=r.range(gMin,gMax);ds=depth(y);x=r.range(40,W-40);
         }
@@ -3037,7 +3098,7 @@ window.JSMT_CONTENT = {
         if(tree)x=tree.x+(flip?1:-1)*(tree.w*.40+49*renderOptions.scale);
         const sp=A.animalSprite(type,renderOptions);
         const box=tryPlace(sp,x,y);if(!box)continue;
-        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(130,210):pose==='hang'?0:r.range(50,95)}:null;
+        const motion=animate?{kind:pose==='hang'?'swing':pose==='fly'?'fly':'walk',amplitude:pose==='fly'?r.range(190,250):pose==='hang'?0:r.range(50,95)}:null;
         const padx=motion?(motion.kind==='swing'?55:motion.amplitude+48):0,pady=motion?(motion.kind==='swing'?22:motion.kind==='fly'?65:12):0;
         const area={x0:box.x0-padx,y0:box.y0-pady,x1:box.x1+padx,y1:box.y1+pady};
         if(motion&&(area.x0<16||area.x1>W-16||area.y0<112||area.y1>H-4||occ.some(b=>J.overlapArea(area,b)>0)))continue;
@@ -3182,6 +3243,12 @@ window.JSMT_CONTENT = {
       const need = it.kind === 'clue' ? .55 : it.kind === 'leopard' ? d.minVis : d.minVis * 0.8;
       const md = sp.mask.data, n = cw * ch;
       let vm = null;
+      const eyePixels = it.eyes.map(e => ({
+        x: Math.round((e.x - it.x - sp.ox) * R),
+        y: Math.round((e.y - it.y - sp.oy) * R)
+      }));
+      const pixelVisible = (x, y) => x >= 0 && y >= 0 && x < cw && y < ch && vm[y * cw + x] === 1;
+      const keepEyes = night && it.kind === 'leopard';
       for (let iter = 0; iter < 64; iter++) {
         const idx = objs.findIndex((o) => o.kind === 'animal' && o.it === it);
         const front = [];
@@ -3199,25 +3266,27 @@ window.JSMT_CONTENT = {
           if (cov[i * 4 + 3] < 110) { vm[i] = 1; vis++; }
         }
         it.vis = tot ? vis / tot : 1;
-        if (it.vis >= need) break;
+        const hiddenEyes = keepEyes ? eyePixels.filter(e => !pixelVisible(e.x, e.y)) : [];
+        if (it.vis >= need && !hiddenEyes.length) break;
         const byOverlap = (a, b) => J.overlapArea(b.box, it.box) - J.overlapArea(a.box, it.box);
         let cands = front.filter((o) => o.kind === 'veg' && !o.essential && !o.bonusGate).sort(byOverlap);
         // Penutup khusus juga dilepas bila batas visibilitas minimum belum terpenuhi.
-        if (!cands.length && it.vis < need) cands = front.filter((o) => o.kind === 'veg' && !o.bonusGate).sort(byOverlap);
+        if (hiddenEyes.length) {
+          const coversEye = o => o.kind === 'veg' && !o.bonusGate && hiddenEyes.some(e => {
+            const x = it.x + sp.ox + e.x / R, y = it.y + sp.oy + e.y / R;
+            return x >= o.box.x0 && x <= o.box.x1 && y >= o.box.y0 && y <= o.box.y1;
+          });
+          const blockers = front.filter(coversEye).sort(byOverlap);
+          if (blockers.length) cands = blockers;
+        }
+        if (!cands.length) cands = front.filter((o) => o.kind === 'veg' && !o.bonusGate).sort(byOverlap);
         if (!cands.length) break;
         const drop = it.vis < need * 0.5 ? 2 : 1;
         for (const c of cands.slice(0, drop)) objs.splice(objs.indexOf(c), 1);
       }
       it.vmask = vm;
       // mata hanya menyala jika tidak tertutup
-      it.eyesVis = it.eyes.filter((e) => {
-        const ex = Math.round((e.x - it.x - sp.ox) * R), ey = Math.round((e.y - it.y - sp.oy) * R);
-        for (let dy = -3; dy <= 3; dy += 3) for (let dx = -3; dx <= 3; dx += 3) {
-          const x = ex + dx, y = ey + dy;
-          if (x >= 0 && y >= 0 && x < cw && y < ch && vm[y * cw + x]) return true;
-        }
-        return false;
-      });
+      it.eyesVis = it.eyes.filter((e, i) => pixelVisible(eyePixels[i].x, eyePixels[i].y));
     }
 
     // Mask tanaman depan dipakai bersama oleh gambar dan deteksi klik bonus.
@@ -3420,6 +3489,10 @@ window.JSMT_CONTENT = {
     document.title = C.title;
     const tl = C.titleLines || [C.title];
     $('attract-title').innerHTML = '<span>' + esc(tl[0]) + '</span>' + (tl[1] ? '<span class="line2">' + esc(tl[1]) + '</span>' : '');
+    $('guide-decoys').textContent = Object.values(C.decoys).map(it => it.name).join(' · ');
+    $('guide-target-score').textContent = `Macan +${CFG.targetPoints} · malam +${CFG.nightTargetPoints}. Lewati stasiun: −${CFG.skipPenaltyPoints} poin.`;
+    $('guide-penalty').textContent = `Pengecoh: −${CFG.decoyPenaltyPoints} poin dan −${CFG.decoyPenaltySec} detik. Skor minimum nol.`;
+    $('guide-bonus-score').textContent = `Macan bonus +${CFG.bonusPoints} · malam +${CFG.nightBonusPoints}. Kelompok cakaran +${CFG.cluePoints} poin.`;
     UI.buildKeyboard();
     UI.buildPinpad();
   };
@@ -3428,7 +3501,7 @@ window.JSMT_CONTENT = {
   UI.esc = esc;
 
   /* ---------- layar ---------- */
-  const screens = ['screen-attract', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin', 'overlay-jwls'];
+  const screens = ['screen-attract', 'screen-guide', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin', 'overlay-jwls'];
   UI.show = function (id) {
     for (const s of screens) { if (s !== 'overlay-admin') $(s).classList.toggle('active', s === id); }
   };
@@ -3680,7 +3753,9 @@ window.JSMT_CONTENT = {
       this.clock = 0; this.passes = 0; this.current = null;
       this.rng = J.rng(scene.seed ^ 0x6bca);
       this.nextAt = CFG.bonusFirstSec+this.rng.range(-1,1);
-      this.sequence = this.rng.shuffle([this.rng.pick(['dash','cover']),this.rng.chance(.5) ? 'peek-left' : 'peek-right','tail','rise']);
+      const peek = this.rng.chance(.5) ? 'peek-left' : 'peek-right';
+      const extra = scene.night ? (peek === 'peek-left' ? 'peek-right' : 'peek-left') : 'tail';
+      this.sequence = this.rng.shuffle([this.rng.pick(['dash','cover']), peek, extra, 'rise']);
     }
     update(dt) {
       this.clock += dt;
@@ -3753,6 +3828,14 @@ window.JSMT_CONTENT = {
       g.drawImage(this.scene.bonusCover,0,0,J.W,J.H);
       g.restore();
       it.visibleMask=null;
+      if (this.scene.night && sp.eyes.length) {
+        const eyes = sp.eyes.filter(e => this.hit(it.x+e.x,it.y+e.y) === it)
+          .map(e => ({x:(e.x-sp.ox)*R,y:(e.y-sp.oy)*R}));
+        // Source-atop keeps the glow within the same silhouette as the hit mask.
+        g.save();g.globalCompositeOperation='source-atop';
+        A.eyeShine(g,eyes,sp.scale*R);
+        g.restore();
+      }
     }
     hit(x,y,tol=0) {
       const it=this.current;
@@ -3794,27 +3877,12 @@ window.JSMT_CONTENT = {
     if(sc.motion)sc.motion.renderSky(ctx);
     ctx.drawImage(sc.comp,0,0,W,H);
     if(sc.motion)sc.motion.render(ctx);
-    if (sc.night) { // mata memantulkan cahaya kamera inframerah
+    if (sc.night) {
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
         if (it.found || !eyes.length) continue;
-        const blink = Math.sin(now * 1.3 + it.x * 0.01) > 0.965 ? 0.15 : 1;
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        for (const e of eyes) {
-          const rad = Math.max(3.5, 6 * it.scale);
-          const gr = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, rad * 3.6);
-          gr.addColorStop(0, 'rgba(255,255,255,' + blink + ')');
-          gr.addColorStop(0.25, 'rgba(230,250,255,' + 0.75 * blink + ')');
-          gr.addColorStop(1, 'rgba(200,235,255,0)');
-          ctx.fillStyle = gr;
-          ctx.beginPath(); ctx.arc(e.x, e.y, rad * 3.6, 0, TAU); ctx.fill();
-        }
-        ctx.restore();
-        for (const e of eyes) {
-          ctx.fillStyle = 'rgba(255,255,255,' + blink + ')';
-          ctx.beginPath(); ctx.arc(e.x, e.y, Math.max(2.2, 3.4 * it.scale), 0, TAU); ctx.fill();
-        }
+        const intensity = it.kind === 'leopard' ? 1 : .55;
+        A.eyeShine(ctx, eyes, it.scale, intensity);
       }
     }
     if (opt.found !== false) {
@@ -4251,6 +4319,9 @@ window.JSMT_CONTENT = {
       UI.renderMiniBoard();
       UI.startAttractFacts();
       if (settings.sound) J.Audio.ambient(true);
+    } else if (next === 'guide') {
+      UI.show('screen-guide');
+      $('btn-guide-back').focus();
     } else if (next === 'briefing') {
       UI.show('screen-briefing');
     } else if (next === 'play') {
@@ -4355,6 +4426,8 @@ window.JSMT_CONTENT = {
     if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); if(state==='play') returnToMenu(true); else openAdmin(); return; }
     if (UI.isOpen('overlay-admin')) return;
     if (e.key==='Escape' && state==='play') { e.preventDefault(); returnToMenu(); return; }
+    if (e.key === 'Escape' && state === 'guide') { closeGuide(); return; }
+    if ((state === 'attract' || state === 'briefing') && e.target instanceof HTMLButtonElement && (e.key === 'Enter' || e.key === ' ')) return;
     if (state === 'result') {
       if (e.key === 'Enter') saveResult(false);
       else if (e.key === 'Backspace') { e.preventDefault(); UI.typeKey('DEL'); }
@@ -4374,6 +4447,14 @@ window.JSMT_CONTENT = {
   function on(id, fn) { $(id).addEventListener('click', (e) => { e.stopPropagation(); fn(e); }); }
   $('screen-attract').addEventListener('click', () => { if (state === 'attract') { J.Audio.unlock(); J.Audio.click(); goto('briefing'); } });
   on('btn-start', () => { J.Audio.unlock(); J.Audio.click(); goto('briefing'); });
+  function closeGuide() {
+    J.Audio.click();
+    goto('attract');
+    $('btn-guide').focus();
+  }
+
+  on('btn-guide', () => { J.Audio.click(); goto('guide'); });
+  on('btn-guide-back', closeGuide);
   on('btn-board', () => { J.Audio.click(); goto('board'); });
   on('btn-fullscreen', () => toggleFullscreen());
   on('btn-jwls', () => UI.overlay('overlay-jwls', true));

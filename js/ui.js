@@ -13,6 +13,10 @@
     document.title = C.title;
     const tl = C.titleLines || [C.title];
     $('attract-title').innerHTML = '<span>' + esc(tl[0]) + '</span>' + (tl[1] ? '<span class="line2">' + esc(tl[1]) + '</span>' : '');
+    $('guide-decoys').textContent = Object.values(C.decoys).map(it => it.name).join(' · ');
+    $('guide-target-score').textContent = `Macan +${CFG.targetPoints} · malam +${CFG.nightTargetPoints}. Lewati stasiun: −${CFG.skipPenaltyPoints} poin.`;
+    $('guide-penalty').textContent = `Pengecoh: −${CFG.decoyPenaltyPoints} poin dan −${CFG.decoyPenaltySec} detik. Skor minimum nol.`;
+    $('guide-bonus-score').textContent = `Macan bonus +${CFG.bonusPoints} · malam +${CFG.nightBonusPoints}. Kelompok cakaran +${CFG.cluePoints} poin.`;
     UI.buildKeyboard();
     UI.buildPinpad();
   };
@@ -21,7 +25,7 @@
   UI.esc = esc;
 
   /* ---------- layar ---------- */
-  const screens = ['screen-attract', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin', 'overlay-jwls'];
+  const screens = ['screen-attract', 'screen-guide', 'screen-briefing', 'overlay-fact', 'screen-result', 'screen-board', 'overlay-admin', 'overlay-jwls'];
   UI.show = function (id) {
     for (const s of screens) { if (s !== 'overlay-admin') $(s).classList.toggle('active', s === id); }
   };

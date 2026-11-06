@@ -60,6 +60,13 @@ try:
         page.on('pageerror', lambda e: errors.append(str(e)))
         boot(page)
         page.screenshot(path=str(OUT / 'home.png'))
+        page.locator('#btn-guide').click()
+        assert page.locator('#screen-guide.active').is_visible()
+        assert 'Elang jawa' in page.locator('#guide-decoys').inner_text()
+        assert '+7' in page.locator('#guide-bonus-score').inner_text()
+        check_layout(page, '.guide-panel')
+        page.keyboard.press('Escape')
+        assert page.locator('#screen-attract.active').is_visible()
         page.locator('#btn-jwls').click()
         assert page.locator('#overlay-jwls').evaluate('e=>e.classList.contains("active")')
         assert page.evaluate('JSMT.debug.state') == 'attract'
@@ -156,6 +163,7 @@ try:
             const decoys=sc.items.filter(x=>x.kind==='decoy');
             out.push({{stage,seed:stationSeed,count:sc.leopards.length,wanted:sc.diff.count[0],max:sc.diff.count[1],requested:sc.targetCount,mix:sc.mix,distribution:sc.distribution,poses:sc.leopards.map(x=>x.pose),decoyPoses:decoys.map(x=>[x.type,x.pose]),nearest:Math.min(...sc.leopards.flatMap((a,i)=>sc.leopards.slice(i+1).map(b=>Math.hypot(a.cx-b.cx,a.cy-b.cy)))),gap:Math.min(...sc.leopards.flatMap((a,i)=>sc.leopards.slice(i+1).map(b=>Math.hypot(Math.max(0,a.box.x0-b.box.x1,b.box.x0-a.box.x1),Math.max(0,a.box.y0-b.box.y1,b.box.y0-a.box.y1))))),span:Math.max(...sc.leopards.map(it=>it.cx))-Math.min(...sc.leopards.map(it=>it.cx)),density:sc.diff.density,movers:sc.motion.items.map(it=>[it.type,it.motion.kind]),trunks:decoys.filter(it=>it.onTrunk).length,wind:sc.wind.length,vegetation:sc.vegetationCount,signature:JSON.stringify([sc.forestLayout,sc.items.map(x=>[x.kind,x.type,x.pose,x.x,x.y])]),decoys:decoys.length,expectedDecoys:sc.diff.decoys,
               types:new Set(decoys.map(x=>x.type)).size,warm:decoys.filter(x=>JSMT.Art.DECOY_WARM_TYPES.includes(x.type)).length,minAdultScale:Math.min(...sc.leopards.filter(x=>!x.cub).map(x=>x.scale)),minCubScale:Math.min(...sc.leopards.filter(x=>x.cub).map(x=>x.scale),1),clues:sc.clues.length,cluesSelectable:sc.clues.every(it=>!!find(it)),minVis:Math.min(...sc.leopards.map(x=>x.vis)),requiredVis:sc.diff.minVis,
+              nightEyes:!sc.night||sc.leopards.every(it=>it.eyesVis.length===2&&it.eyesVis.every(e=>JSMT.Scene.hit(sc,e.x,e.y,0)===it)),
               allSelectable:sc.leopards.every(it=>!!find(it)),ms:sc.genMs}});
           }}JSMT.debug.game.scene=old;return out;
         }}''')
@@ -172,7 +180,7 @@ try:
             assert sc['warm'] >= 5, sc
             assert sc['clues'] == 2 and sc['cluesSelectable'], sc
             assert sc['minVis'] >= sc['requiredVis'] - .01, sc
-            assert sc['allSelectable'], sc
+            assert sc['allSelectable'] and sc['nightEyes'], sc
             assert len(set(sc['poses']))>=2,sc
             assert set(sc['poses'])&{'crouch','sniff','stretch','groom','curl','scratch','climb'},sc
             assert len(set(p[1] for p in sc['decoyPoses']))>=3,sc
@@ -187,7 +195,7 @@ try:
 
         assert set(x['distribution'] for x in scenes)=={'scattered'}
         assert len(set(p for x in scenes for p in x['poses']))>=10
-        assert all(x['nearest']>=380 and x['gap']>=120 and x['span']>=1440 for x in scenes)
+        assert all(x['nearest']>=440 and x['gap']>=150 and x['span']>=1440 for x in scenes)
 
         # Every catalog pose must have its own silhouette, valid metadata and uncropped margins.
         art=page.evaluate('''() => {
@@ -258,6 +266,26 @@ try:
             if x['type']!='dash': assert x['hiddenPixels']>0,x
         (OUT/'bonus-patterns.json').write_text(json.dumps(patterns,indent=2))
 
+        night_glow=page.evaluate('''() => {
+          const sc=JSMT.Scene.generate(3,{seed:123,R:.65,mode:'malam'});
+          const original=JSMT.Art.eyeShine, out=[];
+          for(const type of ['dash','cover','peek-left','peek-right','rise']){
+            const b=new JSMT.Bonus(sc),it=b.spawn(type);
+            let lit=0,selectable=true;
+            JSMT.Art.eyeShine=(ctx,eyes,...args)=>{
+              lit+=eyes.length;
+              selectable&&=eyes.every(e=>b.hit(it.x+it.sp.ox+e.x/it.sp.R,it.y+it.sp.oy+e.y/it.sp.R,0)===it);
+              original(ctx,eyes,...args);
+            };
+            try { for(let i=1;i<20;i++)b.place(it,i/20); }
+            finally { JSMT.Art.eyeShine=original; }
+            out.push({type,lit,selectable,hasTail:b.sequence.includes('tail')});
+          }
+          return out;
+        }''')
+        for entry in night_glow:
+            assert entry['lit']>0 and entry['selectable'] and not entry['hasTail'],entry
+
         # Four bounded opportunities: first at 2–4s, gaps 4–6s, including tail and rise.
         schedule=page.evaluate('''()=>{
           const sc=JSMT.Scene.generate(0,{seed:123,R:.5}),b=new JSMT.Bonus(sc),events=[];let prev=null;
@@ -314,7 +342,8 @@ try:
             assert sc['frozen'] and sc['wind']>=2,sc
             kinds=set(x['kind'] for x in sc['items'])
             assert {'walk','swing'}<=kinds,sc
-            if sc['mode']=='pagi': assert 'fly' in kinds,sc
+            if sc['mode']!='malam': assert 'fly' in kinds,sc
+            assert {'monyet','lutung'} <= {it['type'] for it in sc['items'] if it['kind']=='swing'},sc
             for it in sc['items']:
                 assert it['selectable']>20 and it['positions']>3 and it['frames']>3,it
                 assert it['reject'] and it['inside'],(sc['mode'],it)

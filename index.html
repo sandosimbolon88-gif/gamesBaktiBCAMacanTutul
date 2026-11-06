@@ -62,6 +62,7 @@
           </div>
         </div>
         <div class="attract-tools">
+          <button class="btn btn-small" id="btn-guide">Panduan Bermain</button>
           <button class="btn btn-small" id="btn-jwls">Kenali JWLS ↗</button>
           <button class="btn btn-small" id="btn-board" data-t="ui.boardButton"></button>
           <button class="btn btn-small btn-icon" id="btn-fullscreen" aria-label="Layar penuh" title="Layar penuh">
@@ -69,6 +70,35 @@
           </button>
         </div>
         <div id="admin-hotspot" aria-hidden="true"></div>
+      </section>
+
+      <!-- Panduan dari menu utama -->
+      <section id="screen-guide" class="screen dim">
+        <div class="panel guide-panel" aria-labelledby="guide-title">
+          <div class="card-kicker">EKSPEDISI HUTAN JAWA</div>
+          <h2 id="guide-title">Panduan Bermain</h2>
+          <div class="guide-grid">
+            <section>
+              <h3>Cari macan tutul</h3>
+              <p>Klik atau sentuh bagian macan yang terlihat. Geser untuk melihat sekitar saat diperbesar. Gunakan roda mouse atau cubit layar untuk zoom.</p>
+              <p>Macan tutul berbintik, macan kumbang, dan anak macan dihitung. Temukan semuanya untuk lanjut ke stasiun berikutnya. Saat malam, amati pantulan mata dan bentuk tubuh.</p>
+              <p id="guide-target-score"></p>
+            </section>
+            <section>
+              <h3>Kenali satwa pengecoh</h3>
+              <p>Perhatikan bentuk dan pola tubuh. Kucing kuwuk berbintik kecil. Monyet dan lutung bergelantungan, sedangkan elang melintas di antara pepohonan.</p>
+              <p id="guide-decoys"></p>
+              <p id="guide-penalty"></p>
+            </section>
+            <section>
+              <h3>Tangkap bonus</h3>
+              <p>Macan bonus bisa melintas, merunduk keluar dari semak, atau mengintip dari tepi layar. Pada siang hari, ekornya juga bisa muncul sendiri. Pada malam hari, mata bersinar saat kepalanya terlihat.</p>
+              <p>Klik bagian yang tampak sebelum macan menghilang. Bonus bersifat opsional dan terpisah dari target stasiun.</p>
+              <p id="guide-bonus-score"></p>
+            </section>
+          </div>
+          <button class="btn btn-primary" id="btn-guide-back">Kembali ke Menu</button>
+        </div>
       </section>
 
       <!-- Briefing -->

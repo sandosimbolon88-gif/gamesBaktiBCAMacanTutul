@@ -82,6 +82,9 @@
       UI.renderMiniBoard();
       UI.startAttractFacts();
       if (settings.sound) J.Audio.ambient(true);
+    } else if (next === 'guide') {
+      UI.show('screen-guide');
+      $('btn-guide-back').focus();
     } else if (next === 'briefing') {
       UI.show('screen-briefing');
     } else if (next === 'play') {
@@ -186,6 +189,8 @@
     if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); if(state==='play') returnToMenu(true); else openAdmin(); return; }
     if (UI.isOpen('overlay-admin')) return;
     if (e.key==='Escape' && state==='play') { e.preventDefault(); returnToMenu(); return; }
+    if (e.key === 'Escape' && state === 'guide') { closeGuide(); return; }
+    if ((state === 'attract' || state === 'briefing') && e.target instanceof HTMLButtonElement && (e.key === 'Enter' || e.key === ' ')) return;
     if (state === 'result') {
       if (e.key === 'Enter') saveResult(false);
       else if (e.key === 'Backspace') { e.preventDefault(); UI.typeKey('DEL'); }
@@ -205,6 +210,14 @@
   function on(id, fn) { $(id).addEventListener('click', (e) => { e.stopPropagation(); fn(e); }); }
   $('screen-attract').addEventListener('click', () => { if (state === 'attract') { J.Audio.unlock(); J.Audio.click(); goto('briefing'); } });
   on('btn-start', () => { J.Audio.unlock(); J.Audio.click(); goto('briefing'); });
+  function closeGuide() {
+    J.Audio.click();
+    goto('attract');
+    $('btn-guide').focus();
+  }
+
+  on('btn-guide', () => { J.Audio.click(); goto('guide'); });
+  on('btn-guide-back', closeGuide);
   on('btn-board', () => { J.Audio.click(); goto('board'); });
   on('btn-fullscreen', () => toggleFullscreen());
   on('btn-jwls', () => UI.overlay('overlay-jwls', true));
