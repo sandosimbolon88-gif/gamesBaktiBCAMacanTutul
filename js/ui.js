@@ -42,7 +42,7 @@
 
   /* ---------- HUD ---------- */
   UI.hud = {
-    show(on) { $('hud').classList.toggle('hidden', !on); },
+    show(on) { $('hud').classList.toggle('hidden', !on); $('btn-play-menu').classList.toggle('hidden', !on); },
     score(v, bump) {
       $('hud-score').textContent = v;
       if (bump) { const el = document.querySelector('.hud-score'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }

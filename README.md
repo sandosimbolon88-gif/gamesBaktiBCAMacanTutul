@@ -1,4 +1,4 @@
-# Jejak Si Macan Tutul · V4 Kompetisi Expo
+# Jejak Si Macan Tutul · V4.1 Kompetisi Expo
 
 Game edukasi Bakti BCA: cari macan tutul jawa di hutan Bromo Tengger Semeru, kenali satwa lain, dan pelajari Java Wide Leopard Survey (JWLS).
 
@@ -16,6 +16,12 @@ Versi ini melanjutkan **attachment Macan Tutul V2**, termasuk durasi awal tiga m
 4. Coba satu sesi di perangkat booth sebelum acara. Nonaktifkan sleep dan screen saver melalui pengaturan PC.
 
 Bacaan siaran pers pada menu **Kenali JWLS** membutuhkan internet. Permainan dan kartu edukasi tetap berjalan tanpa koneksi. Penyimpanan skor untuk file lokal bergantung pada pengaturan browser: selalu uji simpan dan cadangan di PC tujuan.
+
+## Ukuran target dan menu panitia
+
+Macan utama diperbesar dengan batas minimum yang tetap berlaku pada level lanjut. Anak macan tetap lebih kecil secara proporsional. Bonus lari dan kepala mengintip juga diperbesar; pengecoh mempertahankan ukuran sebelumnya.
+
+Tombol **Menu utama** di kanan atas layar permainan tetap tersedia ketika kartu edukasi terbuka. Konfirmasi membatalkan sesi tanpa menyimpan skor sementara; batal melanjutkan sesi yang sama. Skor yang sudah tersimpan tidak diubah. **Esc** dapat membuka konfirmasi yang sama. **Ctrl+Shift+A** saat bermain membuka konfirmasi keluar lalu panel PIN admin, sehingga panitia bisa mengubah durasi dan suara sebelum memulai sesi baru.
 
 ## Aturan
 

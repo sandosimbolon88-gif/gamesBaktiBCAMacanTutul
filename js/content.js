@@ -10,6 +10,8 @@ window.JSMT_CONTENT = {
 
   ui: {
     start: 'Mulai Main',
+    playMenu: 'Menu utama',
+    leaveConfirm: 'Kembali ke menu utama? Sesi ini akan dihentikan dan skor sesi ini tidak disimpan.',
     touchToStart: 'Klik atau sentuh layar untuk mulai',
     didYouKnow: 'Tahukah kamu?',
     topToday: 'Jagoan hari ini',

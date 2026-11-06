@@ -1,10 +1,13 @@
-# Catatan V4 Kompetisi Expo · 6 November 2026
+# Catatan V4.1 Kompetisi Expo · 6 November 2026
 
 ## Dasar versi
 
 Implementasi mengambil modul dari HTML attachment Macan Tutul V2, kemudian mengembalikannya ke struktur multi-file repo. Paket `dist/jejak-si-macan-tutul.html` dibangun dari sumber yang sama; ilustrasi pembuka ikut di-inline.
 
 ## Perubahan
+
+- Macan utama diperbesar dengan skala minimum 0,60 untuk dewasa dan 0,48 untuk anak, dibanding minimum sebelumnya 0,40. Posisi mengintip diperbesar lagi agar kepala tetap terbaca. Pengecoh tetap memakai ukuran sebelumnya; bonus lari dan kepala juga disesuaikan.
+- Tombol Menu utama berada di atas kartu edukasi dan tersedia selama sesi. Konfirmasi menghentikan permainan dan membatalkan timer sesi; batal melanjutkan sesi yang sama. Skor sementara tidak disimpan ketika keluar. Ctrl+Shift+A dari permainan dapat langsung melanjutkan ke PIN dan pengaturan admin setelah konfirmasi keluar.
 
 - Bonus satwa +3: lari melompat 12 frame melewati layar (3,2 detik), masuk/keluar semak tengah (2,4 detik), atau hanya kepala mengintip dari kiri/kanan (1,8 detik). Mask vegetasi yang sama dipakai untuk rendering dan deteksi klik. Target utama tetap +1 dan menentukan penyelesaian stasiun.
 - Empat belas jenis pengecoh, sepuluh pada stasiun awal hingga delapan belas pada tingkat lanjut; jenis cokelat keemasan diprioritaskan. Tambahan baru: musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa.
@@ -39,7 +42,7 @@ Tautan publik:
 
 ## Verifikasi
 
-Hasil QA terakhir: **LULUS**. Semua 24 kombinasi seed/stasiun memenuhi jumlah minimum target, jumlah pengecoh, visibilitas minimum, dan keterpilihan target. Bonus diuji dalam delapan kombinasi pola/siang-malam: muncul dan hilang sepenuhnya, terbuka di tengah gerakan, menolak klik pada bagian tertutup, durasi pendek, serta kepala tanpa tubuh. Contoh skip tiga-dari-lima menjadi dua poin, batas nol, cakaran sekali per kelompok, dan penalti lima detik yang mengakhiri sesi juga diuji. Cache offline, zoom/pan, klik/touch, backup, dan alur hasil turut dicakup.
+Hasil QA terakhir: **LULUS**. Semua 24 kombinasi seed/stasiun memenuhi jumlah minimum target, jumlah pengecoh, visibilitas minimum, dan keterpilihan target. Bonus diuji dalam delapan kombinasi pola/siang-malam: muncul dan hilang sepenuhnya, terbuka di tengah gerakan, menolak klik pada bagian tertutup, durasi pendek, serta kepala tanpa tubuh. Contoh skip tiga-dari-lima menjadi dua poin, batas nol, cakaran sekali per kelompok, dan penalti lima detik yang mengakhiri sesi juga diuji. Ukuran minimum target, kembali ke menu dari permainan/kartu fakta, pembatalan konfirmasi, tidak menyimpan sesi yang dibatalkan, shortcut admin, perubahan durasi dan sesi baru juga lulus. Cache offline, zoom/pan, klik/touch, backup, dan alur hasil turut dicakup.
 
 `node tools/build-single.mjs` memeriksa konten dan membuat HTML mandiri. `python tools/test-game.py` menguji klik/touch, drag, pemisahan bonus, jeda, penalti satu kali, penyelesaian stasiun, kartu fakta, hasil, penyimpanan/cadangan, aset standalone, storage yang tidak tersedia, ukuran layar, dan 24 kombinasi stasiun/seed di semua mode pencahayaan.
 

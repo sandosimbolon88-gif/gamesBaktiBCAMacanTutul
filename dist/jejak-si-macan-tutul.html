@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · 721705f -->
+<!-- Jejak Si Macan Tutul · versi satu file · dibuat 2026-11-06 · 5b9468b -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -298,6 +298,8 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 .competition-note { font-size:calc(var(--u)*1);color:#6c4d23;margin:calc(var(--u)*-.8) 0 calc(var(--u)*1.1);font-weight:700; }
 .hud-bonus { font-size:calc(var(--u)*.88); }
 
+.play-menu { position:absolute; right:2.4%; top:calc(var(--u)*8.7); z-index:35; font-size:calc(var(--u)*1); background:#082f35ed; color:#fff9e9; border:1px solid #d5e2ca70; }
+
 </style>
 </head>
 <body>
@@ -322,6 +324,8 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
         <button type="button" id="btn-reset-view" class="btn btn-small hud-reset-view">Lihat Semua</button>
         <button type="button" id="btn-skip-station" class="btn btn-small hud-skip-station">Ganti stasiun (−1 poin)</button>
       </div>
+
+      <button type="button" id="btn-play-menu" class="btn btn-small play-menu hidden" data-t="ui.playMenu" title="Menu utama (Esc)" aria-keyshortcuts="Escape"></button>
 
       <div id="banner" class="banner"></div>
       <div id="bubbles"></div>
@@ -479,6 +483,13 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
   <script>/* js/config.js */
 /* Pengaturan permainan. Aman diubah oleh panitia booth. */
 window.JSMT_CONFIG = {
+  targetScaleMultiplier: 1.28,
+  targetMinScale: 0.60,
+  targetMaxScale: 0.74,
+  cubMinScale: 0.48,
+  cubMaxScale: 0.58,
+  bonusRunScale: 1.0,
+  bonusHeadScale: 1.35,
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   bonusPoints: 3,
@@ -542,6 +553,8 @@ window.JSMT_CONTENT = {
 
   ui: {
     start: 'Mulai Main',
+    playMenu: 'Menu utama',
+    leaveConfirm: 'Kembali ke menu utama? Sesi ini akan dihentikan dan skor sesi ini tidak disimpan.',
     touchToStart: 'Klik atau sentuh layar untuk mulai',
     didYouKnow: 'Tahukah kamu?',
     topToday: 'Jagoan hari ini',
@@ -2531,13 +2544,14 @@ window.JSMT_CONTENT = {
       for (let attempt = 0; attempt < 8; attempt++) {
         let y = 0, slot = null, ds = 0.94;
         if (pose === 'branch') {
-          slot = pickSlot(190 * d.scale);
+          slot = pickSlot(190 * Math.max(CFG.targetMinScale,d.scale*CFG.targetScaleMultiplier));
           if (!slot) return null;
         } else {
           const lo = gMin + (pose === 'peek' ? -10 : 0), hi = gMax - (pose === 'peek' ? 90 : 0);
           y = r.range(lo, hi); ds = depth(y);
         }
-        const scale = Math.max(0.40, Math.min(0.60, d.scale * ds * r.range(0.96, 1.04)));
+        const sizeBoost = pose === "peek" ? 1.12 : 1;
+        const scale = J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*sizeBoost;
         const sp = A.leopardSprite({ pose, variant, night, scale, R, flip: r.chance(0.5), soft });
         for (let k = 0; k < 24; k++) {
           let x;
@@ -2563,7 +2577,7 @@ window.JSMT_CONTENT = {
     }
     function placeCub(mom) {
       const pose = r.pick(['sit', 'walk']);
-      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: Math.max(0.40, Math.min(0.48, mom.scale * r.range(0.78, 0.88))), R, flip: r.chance(0.5), cub: true, soft });
+      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale), R, flip: r.chance(0.5), cub: true, soft });
       for (const side of r.shuffle([-1, 1])) {
         const x = mom.x + side * ((mom.box.x1 - mom.box.x0) * 0.5 + r.range(38, 68));
         const y = Math.min(gMax, mom.y + r.range(-4, 10));
@@ -3019,7 +3033,7 @@ window.JSMT_CONTENT = {
 
   /* ---------- HUD ---------- */
   UI.hud = {
-    show(on) { $('hud').classList.toggle('hidden', !on); },
+    show(on) { $('hud').classList.toggle('hidden', !on); $('btn-play-menu').classList.toggle('hidden', !on); },
     score(v, bump) {
       $('hud-score').textContent = v;
       if (bump) { const el = document.querySelector('.hud-score'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
@@ -3227,11 +3241,11 @@ window.JSMT_CONTENT = {
 
   function sprites(scene, type, flip, variant) {
     const head = type.startsWith('peek');
-    const key = [scene.R,scene.night,head,flip,variant].join('|');
+    const key = [scene.R,scene.night,head,flip,variant,CFG.bonusRunScale,CFG.bonusHeadScale].join('|');
     if (cache.has(key)) return cache.get(key);
     const frames = [];
     for (let i=0; i<(head ? 1 : 12); i++) {
-      const o = { pose:'run', variant, night:scene.night, scale:head ? 1.2 : .9,
+      const o = { pose:'run', variant, night:scene.night, scale:head ? CFG.bonusHeadScale : CFG.bonusRunScale,
         R:scene.R, flip, gait:i/12*Math.PI*2 };
       const sp = head ? A.leopardHeadSprite(o) : A.leopardSprite(o);
       if (scene.night) A.toIR(sp.canvas,{level:1,gain:1.1,noise:0});
@@ -3826,6 +3840,15 @@ window.JSMT_CONTENT = {
     }
   }
 
+  function returnToMenu(settingsAfter=false) {
+    if (state!=='play' || !window.confirm(C.ui.leaveConfirm)) return;
+    pendingResult=null;
+    pointers.clear();drag=null;pinch=null;
+    J.Audio.click();
+    goto('attract'); // game.stop membatalkan timer dan kartu fakta sesi lama.
+    if (settingsAfter) openAdmin();
+  }
+
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
@@ -3902,8 +3925,9 @@ window.JSMT_CONTENT = {
   window.addEventListener('pointerdown', () => { lastInput = J.now(); J.Audio.unlock(); }, true);
   window.addEventListener('keydown', (e) => {
     lastInput = J.now();
-    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openAdmin(); return; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); if(state==='play') returnToMenu(true); else openAdmin(); return; }
     if (UI.isOpen('overlay-admin')) return;
+    if (e.key==='Escape' && state==='play') { e.preventDefault(); returnToMenu(); return; }
     if (state === 'result') {
       if (e.key === 'Enter') saveResult(false);
       else if (e.key === 'Backspace') { e.preventDefault(); UI.typeKey('DEL'); }
@@ -3929,6 +3953,7 @@ window.JSMT_CONTENT = {
   on('btn-jwls-close', () => UI.overlay('overlay-jwls', false));
   on('btn-jwls-source', () => window.open('https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul', '_blank', 'noopener,noreferrer'));
   on('btn-go', () => { J.Audio.click(); goto('play'); });
+  on('btn-play-menu', () => returnToMenu());
   on('btn-reset-view',()=>{J.Audio.click();resetCamera();});
   on('btn-skip-station', () => { J.Audio.click(); game.skipStation(); });
   on('btn-save', () => saveResult(false));

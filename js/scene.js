@@ -195,13 +195,14 @@
       for (let attempt = 0; attempt < 8; attempt++) {
         let y = 0, slot = null, ds = 0.94;
         if (pose === 'branch') {
-          slot = pickSlot(190 * d.scale);
+          slot = pickSlot(190 * Math.max(CFG.targetMinScale,d.scale*CFG.targetScaleMultiplier));
           if (!slot) return null;
         } else {
           const lo = gMin + (pose === 'peek' ? -10 : 0), hi = gMax - (pose === 'peek' ? 90 : 0);
           y = r.range(lo, hi); ds = depth(y);
         }
-        const scale = Math.max(0.40, Math.min(0.60, d.scale * ds * r.range(0.96, 1.04)));
+        const sizeBoost = pose === "peek" ? 1.12 : 1;
+        const scale = J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*sizeBoost;
         const sp = A.leopardSprite({ pose, variant, night, scale, R, flip: r.chance(0.5), soft });
         for (let k = 0; k < 24; k++) {
           let x;
@@ -227,7 +228,7 @@
     }
     function placeCub(mom) {
       const pose = r.pick(['sit', 'walk']);
-      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: Math.max(0.40, Math.min(0.48, mom.scale * r.range(0.78, 0.88))), R, flip: r.chance(0.5), cub: true, soft });
+      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale), R, flip: r.chance(0.5), cub: true, soft });
       for (const side of r.shuffle([-1, 1])) {
         const x = mom.x + side * ((mom.box.x1 - mom.box.x0) * 0.5 + r.range(38, 68));
         const y = Math.min(gMax, mom.y + r.range(-4, 10));

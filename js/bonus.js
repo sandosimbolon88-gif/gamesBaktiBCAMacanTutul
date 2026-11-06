@@ -7,11 +7,11 @@
 
   function sprites(scene, type, flip, variant) {
     const head = type.startsWith('peek');
-    const key = [scene.R,scene.night,head,flip,variant].join('|');
+    const key = [scene.R,scene.night,head,flip,variant,CFG.bonusRunScale,CFG.bonusHeadScale].join('|');
     if (cache.has(key)) return cache.get(key);
     const frames = [];
     for (let i=0; i<(head ? 1 : 12); i++) {
-      const o = { pose:'run', variant, night:scene.night, scale:head ? 1.2 : .9,
+      const o = { pose:'run', variant, night:scene.night, scale:head ? CFG.bonusHeadScale : CFG.bonusRunScale,
         R:scene.R, flip, gait:i/12*Math.PI*2 };
       const sp = head ? A.leopardHeadSprite(o) : A.leopardSprite(o);
       if (scene.night) A.toIR(sp.canvas,{level:1,gain:1.1,noise:0});

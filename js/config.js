@@ -1,5 +1,12 @@
 /* Pengaturan permainan. Aman diubah oleh panitia booth. */
 window.JSMT_CONFIG = {
+  targetScaleMultiplier: 1.28,
+  targetMinScale: 0.60,
+  targetMaxScale: 0.74,
+  cubMinScale: 0.48,
+  cubMaxScale: 0.58,
+  bonusRunScale: 1.0,
+  bonusHeadScale: 1.35,
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
   bonusPoints: 3,

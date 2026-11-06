@@ -286,3 +286,5 @@ button:focus-visible { outline:3px solid #72c9f6; outline-offset:5px; }
 
 .competition-note { font-size:calc(var(--u)*1);color:#6c4d23;margin:calc(var(--u)*-.8) 0 calc(var(--u)*1.1);font-weight:700; }
 .hud-bonus { font-size:calc(var(--u)*.88); }
+
+.play-menu { position:absolute; right:2.4%; top:calc(var(--u)*8.7); z-index:35; font-size:calc(var(--u)*1); background:#082f35ed; color:#fff9e9; border:1px solid #d5e2ca70; }

@@ -98,6 +98,15 @@
     }
   }
 
+  function returnToMenu(settingsAfter=false) {
+    if (state!=='play' || !window.confirm(C.ui.leaveConfirm)) return;
+    pendingResult=null;
+    pointers.clear();drag=null;pinch=null;
+    J.Audio.click();
+    goto('attract'); // game.stop membatalkan timer dan kartu fakta sesi lama.
+    if (settingsAfter) openAdmin();
+  }
+
   function showResult(res) {
     UI.show('screen-result');
     $('result-score').textContent = res.score;
@@ -174,8 +183,9 @@
   window.addEventListener('pointerdown', () => { lastInput = J.now(); J.Audio.unlock(); }, true);
   window.addEventListener('keydown', (e) => {
     lastInput = J.now();
-    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openAdmin(); return; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); if(state==='play') returnToMenu(true); else openAdmin(); return; }
     if (UI.isOpen('overlay-admin')) return;
+    if (e.key==='Escape' && state==='play') { e.preventDefault(); returnToMenu(); return; }
     if (state === 'result') {
       if (e.key === 'Enter') saveResult(false);
       else if (e.key === 'Backspace') { e.preventDefault(); UI.typeKey('DEL'); }
@@ -201,6 +211,7 @@
   on('btn-jwls-close', () => UI.overlay('overlay-jwls', false));
   on('btn-jwls-source', () => window.open('https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul', '_blank', 'noopener,noreferrer'));
   on('btn-go', () => { J.Audio.click(); goto('play'); });
+  on('btn-play-menu', () => returnToMenu());
   on('btn-reset-view',()=>{J.Audio.click();resetCamera();});
   on('btn-skip-station', () => { J.Audio.click(); game.skipStation(); });
   on('btn-save', () => saveResult(false));

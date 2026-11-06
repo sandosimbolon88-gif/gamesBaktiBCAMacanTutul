@@ -149,13 +149,14 @@ try:
             const sc=JSMT.Scene.generate(stage,{{seed,R:.65}});JSMT.debug.game.scene=sc;
             const decoys=sc.items.filter(x=>x.kind==='decoy');
             out.push({{stage,seed,count:sc.leopards.length,wanted:sc.diff.count[0],decoys:decoys.length,expectedDecoys:sc.diff.decoys,
-              types:new Set(decoys.map(x=>x.type)).size,warm:decoys.filter(x=>JSMT.Art.DECOY_WARM_TYPES.includes(x.type)).length,clues:sc.clues.length,cluesSelectable:sc.clues.every(it=>!!find(it)),minVis:Math.min(...sc.leopards.map(x=>x.vis)),requiredVis:sc.diff.minVis,
+              types:new Set(decoys.map(x=>x.type)).size,warm:decoys.filter(x=>JSMT.Art.DECOY_WARM_TYPES.includes(x.type)).length,minAdultScale:Math.min(...sc.leopards.filter(x=>!x.cub).map(x=>x.scale)),minCubScale:Math.min(...sc.leopards.filter(x=>x.cub).map(x=>x.scale),1),clues:sc.clues.length,cluesSelectable:sc.clues.every(it=>!!find(it)),minVis:Math.min(...sc.leopards.map(x=>x.vis)),requiredVis:sc.diff.minVis,
               allSelectable:sc.leopards.every(it=>!!find(it)),ms:sc.genMs}});
           }}JSMT.debug.game.scene=old;return out;
         }}''')
         (OUT / 'scene-checks.json').write_text(json.dumps(scenes, indent=2))
         for sc in scenes:
             assert sc['count'] >= sc['wanted'], sc
+            assert sc['minAdultScale']>=.60 and sc['minCubScale']>=.48,sc
             assert sc['decoys'] >= sc['expectedDecoys'], sc
             assert sc['types'] >= 8, sc
             assert sc['warm'] >= 5, sc
@@ -246,6 +247,47 @@ try:
         assert page.evaluate('JSMT.debug.game.stage') == 0
         assert not page.locator('#overlay-fact').evaluate('e=>e.classList.contains("active")')
 
+        # Return-to-menu is reachable during play and facts; cancellation retains the session.
+        assert page.locator('#btn-play-menu').is_visible()
+        check_layout(page,'#btn-play-menu')
+        before_menu=page.evaluate('({score:JSMT.debug.game.score,entries:JSMT.Leaderboard.load().length})')
+        page.once('dialog',lambda dialog:dialog.dismiss())
+        page.locator('#btn-play-menu').click()
+        assert page.evaluate('JSMT.debug.state')=='play'
+        assert page.evaluate('JSMT.debug.game.score')==before_menu['score']
+        page.evaluate('JSMT.debug.game.stageClear()')
+        page.wait_for_function('document.getElementById("overlay-fact").classList.contains("active")')
+        page.once('dialog',lambda dialog:dialog.dismiss())
+        page.locator('#btn-play-menu').click()
+        assert page.locator('#overlay-fact').evaluate('e=>e.classList.contains("active")')
+        page.once('dialog',lambda dialog:dialog.accept())
+        page.locator('#btn-play-menu').click()
+        assert page.evaluate('JSMT.debug.state')=='attract'
+        assert not page.evaluate('JSMT.debug.game.active')
+        assert page.locator('#btn-play-menu').is_hidden()
+        assert page.evaluate('JSMT.Leaderboard.load().length')==before_menu['entries']
+        assert page.evaluate('JSMT.debug.game.timers.size')==0
+        page.wait_for_timeout(1300)
+        assert page.evaluate('JSMT.debug.state')=='attract'
+        assert not page.locator('#overlay-fact').evaluate('e=>e.classList.contains("active")')
+
+        # Admin shortcut can leave a running game and reach the PIN/settings screen.
+        page.locator('#btn-start').click();page.locator('#btn-go').click()
+        page.once('dialog',lambda dialog:dialog.accept())
+        page.keyboard.press('Control+Shift+A')
+        assert page.evaluate('JSMT.debug.state')=='attract'
+        assert page.locator('#overlay-admin').evaluate('e=>e.classList.contains("active")')
+        for digit in '1234':page.locator('#pinpad').get_by_role('button',name=digit,exact=True).click()
+        page.locator('#pinpad').get_by_role('button',name='✓',exact=True).click()
+        page.locator('#admin-durations').get_by_role('button',name='90 detik',exact=True).click()
+        page.locator('#btn-admin-close').click()
+        page.locator('#btn-start').click();page.locator('#btn-go').click()
+        assert page.evaluate('JSMT.debug.game.duration')==90
+        assert page.evaluate('JSMT.debug.game.score')==0
+        page.once('dialog',lambda dialog:dialog.accept())
+        page.keyboard.press('Escape')
+        assert page.evaluate('JSMT.debug.state')=='attract'
+
         # Cache-backed multi-file app still boots and starts with network disabled.
         page.wait_for_function('!!navigator.serviceWorker.controller')
         context.set_offline(True)
@@ -273,10 +315,11 @@ try:
         assert single.evaluate('JSMT.debug.game.baseFound') == 1
         for width,height in [(1920,1080),(844,390),(390,844)]:
             single.set_viewport_size({'width':width,'height':height})
+            single.wait_for_function('Math.abs(document.getElementById("stage").getBoundingClientRect().width-Math.min(innerWidth,innerHeight*16/9))<1')
             single.evaluate('JSMT.debug.goto("briefing")')
             check_layout(single,'.brief-panel')
         assert not errors, errors
-        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','one-time decoy penalty','target visibility','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
+        print(json.dumps({'status':'PASS','seeded_scenes':len(scenes),'modes':['siang','pagi','malam','senja'], 'checks':['click and touch','drag and zoom navigation','fast leaping and peeking with occlusion','bonus isolation and pause','claw clues','skip penalties','one-time decoy penalty','target size floor','target visibility','return to menu and cancel','admin settings from play','scene transitions','result and backup','standalone assets','offline cache','storage unavailable','responsive layouts'], 'artifacts':str(OUT)},ensure_ascii=False))
         browser.close()
 finally:
     server.shutdown()
