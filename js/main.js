@@ -323,8 +323,8 @@
   function ruleIcons() {
     const mk = (o) => A.leopardSprite(Object.assign({ R: 2, flip: false }, o)).canvas.toDataURL();
     return {
-      spotted: mk({ pose: 'sit', variant: 'spotted', scale: 0.6 }),
-      black: mk({ pose: 'sit', variant: 'black', scale: 0.6 }),
+      spotted: mk({ pose: 'crouch', variant: 'spotted', scale: 0.6 }),
+      black: mk({ pose: 'sniff', variant: 'black', scale: 0.6 }),
       moving: mk({ pose: 'run', variant: 'spotted', scale: 0.6, gait:Math.PI*.5 }),
       scratch: A.scratchSprite({scale:1,R:2}).canvas.toDataURL(),
       kuwuk: A.animalSprite('kuwuk', { scale: 1.3, R: 2, pose: 'sit' }).canvas.toDataURL()

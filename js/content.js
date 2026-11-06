@@ -23,10 +23,10 @@ window.JSMT_CONTENT = {
     briefTitle: 'Kamu adalah peneliti macan tutul!',
     briefText: 'Kamera pengintai sudah dipasang di hutan Bromo Tengger Semeru. Periksa setiap rekaman dan temukan semua macan tutul jawa sebelum waktu habis.',
     rules: [
-      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul utama yang kamu temukan menambah dua poin.' },
+      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul utama yang kamu temukan menambah tiga poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
-      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Setiap klik pengecoh mengurangi satu poin dan lima detik. Skor minimum nol. Amati bentuk dan pola bulunya!' },
-      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari melompat, keluar semak, atau mengintip memberi tiga poin. Tangkap momennya sebelum menghilang!' },
+      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Setiap klik pengecoh mengurangi dua poin dan lima detik. Skor minimum nol. Amati bentuk dan pola bulunya!' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari melompat, keluar semak, atau mengintip memberi lima poin. Tangkap momennya sebelum menghilang!' },
       { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',

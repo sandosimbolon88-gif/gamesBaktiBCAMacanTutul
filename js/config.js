@@ -9,9 +9,9 @@ window.JSMT_CONFIG = {
   bonusHeadScale: 1.35,
   durationSec: 180,            // lama satu sesi (detik)
   durationOptions: [60, 90, 120, 180],
-  targetPoints: 2,
-  decoyPenaltyPoints: 1,
-  bonusPoints: 3,
+  targetPoints: 3,
+  decoyPenaltyPoints: 2,
+  bonusPoints: 5,
   bonusFirstSec: 4,
   bonusPassSec: 3.2,
   bonusCoverSec: 2.4,
@@ -21,7 +21,7 @@ window.JSMT_CONFIG = {
   cluePoints: 1,
   cluesPerStation: 2,
   skipPenaltyPoints: 1,
-  rulesVersion: 5,
+  rulesVersion: 6,
   clearBonusSec: 0,           // bonus waktu setiap stasiun bersih
   decoyPenaltySec: 5,         // pengurangan waktu jika memilih satwa pengecoh
   hintAfterSec: 12,           // daun berguguran sebagai petunjuk

@@ -193,110 +193,87 @@
       it.scale = sp.scale;
       return it;
     }
-    function pickSlot(minLen) {
-      const cand = freeSlots.filter((s) => !s.used && s.x1 - s.x0 >= minLen);
-      return cand.length ? r.pick(cand) : null;
+    function pickSlot(minLen,nearX) {
+      const cand=freeSlots.filter(s=>!s.used&&s.x1-s.x0>=minLen);
+      if(nearX!=null)cand.sort((a,b)=>Math.abs((a.x0+a.x1)/2-nearX)-Math.abs((b.x0+b.x1)/2-nearX));
+      return cand.length ? r.pick(nearX==null ? cand : cand.slice(0,Math.min(3,cand.length))) : null;
     }
-    function placeLeopard(pose, variant) {
-      for (let attempt = 0; attempt < 8; attempt++) {
-        let y = 0, slot = null, ds = 0.94;
-        if (pose === 'branch') {
-          slot = pickSlot(190 * Math.max(CFG.targetMinScale,d.scale*CFG.targetScaleMultiplier));
-          if (!slot) return null;
-        } else {
-          const lo = gMin + (pose === 'peek' ? -10 : 0), hi = gMax - (pose === 'peek' ? 90 : 0);
-          y = r.range(lo, hi); ds = depth(y);
+    function desiredLocation(index,attempt) {
+      const cluster=distribution==='clustered'||distribution==='mixed'&&index%2===0;
+      if(attempt<24&&cluster){const c=clusters[index%clusters.length];return {x:J.clamp(c.x+r.range(-185,185),180,W-180),y:J.clamp(c.y+r.range(-105,105),gMin,gMax)};}
+      if(attempt<24&&distribution!=='clustered')return {x:J.clamp((index+.5)*W/nLeo+r.range(-W/nLeo*.25,W/nLeo*.25),160,W-160),y:r.range(gMin,gMax)};
+      return {x:r.range(140,W-140),y:r.range(gMin,gMax)};
+    }
+    function placeLeopard(pose,variant,index) {
+      const onBranch=pose==='branch',onTrunk=pose==='scratch'||pose==='climb';
+      for(let attempt=0;attempt<48;attempt++){
+        const want=desiredLocation(index,attempt),ds=(onBranch||onTrunk) ? .94 : depth(want.y);
+        const scale=J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*(pose==='peek'?1.12:1);
+        let x=want.x,y=want.y,slot=null,tree=null,flip=r.chance(.5);
+        if(onBranch){slot=pickSlot(190*scale,want.x);if(!slot)continue;const half=96*scale;x=J.clamp(want.x,slot.x0+half,slot.x1-half);if(slot.x1-slot.x0<half*2)x=(slot.x0+slot.x1)/2;y=slot.y(x);}
+        else if(onTrunk){
+          const candidates=trees.slice().sort((a,b)=>Math.abs(a.x-want.x)-Math.abs(b.x-want.x));
+          tree=r.pick(candidates.slice(0,Math.min(3,candidates.length)));
+          const side=flip?1:-1,paw=pose==='scratch'?128:92;
+          x=tree.x+side*(tree.w*.40+paw*scale);y=pose==='scratch'?tree.base-6:tree.base-r.range(150,280);
         }
-        const sizeBoost = pose === "peek" ? 1.12 : 1;
-        const scale = J.clamp(d.scale*CFG.targetScaleMultiplier*ds*r.range(.96,1.04),CFG.targetMinScale,CFG.targetMaxScale)*sizeBoost;
-        const sp = A.leopardSprite({ pose, variant, night, scale, R, flip: r.chance(0.5), soft });
-        for (let k = 0; k < 24; k++) {
-          let x;
-          if (slot) {
-            const half = 96 * scale;
-            x = slot.x1 - slot.x0 > half * 2 ? r.range(slot.x0 + half, slot.x1 - half) : (slot.x0 + slot.x1) / 2;
-            y = slot.y(x);
-          } else x = r.range(24, W - 24);
-          const b = tryPlace(sp, x, y);
-          const minSpread = Math.max(105, 185 - stage * 10);
-          const tooClose = animals.some((a) => a.kind === 'leopard' && !a.cub && Math.hypot(a.cx - (b ? (b.x0 + b.x1) / 2 : x), a.cy - (b ? (b.y0 + b.y1) / 2 : y)) < minSpread);
-          if (b && !tooClose) {
-            occ.push(b);
-            if (slot) slot.used = true;
-            const it = mk('leopard', { pose, variant, cub: false }, sp, x, y, b);
-            it.label = labelFor(it);
-            return it;
-          }
-          if (slot) break;
-        }
+        if(pose==='peek')y=Math.min(y,gMax-80);
+        const sp=A.leopardSprite({pose,variant,night,scale,R,flip,soft});
+        const box=tryPlace(sp,x,y);if(!box)continue;
+        const spread=distribution==='scattered'?110:65;
+        if(animals.some(a=>a.kind==='leopard'&&!a.cub&&Math.hypot(a.cx-(box.x0+box.x1)/2,a.cy-(box.y0+box.y1)/2)<spread))continue;
+        occ.push(box);if(slot)slot.used=true;
+        const it=mk('leopard',{pose,variant,cub:false,onBranch,onTrunk,tree},sp,x,y,box);it.label=labelFor(it);return it;
       }
       return null;
     }
     function placeCub(mom) {
-      const pose = r.pick(['sit', 'walk']);
-      const sp = A.leopardSprite({ pose, variant: mom.variant, night, scale: J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale), R, flip: r.chance(0.5), cub: true, soft });
-      for (const side of r.shuffle([-1, 1])) {
-        const x = mom.x + side * ((mom.box.x1 - mom.box.x0) * 0.5 + r.range(38, 68));
-        const y = Math.min(gMax, mom.y + r.range(-4, 10));
-        const b = tryPlace(sp, x, y, mom.box);
-        if (b) {
-          occ.push(b);
-          const it = mk('leopard', { pose, variant: mom.variant, cub: true }, sp, x, y, b);
-          it.label = labelFor(it);
-          return it;
-        }
+      const pose=r.pick(['crouch','sniff','groom','curl','walk'].filter(p=>p!==mom.pose));
+      const sp=A.leopardSprite({pose,variant:mom.variant,night,scale:J.clamp(mom.scale*r.range(.78,.88),CFG.cubMinScale,CFG.cubMaxScale),R,flip:r.chance(.5),cub:true,soft});
+      for(let attempt=0;attempt<16;attempt++){
+        const side=attempt%2?1:-1;
+        const x=mom.x+side*((mom.box.x1-mom.box.x0)*.5+r.range(38,100)),y=J.clamp(mom.y+r.range(-40,55),gMin,gMax);
+        const box=tryPlace(sp,x,y);if(!box)continue;
+        occ.push(box);const it=mk('leopard',{pose,variant:mom.variant,cub:true,onBranch:false,onTrunk:false},sp,x,y,box);it.label=labelFor(it);return it;
       }
       return null;
     }
 
-    const nLeo = r.int(d.count[0], d.count[1]);
-    const poseW = { walk: 3, sit: 2.2, lie: 2.4, peek: 1.8, branch: 4.8 };
-    let blackLeft = d.minBlack || 0, wantCub = !!d.cub && r.chance(d.cub);
-    let placed = 0, guard = 0, branchPlaced = 0;
-    // Selalu usahakan minimal satu macan di dahan; mulai level 4 bisa ada dua.
-    const branchTarget = Math.min(stage >= 12 ? 3 : (stage >= 3 ? 2 : 1), Math.max(1, Math.floor(nLeo / 2)));
-    while (placed < nLeo && guard < nLeo * 14) {
-      guard++;
-      const avail = Object.assign({}, poseW);
-      const branchAvailable = !!pickSlot(190 * d.scale);
-      if (!branchAvailable) delete avail.branch;
-      const pose = branchPlaced < branchTarget && branchAvailable ? 'branch' : r.weighted(avail);
-      const blackSoFar = animals.filter((a) => a.variant === 'black').length;
-      const black = blackLeft > 0 || (blackSoFar < Math.ceil(nLeo / 2) && r.chance(d.black || 0));
-      const it = placeLeopard(pose, black ? 'black' : 'spotted');
-      if (!it) { poseW[pose] *= 0.7; continue; }
-      poseW[pose] *= 0.4;
-      animals.push(it); placed++;
-      if (pose === 'branch') branchPlaced++;
-      if (black && blackLeft > 0) blackLeft--;
-      if (wantCub && placed < nLeo && (pose === 'walk' || pose === 'sit' || pose === 'lie')) {
-        const cub = placeCub(it);
-        if (cub) { animals.push(cub); placed++; wantCub = false; }
+    const nLeo=r.int(d.count[0],d.count[1]);
+    const distribution=r.pick(['scattered','clustered','mixed']);
+    const clusters=Array.from({length:nLeo>=4?r.int(1,2):1},()=>({x:r.range(390,W-390),y:r.range(gMin+30,gMax-30)}));
+    const firstPose=r.pick(['crouch','sniff','stretch','groom','curl']);
+    const deck=[firstPose,...r.shuffle(A.LEOPARD_STATIC_POSES.filter(p=>p!==firstPose))];
+    let blackLeft=d.minBlack||0,wantCub=!!d.cub&&r.chance(d.cub),placed=0,guard=0;
+    while(placed<nLeo&&guard<nLeo*20){
+      const pose=deck[guard%deck.length];guard++;
+      const black=blackLeft>0||animals.filter(a=>a.kind==='leopard'&&a.variant==='black').length<Math.ceil(nLeo/2)&&r.chance(d.black||0);
+      const it=placeLeopard(pose,black?'black':'spotted',placed);if(!it)continue;
+      animals.push(it);placed++;if(black&&blackLeft>0)blackLeft--;
+      if(wantCub&&placed<nLeo&&!it.onBranch&&!it.onTrunk&&pose!=='peek'){
+        const cub=placeCub(it);if(cub){animals.push(cub);placed++;wantCub=false;}
       }
     }
 
     // Acak tanpa pengulangan jenis sampai seluruh pilihan terpakai.
     const warm = r.shuffle(A.DECOY_WARM_TYPES.slice());
     const dTypes = warm.concat(r.shuffle(A.DECOY_TYPES.filter(t => !warm.includes(t))));
-    let placedDecoys = 0;
-    for (let i = 0; i < (d.decoys || 0) * 4 && placedDecoys < d.decoys; i++) {
-      let type = dTypes[i % dTypes.length], slot = null;
-      if (A.DECOY_ON_BRANCH[type]) slot = pickSlot(60);
-      for (let k = 0; k < 64; k++) {
-        let x, y, ds = 0.94;
-        if (slot) { x = r.range(slot.x0 + 30, slot.x1 - 30); y = slot.y(x); }
-        else { y = r.range(gMin, gMax); ds = depth(y); x = r.range(40, W - 40); }
-        const sp = A.animalSprite(type, { scale: d.scale * ds * r.range(0.93, 1.07), R, flip: r.chance(0.5), night, pose: r.chance(0.6) ? 'walk' : 'sit', soft });
-        const b = tryPlace(sp, x, y);
-        if (b) {
-          occ.push(b);
-          if (slot) slot.used = true;
-          const it = mk('decoy', { type, variant: type }, sp, x, y, b);
-          it.info = C.decoys[type];
-          it.label = it.info.name;
-          animals.push(it); placedDecoys++;
-          break;
+    let placedDecoys=0;
+    for(let i=0;i<(d.decoys||0)*4&&placedDecoys<d.decoys;i++){
+      const type=dTypes[i%dTypes.length],pose=r.pick(A.DECOY_POSES[type]);
+      for(let k=0;k<64;k++){
+        const habitatType=r.pick(A.decoyHabitats(type,pose));
+        let slot=null,x,y,ds=.94;
+        if(habitatType==='branch'){
+          slot=pickSlot(70);if(!slot)continue;x=r.range(slot.x0+30,slot.x1-30);y=slot.y(x);
+        }else{
+          y=r.range(gMin,gMax);ds=depth(y);x=r.range(40,W-40);
         }
+        const sp=A.animalSprite(type,{scale:d.scale*ds*r.range(.93,1.07),R,flip:r.chance(.5),night,pose,soft});
+        const box=tryPlace(sp,x,y);if(!box)continue;
+        occ.push(box);if(slot)slot.used=true;
+        const it=mk('decoy',{type,variant:type,pose,onBranch:!!slot,onTrunk:false},sp,x,y,box);
+        it.info=C.decoys[type];it.label=it.info.name;animals.push(it);placedDecoys++;break;
       }
     }
 
@@ -371,10 +348,13 @@
       if (it.kind === "clue") continue;
       const b = it.box, bw = b.x1 - b.x0, bh = b.y1 - b.y0;
       const isLeo = it.kind === 'leopard';
-      const onBranch = it.pose === 'branch' || A.DECOY_ON_BRANCH[it.type];
+      const onBranch = !!it.onBranch;
       const z = it.y;
       let k = Math.round((d.occl || 0) * (isLeo ? 3.4 : 2.2) + fr.range(-0.45, 0.45));
-      if (it.pose === 'peek') {
+      if (it.onTrunk && it.tree) {
+        addV('trunk',{x:it.tree.x,y:it.tree.base,w:it.tree.w},z+3,it,true);
+        k=Math.max(0,k-1);
+      } else if (it.pose === 'peek') {
         addV('bush', { x: it.x, y: it.y + 92 * it.scale, w: 150 * it.scale + 40, h: 104 * it.scale + 12 }, z + 2, it, true);
         k = Math.max(0, k - 1);
       } else if (isLeo && onBranch && fr.chance(d.hide || 0)) {
@@ -382,7 +362,7 @@
         const fx = it.x + (it.sp.head ? -it.sp.head.x * 0.25 : 0);
         addV('foliage', { x: fx, y: it.y - 26 * it.scale, rad: 70 * it.scale + 14 }, z + 3, it, true);
         k = Math.max(0, k - 1);
-      } else if (isLeo && !onBranch && (it.pose === 'walk' || it.pose === 'sit' || it.pose === 'lie') && fr.chance(d.hide || 0)) {
+      } else if (isLeo && !onBranch && ['walk','sit','lie','crouch','sniff','stretch','groom','curl'].includes(it.pose) && fr.chance(d.hide || 0)) {
         // bersembunyi di balik batang pohon
         addV('trunk', { x: it.cx + fr.range(-0.12, 0.12) * bw, y: it.y + fr.range(6, 26), w: J.clamp(bw * 0.28, 26, 56) }, z + 2, it, true);
         k = Math.max(0, k - 1);
@@ -499,7 +479,7 @@
 
     animals.sort((a, b) => a.y - b.y);
     return {
-      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix,
+      seed, stage, diff: d, mode, night, comp, items: animals, R, bonusCover, habitat, mix, distribution,
       targetCount:nLeo, vegetationCount:objs.filter(o=>o.kind==='veg').length,
       forestLayout:trees.map(t=>({x:t.x,w:t.w,base:t.base})),
       clues: animals.filter(i => i.kind === "clue"),
