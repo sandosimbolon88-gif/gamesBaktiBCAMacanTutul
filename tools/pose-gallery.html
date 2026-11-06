@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="id"><meta charset="utf-8"><title>Atlas pose · Jejak Si Macan Tutul</title>
+<style>body{margin:0;background:#fff8e8}canvas{display:block;width:100%;height:auto}</style>
+<canvas id="atlas"></canvas>
+<script src="../js/config.js"></script><script src="../js/util.js"></script>
+<script src="../js/art/leopard.js"></script><script src="../js/art/animals.js"></script><script src="../js/art/animal-poses.js"></script>
+<script>
+const A=JSMT.Art,decoys=new URLSearchParams(location.search).has('decoys');
+const titles={crouch:'Merunduk / mengendap',sniff:'Mengendus tanah',stretch:'Meregangkan tubuh',groom:'Merawat bulu',curl:'Meringkuk',scratch:'Mencakar batang',climb:'Memanjat',walk:'Berjalan',sit:'Duduk waspada',lie:'Berbaring',branch:'Bersantai di dahan',peek:'Mengintip'};
+const names={kijang:'Kijang muncak',kancil:'Pelanduk kancil',musang:'Musang luwak',linsang:'Linsang',garangan:'Garangan jawa',binturong:'Binturong',landak:'Landak jawa',trenggiling:'Trenggiling',kuwuk:'Kucing kuwuk',lutung:'Lutung jawa',monyet:'Monyet ekor panjang',bajing:'Bajing kelapa',ayam:'Ayam hutan',elang:'Elang jawa'};
+const poseNames={stand:'Berdiri',walk:'Berjalan',graze:'Merumput',alert:'Waspada',sniff:'Mengendus',crouch:'Merunduk',rest:'Beristirahat',curl:'Meringkuk',defend:'Mengembangkan duri',forage:'Mencari makan',reach:'Meraih dahan',sit:'Duduk',perch:'Bertengger',wings:'Membuka sayap',lookback:'Menoleh',climb:'Memanjat batang',hang:'Bergelantungan',fly:'Terbang'};
+const entries=decoys?A.DECOY_TYPES.flatMap(type=>A.DECOY_POSES[type].map(pose=>({type,pose}))):A.LEOPARD_STATIC_POSES.map(pose=>({type:'spotted',pose}));
+const columns=decoys?6:4,cw=decoys?248:373,ch=decoys?230:310;
+const c=document.getElementById('atlas');c.width=1600;c.height=130+Math.ceil(entries.length/columns)*ch;
+const g=c.getContext('2d');g.fillStyle='#fff8e8';g.fillRect(0,0,c.width,c.height);g.fillStyle='#174b40';g.font='bold 38px sans-serif';g.fillText(decoys?'VARIASI POSE SATWA PENGECOH':'VARIASI POSE MACAN TUTUL',46,58);
+g.font='19px sans-serif';g.fillText('Pose digambar sesuai perilaku · penempatan dan tutupan vegetasi diacak di dalam permainan',46,96);
+entries.forEach(({type,pose},i)=>{
+ const x=44+(i%columns)*(cw+10),y=126+Math.floor(i/columns)*ch;
+ g.fillStyle='#ece7d5';g.beginPath();g.roundRect(x,y,cw,ch-14,15);g.fill();
+ const sp=decoys?A.animalSprite(type,{pose,scale:1,R:1.5}):A.leopardSprite({pose,variant:'spotted',scale:1,R:1.5});
+ const b=sp.box,bw=b.x1-b.x0,bh=b.y1-b.y0,s=Math.min(1,(cw-24)/bw,(ch-77)/bh);
+ const anchorX=x+(cw-bw*s)/2-b.x0*s,anchorY=y+10+(ch-77-bh*s)/2-b.y0*s;
+ const dx=anchorX+sp.ox*s,dy=anchorY+sp.oy*s;
+ if(!decoys&&['climb','scratch'].includes(pose)){const tx=dx+(-sp.ox+(pose==='climb'?92:128))*s;g.fillStyle='#7d6444';g.beginPath();g.roundRect(tx,dy,26,sp.lh*s,6);g.fill();g.strokeStyle='#af9366';g.lineWidth=2;g.beginPath();g.moveTo(tx+7,dy+4);g.lineTo(tx+7,dy+sp.lh*s-5);g.stroke();}
+ g.drawImage(sp.canvas,dx,dy,sp.lw*s,sp.lh*s);g.fillStyle='#174b40';g.font=`bold ${decoys?17:20}px sans-serif`;
+ g.fillText(decoys?names[type]:titles[pose],x+16,y+ch-48);
+ if(decoys){g.font='16px sans-serif';g.fillText(poseNames[pose]||pose,x+16,y+ch-25);}
+});
+window.atlasReady=true;
+</script></html>

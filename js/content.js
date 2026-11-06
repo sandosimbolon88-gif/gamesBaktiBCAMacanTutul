@@ -3,13 +3,15 @@
    Jalankan `node tools/check-no-digits.mjs` untuk memeriksa.
    Angka permainan (skor, waktu, nomor stasiun) diisi otomatis lewat placeholder {n}, {s}, dst. */
 window.JSMT_CONTENT = {
-  title: 'Jejak Si Macan Tutul',
+  title: 'Jejak Si Macan Tutul · Bakti BCA',
   titleLines: ['Jejak Si', 'Macan Tutul'],
-  tagline: 'Jadilah peneliti! Temukan macan tutul jawa yang bersembunyi di hutan.',
+  tagline: 'Masuki rimbunnya hutan. Temukan sang penjaga keseimbangan.',
   credit: 'Program Bakti Lingkungan · Bakti BCA',
 
   ui: {
     start: 'Mulai Main',
+    playMenu: 'Menu utama',
+    leaveConfirm: 'Kembali ke menu utama? Sesi ini akan dihentikan dan skor sesi ini tidak disimpan.',
     touchToStart: 'Klik atau sentuh layar untuk mulai',
     didYouKnow: 'Tahukah kamu?',
     topToday: 'Jagoan hari ini',
@@ -21,9 +23,11 @@ window.JSMT_CONTENT = {
     briefTitle: 'Kamu adalah peneliti macan tutul!',
     briefText: 'Kamera pengintai sudah dipasang di hutan Bromo Tengger Semeru. Periksa setiap rekaman dan temukan semua macan tutul jawa sebelum waktu habis.',
     rules: [
-      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Setiap macan tutul yang kamu temukan menambah satu skor.' },
+      { icon: 'spotted', title: 'Klik atau sentuh macan tutul', text: 'Macan utama memberi tiga poin. Saat malam lebih sulit: setiap temuan memberi lima poin.' },
       { icon: 'black', title: 'Macan kumbang juga dihitung', text: 'Macan kumbang yang hitam juga macan tutul jawa. Cari juga, ya!' },
-      { icon: 'kuwuk', title: 'Awas pengecoh!', text: 'Salah memilih satwa lain, waktumu berkurang sedikit.' }
+      { icon: 'kuwuk', title: 'Kenali satwa lain', text: 'Pengecoh bisa berjalan, terbang, memanjat atau bergelantungan. Setiap klik salah mengurangi dua poin dan lima detik, termasuk satwa bergerak. Skor minimum nol.' },
+      { icon: 'moving', title: 'Tangkap momen singkat!', text: 'Macan berlari, mengendap, atau hanya kepala dan ekornya muncul dari semak. Bonus lima poin; saat malam tujuh poin. Amati pola bulunya sebelum mengeklik!' },
+      { icon:'scratch', title:'Baca tanda di pohon', text:'Klik satu kelompok cakaran untuk satu poin tambahan. Temuan jejak juga membantu peneliti.' }
     ],
     go: 'Ayo Mulai!',
 
@@ -43,7 +47,7 @@ window.JSMT_CONTENT = {
 
     resultKicker: 'Waktu habis!',
     resultTitles: ['Kerja bagus, peneliti!', 'Hebat, matamu tajam!', 'Luar biasa, peneliti ulung!'],
-    resultUnit: 'macan tutul ditemukan',
+    resultUnit: 'total poin ekspedisi',
     stations: 'Stasiun bersih',
     mistakes: 'Salah pilih',
     rankToday: 'Peringkat hari ini',
@@ -92,6 +96,14 @@ window.JSMT_CONTENT = {
 
   /* Satwa pengecoh — muncul saat pemain salah memilih. */
   decoys: {
+    musang: { name:'Musang luwak', text:'Bulu cokelatnya bisa menyatu dengan hutan. Kenali wajah bermasker dan ekor panjangnya; satwa ini bukan macan tutul.' },
+    garangan: { name:'Garangan jawa', text:'Tubuh cokelat keemasannya ramping dengan moncong panjang. Perhatikan bentuknya, bukan hanya warnanya.' },
+    kancil: { name:'Pelanduk kancil', text:'Satwa kecil ini berbulu cokelat dengan kaki ramping dan tanpa tanduk. Bukan anak macan tutul, ya!' },
+    bajing: { name:'Bajing kelapa', text:'Ekornya lebat dan panjang dengan garis pucat di sisi tubuh. Warna cokelatnya bisa mengecoh pengamat.' },
+    trenggiling: { name: 'Trenggiling peusing', text: 'Tubuhnya bersisik dan moncongnya panjang. Satwa ini ikut tercatat dalam laporan JWLS, tetapi bukan macan tutul.' },
+    binturong: { name: 'Binturong', text: 'Bulunya gelap, berkumis panjang, dan berekor kuat. Binturong termasuk satwa yang tercatat di bentang alam survei.' },
+    linsang: { name: 'Linsang', text: 'Badannya ramping dengan ekor panjang bercincin. Perhatikan bentuk tubuhnya agar tidak tertukar dengan macan tutul.' },
+    monyet: { name: 'Monyet ekor panjang', text: 'Primata ini juga tercatat dalam laporan JWLS. Menjaga habitat berarti melindungi beragam penghuni hutan.' },
     kuwuk: { name: 'Kucing kuwuk', text: 'Mirip macan tutul, tapi jauh lebih kecil dan tutulnya bintik, bukan roset. Kucing kuwuk termasuk mangsa macan tutul.' },
     kijang: { name: 'Kijang muncak', text: 'Rusa kecil ini adalah salah satu mangsa macan tutul jawa.' },
     ayam: { name: 'Ayam hutan merah', text: 'Nenek moyang ayam kampung ini juga mangsa macan tutul.' },
@@ -100,37 +112,37 @@ window.JSMT_CONTENT = {
     elang: { name: 'Elang jawa', text: 'Burung pemangsa yang dilindungi. Ia hidup di hutan yang sama dengan macan tutul.' }
   },
 
-  /* Fakta edukasi (tanpa angka). id dipakai untuk urutan prioritas. */
+  /* Materi edukasi diringkas dari publikasi SINTAS Indonesia dan Bakti BCA. */
   facts: [
-    { id: 'kumbang', title: 'Macan kumbang', text: 'Macan kumbang yang hitam juga macan tutul jawa! Tutulnya tetap ada, hanya tersamar oleh bulu yang gelap.' },
-    { id: 'sidikjari', title: 'Seperti sidik jari', text: 'Pola tutul setiap macan tutul berbeda-beda. Dari foto kamera pengintai, peneliti bisa mengenali setiap individu.' },
-    { id: 'terakhir', title: 'Kucing besar terakhir di Jawa', text: 'Macan tutul jawa adalah satu-satunya kucing besar yang masih hidup di Pulau Jawa, setelah harimau jawa punah.' },
-    { id: 'roset', title: 'Tutul berbentuk bunga', text: 'Tutul di badan macan tutul berbentuk lingkaran terbuka seperti bunga, disebut roset. Di kepala dan kaki, tutulnya berupa bintik padat.' },
-    { id: 'endemik', title: 'Asli Indonesia', text: 'Macan tutul jawa hanya ada di Indonesia. Ia endemik Pulau Jawa dan beberapa pulau kecil di sekitarnya.' },
-    { id: 'status', title: 'Terancam punah', text: 'Statusnya Kritis (Critically Endangered) menurut IUCN dan dilindungi undang-undang di Indonesia.' },
-    { id: 'inframerah', title: 'Rahasia kamera malam', text: 'Di rekaman kamera inframerah, tutul macan kumbang bisa terlihat jelas. Ini membantu peneliti mengenali setiap individu.' },
-    { id: 'mata', title: 'Mata yang menyala', text: 'Di malam hari, mata satwa memantulkan cahaya kamera. Mata yang menyala belum tentu macan tutul, perhatikan ukurannya!' },
-    { id: 'soliter', title: 'Si penyendiri', text: 'Macan tutul dewasa hidup menyendiri. Mereka bertemu saat musim kawin, dan induk betina membesarkan anaknya.' },
-    { id: 'gamenote', title: 'Kenapa banyak di satu layar?', text: 'Di alam, macan tutul jarang terlihat bersama. Di game ini, kami kumpulkan dari banyak rekaman supaya kamu bisa berlatih jadi peneliti!' },
-    { id: 'pohon', title: 'Suka bersantai di pohon', text: 'Macan tutul suka beristirahat di tanah, di bawah semak, atau berbaring di dahan besar dengan kaki menjuntai.' },
-    { id: 'tanda', title: 'Meninggalkan tanda', text: 'Macan tutul membuat cakaran di batang pohon dan kaisan di tanah sebagai tanda keberadaannya.' },
-    { id: 'rawat', title: 'Rajin merawat diri', text: 'Seperti kucing di rumah, macan tutul membersihkan diri dengan menjilati bulunya.' },
-    { id: 'penasaran', title: 'Penasaran dengan kamera', text: 'Macan tutul jawa sering penasaran dengan kamera pengintai. Kadang wajahnya terekam dari dekat sekali!' },
-    { id: 'mangsa', title: 'Menu makan', text: 'Mangsa macan tutul jawa antara lain kijang muncak, ayam hutan merah, kucing kuwuk, dan landak jawa.' },
-    { id: 'predator', title: 'Penjaga keseimbangan hutan', text: 'Sebagai predator puncak, macan tutul menjaga keseimbangan hutan. Melindunginya berarti melindungi satwa lain juga.' },
-    { id: 'habitat', title: 'Rumah yang terjaga', text: 'Macan tutul jawa paling banyak ditemukan di hutan yang masih terjaga baik.' },
-    { id: 'dna', title: 'Detektif dari kotoran', text: 'Peneliti mengumpulkan kotoran macan tutul. Dari DNA di dalamnya, bisa diketahui jenis kelamin dan apa yang dimakannya.' },
-    { id: 'tetangga', title: 'Tetangga di hutan', text: 'Hutan Bromo Tengger Semeru juga rumah bagi elang jawa, lutung jawa, trenggiling, binturong, dan paok pancawarna.' },
-    { id: 'ancaman', title: 'Ancaman', text: 'Perburuan, jerat, hutan yang menyempit, dan aktivitas manusia di dalam hutan mengancam kehidupan macan tutul jawa.' },
-    { id: 'konflik', title: 'Hidup berdampingan', text: 'Saat hutan menyempit, macan tutul bisa mendekati permukiman. Menjaga hutan membantu manusia dan macan tutul hidup berdampingan.' },
-    { id: 'jwls', title: 'Java-Wide Leopard Survey', text: 'JWLS adalah survei macan tutul jawa di seluruh Pulau Jawa, hasil kolaborasi pemerintah, lembaga konservasi, sektor swasta, dan komunitas lokal.' },
-    { id: 'baktibca', title: 'Bakti BCA untuk macan tutul', text: 'Bakti BCA bersama Kementerian Kehutanan, Taman Nasional Bromo Tengger Semeru, dan SINTAS Indonesia mendukung survei macan tutul jawa.' },
-    { id: 'lokal', title: 'Pahlawan lokal', text: 'Komunitas lokal yang terlatih menjadi penggerak survei di lapangan: memasang kamera pengintai dan menjelajah hutan.' }
+    { id: 'endemik', title: 'Hanya Ada di Pulau Jawa', text: 'Macan tutul jawa adalah satwa endemik. Di alam liar, satwa ini hanya ditemukan di Pulau Jawa.' },
+    { id: 'predator', title: 'Penjaga Keseimbangan Hutan', text: 'Sebagai predator puncak, macan tutul membantu menjaga keseimbangan populasi mangsa dan rantai kehidupan hutan.' },
+    { id: 'sidikjari', title: 'Tutul seperti Sidik Jari', text: 'Pola tutul setiap individu berbeda. Peneliti membandingkan pola pada foto kamera pengintai untuk mengenali macan yang sama.' },
+    { id: 'kumbang', title: 'Macan Kumbang', text: 'Macan kumbang bukan spesies berbeda. Warna gelapnya disebut melanisme, dan pola tutulnya masih dapat terlihat pada pencahayaan tertentu.' },
+    { id: 'kamera', title: 'Kamera Tanpa Penjaga', text: 'Kamera pengintai memakai sensor gerak dan panas tubuh untuk merekam satwa secara otomatis tanpa harus ditunggu manusia.' },
+    { id: 'stasiun', title: 'Mengapa Kameranya Berpindah?', text: 'Satu kamera hanya melihat sebagian kecil hutan. Banyak stasiun kamera diperlukan untuk memahami persebaran macan di bentang alam luas.' },
+    { id: 'dna', title: 'Jejak Bukan Hanya Foto', text: 'Sampel kotoran dapat dianalisis secara genetik untuk mempelajari jenis kelamin, struktur populasi, dan hubungan antarpopulasi.' },
+    { id: 'jawa', title: 'Survei Seluas Pulau Jawa', text: 'Java-Wide Leopard Survey memantau habitat macan tutul dari Jawa bagian barat hingga timur melalui banyak bentang alam.' },
+    { id: 'baseline', title: 'Data Awal, Bukan Total Populasi', text: 'Jumlah individu yang dikenali dari survei adalah data awal. Angka itu bukan jumlah seluruh macan tutul jawa di alam.' },
+    { id: 'fragmentasi', title: 'Habitat yang Terpisah', text: 'Kantong hutan yang terpisah menyulitkan macan mencari wilayah jelajah dan pasangan. Karena itu, konektivitas habitat perlu dijaga.' },
+    { id: 'permukiman', title: 'Mengapa Mendekati Permukiman?', text: 'Perubahan habitat dan jalur jelajah dapat mendorong macan keluar dari hutan. Menjaga habitat membantu mengurangi perjumpaan dengan manusia.' },
+    { id: 'srak', title: 'Data Menjadi Aksi', text: 'Foto, lokasi, jejak, dan data genetik membantu menentukan kawasan prioritas dan memperkuat strategi konservasi macan tutul jawa.' },
+    { id: 'survei', title: 'Dari Rekaman Menjadi Pengetahuan', text: 'Survei di Bromo Tengger Semeru menggabungkan kamera pengintai dan sampel kotoran untuk mempelajari individu serta satwa mangsa.', source: 'Laporan kemajuan JWLS · Januari dua ribu dua puluh empat–Agustus dua ribu dua puluh enam' },
+    { id: 'lapangan', title: 'Penjaga Hutan di Balik Layar', text: 'Komunitas lokal terlatih membantu memasang dan mengambil kamera. Konservasi tumbuh lewat kerja bersama di lapangan.', source: 'Laporan kemajuan JWLS · Kegiatan lapangan' },
+    { id: 'latihkamera', title: 'Belajar Memasang Kamera', text: 'Pelatihan survei dan analisis membantu tim mengubah rekaman satwa menjadi dasar perencanaan konservasi.', source: 'Siaran pers BCA · Mei dua ribu dua puluh enam' },
+    { id: 'luas', title: 'Habitat Harus Cukup Luas', text: 'Macan tutul membutuhkan habitat aman dan cukup luas untuk bergerak, berburu, berlindung, dan berkembang biak.' },
+    { id: 'terhubung', title: 'Hutan Perlu Terhubung', text: 'Keterhubungan antarkawasan membantu satwa mencari makanan, pasangan, dan wilayah jelajah yang lebih aman.' },
+    { id: 'rumah', title: 'Hutan Adalah Rumah Mereka', text: 'Perubahan bentang alam akibat aktivitas manusia dapat mendorong macan tutul keluar dari habitat alaminya.' },
+    { id: 'aman', title: 'Jangan Mengganggu Satwa', text: 'Jika berjumpa macan tutul, jangan mendekat, mengejar, mengelilingi, atau memprovokasi. Beri ruang agar satwa dapat menjauh.' },
+    { id: 'waktu', title: 'Berbagi Waktu dengan Satwa', text: 'Pengaturan waktu aktivitas manusia dapat mengurangi perjumpaan di jalur yang masih digunakan satwa liar.' },
+    { id: 'kolaborasi', title: 'Konservasi Perlu Kolaborasi', text: 'JWLS di Bromo Tengger Semeru melibatkan Bakti BCA, Kementerian Kehutanan, pengelola taman nasional, dan SINTAS Indonesia.' },
+    { id: 'baktibca', title: 'Dukungan Bakti BCA', text: 'Sejak dua ribu dua puluh empat, Bakti BCA mendukung JWLS untuk memperkuat konservasi berbasis data dan penyusunan strategi perlindungan macan tutul jawa.' },
+    { id: 'riset', title: 'Riset Sebelum Bertindak', text: 'Konservasi yang tepat dimulai dari data yang dapat dipertanggungjawabkan, bukan hanya dari perkiraan.' },
+    { id: 'masyarakat', title: 'Masyarakat Ikut Menjaga', text: 'Pengetahuan dan keterlibatan masyarakat sekitar hutan membantu menjaga habitat serta mengurangi risiko konflik dengan satwa.' }
   ],
   /* Fakta yang ditampilkan lebih dulu di setiap sesi. */
-  priorityFacts: ['kumbang', 'sidikjari', 'terakhir', 'gamenote', 'roset'],
+  priorityFacts: ['baktibca', 'sidikjari', 'survei', 'lapangan', 'kumbang'],
   /* Fakta khusus saat stasiun malam. */
-  nightFacts: ['inframerah', 'mata'],
+  nightFacts: ['kamera', 'kumbang'],
 
   actions: [
     'Jangan membeli produk dari satwa liar.',

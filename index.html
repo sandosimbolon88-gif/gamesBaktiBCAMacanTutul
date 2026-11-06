@@ -27,8 +27,13 @@
           <div class="pill hud-time"><span class="lbl" data-t="ui.time"></span><span id="hud-time" class="val">0:00</span>
             <div class="bar"><span id="hud-timebar"></span></div></div>
         </div>
+        <div id="hud-bonus" class="hud-bonus">Bonus lintasan · +5 poin</div>
         <div id="hud-ir" class="ir-tag">IR</div>
+        <button type="button" id="btn-reset-view" class="btn btn-small hud-reset-view">Lihat Semua</button>
+        <button type="button" id="btn-skip-station" class="btn btn-small hud-skip-station">Ganti stasiun (−1 poin)</button>
       </div>
+
+      <button type="button" id="btn-play-menu" class="btn btn-small play-menu hidden" data-t="ui.playMenu" title="Menu utama (Esc)" aria-keyshortcuts="Escape"></button>
 
       <div id="banner" class="banner"></div>
       <div id="bubbles"></div>
@@ -37,12 +42,14 @@
       <section id="screen-attract" class="screen">
         <div class="attract-shade"></div>
         <div class="attract-main">
-          <div class="kicker" data-t="credit"></div>
+          <div class="brand-line"><span class="brand-word">bakti<span>BCA</span></span><span class="edition">EKSPEDISI HUTAN JAWA</span></div>
           <h1 class="game-title" id="attract-title"></h1>
           <p class="tagline" data-t="tagline"></p>
           <button class="btn btn-primary btn-big pulse" id="btn-start" data-t="ui.start"></button>
-          <div class="hint-touch" data-t="ui.touchToStart"></div>
+          <div class="hint-touch">Cari jejaknya. Kenali satwanya. Jaga hutannya.</div>
+          <div class="mission-meta"><span>◷ <b id="session-length">3 menit</b> petualangan</span><span>✦ Bonus satwa bergerak</span></div>
         </div>
+        <div class="habitat-label"><span>HABITAT MACAN TUTUL JAWA</span><b>Bromo Tengger Semeru</b></div>
         <div class="attract-side">
           <div class="card fact-card-mini">
             <div class="card-kicker" data-t="ui.didYouKnow"></div>
@@ -55,6 +62,7 @@
           </div>
         </div>
         <div class="attract-tools">
+          <button class="btn btn-small" id="btn-jwls">Kenali JWLS ↗</button>
           <button class="btn btn-small" id="btn-board" data-t="ui.boardButton"></button>
           <button class="btn btn-small btn-icon" id="btn-fullscreen" aria-label="Layar penuh" title="Layar penuh">
             <svg viewBox="0 0 24 24" width="1em" height="1em"><path fill="currentColor" d="M4 9V4h5v2H6v3H4zm10-5h6v5h-2V6h-4V4zM4 15h2v3h3v2H4v-5zm14 3v-3h2v5h-6v-2h4z"/></svg>
@@ -70,6 +78,7 @@
           <h2 data-t="ui.briefTitle"></h2>
           <p class="lead" data-t="ui.briefText"></p>
           <div class="rules" id="rules"></div>
+          <p class="competition-note">Macan +3 / malam +5 · Bonus macan +5 / malam +7 · Semua pengecoh −2 poin &amp; −5 detik · Skip −1 · Cakaran +1 · Skor minimum nol</p>
           <button class="btn btn-primary btn-big" id="btn-go" data-t="ui.go"></button>
         </div>
       </section>
@@ -81,8 +90,8 @@
           <div class="card-kicker" data-t="ui.didYouKnow"></div>
           <h2 id="fact-title"></h2>
           <p class="lead" id="fact-text"></p>
-          <div class="progress"><span id="fact-progress"></span></div>
-          <button class="btn btn-primary" id="btn-fact-next" data-t="ui.next"></button>
+          <p class="source-note" id="fact-source"></p>
+          <button class="btn btn-primary" id="btn-fact-next">Lanjut ke stasiun selanjutnya</button>
         </div>
       </section>
 
@@ -93,6 +102,7 @@
             <div class="card-kicker" data-t="ui.resultKicker"></div>
             <h2 id="result-title"></h2>
             <div class="score-big"><span id="result-score">0</span><small data-t="ui.resultUnit"></small></div>
+            <p class="result-breakdown" id="result-breakdown"></p>
             <div class="stats">
               <div><b id="result-stations">0</b><span data-t="ui.stations"></span></div>
               <div><b id="result-mistakes">0</b><span data-t="ui.mistakes"></span></div>
@@ -127,6 +137,17 @@
             <button class="btn" id="btn-home" data-t="ui.home"></button>
             <button class="btn btn-primary" id="btn-again" data-t="ui.again"></button>
           </div>
+        </div>
+      </section>
+
+      <section id="overlay-jwls" class="screen dim" role="dialog" aria-modal="true" aria-labelledby="jwls-title">
+        <div class="panel jwls-panel">
+          <div class="card-kicker">Bakti BCA · Bakti Lingkungan</div>
+          <h2 id="jwls-title">Dari jejak, jadi harapan.</h2>
+          <p class="lead">Java Wide Leopard Survey (JWLS) mengumpulkan data macan tutul jawa untuk membantu perencanaan konservasi. Bakti BCA mendukung survei di Bromo Tengger Semeru bersama Kementerian Kehutanan, pengelola taman nasional, dan SINTAS Indonesia.</p>
+          <div class="jwls-grid"><div><b>Amati tanpa mengganggu</b><p>Kamera pengintai merekam satwa di habitatnya. Pola roset membantu peneliti mengenali individu.</p></div><div><b>Jaga rumah mereka</b><p>Hutan yang aman dan terhubung membantu satwa mencari makan, berlindung, dan berkembang biak.</p></div></div>
+          <p class="source-note">Sumber: laporan kemajuan JWLS Januari 2024–Agustus 2026 yang disertakan panitia; siaran pers BCA, 4 Mei 2026. Contoh satwa hutan Jawa juga merujuk publikasi BBKSDA Jawa Timur, 11 Agustus 2026, tentang Gunung Wilis. Ilustrasi dan kepadatan satwa merupakan simulasi.</p>
+          <div class="row"><button class="btn" id="btn-jwls-source">Baca siaran pers BCA ↗</button><button class="btn btn-primary" id="btn-jwls-close">Kembali menjelajah</button></div>
         </div>
       </section>
 
@@ -166,17 +187,19 @@
       <div id="loading" class="loading">Menyiapkan hutan…</div>
     </div>
   </div>
-
   <script src="js/config.js"></script>
   <script src="js/content.js"></script>
   <script src="js/util.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/art/leopard.js"></script>
   <script src="js/art/animals.js"></script>
+  <script src="js/art/animal-poses.js"></script>
   <script src="js/art/forest.js"></script>
+  <script src="js/motion.js"></script>
   <script src="js/scene.js"></script>
   <script src="js/leaderboard.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/bonus.js"></script>
   <script src="js/game.js"></script>
   <script src="js/main.js"></script>
 </body>

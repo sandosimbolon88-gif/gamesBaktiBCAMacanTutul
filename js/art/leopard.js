@@ -222,8 +222,104 @@
 
   /* ---------- pose (koordinat lokal, menghadap kanan, tanah di y=0) ---------- */
   const POSES = {
+    crouch() {
+      const g=POSES.lie();
+      g.bounds=[-240,-116,170,14];
+      g.parts[0].d='M -94 -23 C -151 -39 -181 -20 -220 -30';
+      g.parts[0].tip='M -202 -25 L -220 -30';
+      g.parts[3].d='M -105 -19 C -111 -67 -63 -79 -17 -70 C 31 -66 80 -62 99 -35 L 76 -10 L -79 -8 Z';
+      g.parts[1].d='M 62 -28 Q 97 -30 88 -9';g.parts[2].e=[94,-8,12,6,0];
+      g.parts[5].d='M 62 -24 Q 92 -19 104 -7';g.parts[6].e=[112,-6,13,6,0];
+      g.head={x:123,y:-53,s:.97,turn:.65,tilt:.08};
+      return g;
+    },
+    sniff(o) {
+      const g=POSES.walk(o);
+      g.bounds=[-235,-138,200,15];
+      g.parts[11].d='M 45 -100 Q 90 -102 117 -69 L 146 -42 L 122 -18 Q 98 -45 70 -53 Z';
+      g.head={x:149,y:-35,s:1,turn:.7,tilt:.30};
+      return g;
+    },
+    stretch(o) {
+      const g=POSES.walk(o);g.bounds=[-245,-200,207,15];
+      g.parts[0].d='M -88 -108 Q -142 -176 -190 -153 Q -225 -136 -224 -164';
+      g.parts[0].tip='M -213 -151 Q -225 -151 -224 -164';
+      g.parts[5].d='M -100 -123 Q -87 -170 -48 -141 Q -8 -99 52 -61 L 91 -38 L 62 -20 Q -5 -39 -65 -80 Z';
+      g.parts[6].e=[-72,-103,29,43,-.16];
+      g.parts[3].d='M -76 -104 L -93 -7';g.parts[4].e=[-89,-7,12,6,0];
+      g.parts[7].d='M -60 -102 Q -68 -49 -70 -7';g.parts[8].e=[-64,-7,13,7,0];
+      g.parts[1].d='M 55 -40 L 126 -8';g.parts[2].e=[132,-7,12,6,0];
+      g.parts[9].d='M 67 -35 L 150 -7';g.parts[10].e=[158,-6,13,7,0];
+      g.parts[11].d='M 42 -66 Q 84 -84 116 -55 L 133 -27 L 83 -20 Z';
+      g.head={x:136,y:-48,s:.98,turn:.6,tilt:.12};return g;
+    },
+    groom(o) {
+      const g=POSES.sit(o);g.bounds=[-96,-203,116,17];
+      g.parts[6].d='M 38 -91 Q 82 -99 63 -132';
+      g.parts[7].e=[61,-134,12,9,-.4];
+      g.head={x:39,y:-144,s:1.03,turn:.6,tilt:.48};return g;
+    },
+    curl() {
+      return {bounds:[-137,-133,145,18],shadow:[-5,1,102,9],parts:[
+        {k:'shape',d:'M -104 -13 C -127 -72 -79 -117 -14 -112 C 55 -115 108 -80 102 -33 Q 87 9 -49 6 Z',f:'body',own:true,body:{shade:[-3,-8,105,20],hi:[-27,-98,68,9],belly:[20,-28,43,26,.2]}},
+        {k:'ell',e:[-63,-43,33,35,-.4],f:'body',own:true},
+        {k:'line',d:'M -83 -14 C -25 29 93 19 117 -26 Q 123 -44 99 -40',w:17,f:'spot',tail:true,own:true,tip:'M 117 -26 Q 123 -44 99 -40'},
+        {k:'ell',e:[66,-9,15,8,0],f:'spot',own:true}
+      ],head:{x:64,y:-50,s:1,turn:-.15,tilt:-.32}};
+    },
+    scratch() {
+      return {bounds:[-136,-260,150,18],shadow:[-20,0,81,9],parts:[
+        {k:'line',d:'M -48 -45 Q -98 -25 -117 5 Q -127 18 -131 1',w:14,f:'spot',tail:true,tip:'M -117 5 Q -127 18 -131 1'},
+        {k:'line',d:'M -27 -70 L -34 -7',w:19,f:'spot',far:true},
+        {k:'ell',e:[-28,-5,15,7,0],f:'spot',far:true},
+        {k:'shape',d:'M -51 -46 C -65 -99 -21 -158 26 -181 Q 48 -191 67 -174 L 52 -124 Q 14 -106 5 -41 Z',f:'body',own:true,body:{shade:[-20,-59,45,23],hi:[15,-153,25,12]}},
+        {k:'ell',e:[-28,-51,28,33,-.35],f:'body',own:true},
+        {k:'line',d:'M -22 -51 L -2 -7',w:20,f:'spot',own:true},
+        {k:'ell',e:[6,-5,16,8,0],f:'spot',own:true},
+        {k:'line',d:'M 39 -155 Q 71 -190 119 -185',w:16,f:'spot',own:true,far:true},
+        {k:'ell',e:[125,-185,13,8,0],f:'spot',own:true,far:true},
+        {k:'line',d:'M 51 -148 Q 93 -162 124 -208',w:18,f:'spot',own:true},
+        {k:'ell',e:[129,-212,12,9,-.45],f:'spot',own:true}
+      ],head:{x:68,y:-211,s:1,turn:.7,tilt:-.12}};
+    },
+    climb() {
+      return {bounds:[-142,-286,145,118],shadow:null,parts:[
+        {k:'line',d:'M -38 -25 C -89 6 -67 69 -111 95 Q -133 100 -132 79',w:15,f:'spot',tail:true,tip:'M -111 95 Q -133 100 -132 79'},
+        {k:'shape',d:'M -52 -32 Q -71 -113 -16 -170 L 21 -196 Q 55 -200 64 -173 L 31 -91 Q 10 -62 9 -12 Z',f:'body',own:true,body:{shade:[-27,-45,30,33],hi:[12,-150,15,24]}},
+        {k:'ell',e:[-23,-35,26,35,-.5],f:'body',own:true},
+        {k:'line',d:'M -22 -38 Q 5 -17 72 -10',w:18,f:'spot',own:true},
+        {k:'ell',e:[80,-9,12,8,0],f:'spot',own:true},
+        {k:'line',d:'M -17 -65 Q 29 -52 83 -79',w:16,f:'spot',own:true,far:true},
+        {k:'ell',e:[89,-82,11,8,-.4],f:'spot',own:true,far:true},
+        {k:'line',d:'M 32 -164 Q 59 -194 88 -229',w:17,f:'spot',own:true},
+        {k:'ell',e:[92,-235,12,9,-.5],f:'spot',own:true},
+        {k:'line',d:'M 20 -162 Q 68 -153 109 -184',w:15,f:'spot',own:true,far:true},
+        {k:'ell',e:[116,-187,11,8,-.35],f:'spot',own:true,far:true}
+      ],head:{x:39,y:-237,s:1,turn:.6,tilt:-.20}};
+    },
+    run(o) {
+      const geom = POSES.walk(Object.assign({}, o, { gait: 0 }));
+      const ph = o.gait || 0, reach = Math.cos(ph), tuck = Math.sin(ph);
+      const fore = 93 + reach * 65, hind = -73 - reach * 61;
+      const fy = -8 - Math.max(0, tuck) * 47, hy = -8 - Math.max(0, -tuck) * 40;
+      geom.bounds = [-265, -180, 230, 30];
+      geom.parts[0].d = `M -86 -78 C -140 -90 -169 -51 -217 -60 Q -239 -68 -232 -86`;
+      geom.parts[0].tip = 'M -217 -60 Q -239 -68 -232 -86';
+      geom.parts[1].d = `M 58 -66 Q ${fore-25} -48 ${fore-17} ${fy-5}`;
+      geom.parts[2].e = [fore-14, fy-5, 12, 6.5, 0];
+      geom.parts[3].d = `M -74 -62 Q ${hind-12} -45 ${hind-15} ${hy-5}`;
+      geom.parts[4].e = [hind-12, hy-5, 12, 6.5, 0];
+      geom.parts[7].d = `M -60 -54 Q ${hind+13} -40 ${hind} ${hy}`;
+      geom.parts[8].e = [hind+5, hy, 13, 7, 0];
+      geom.parts[9].d = `M 74 -70 Q ${fore-24} -43 ${fore} ${fy}`;
+      geom.parts[10].e = [fore+6, fy, 13, 7, 0];
+      geom.head.tilt = -.08 + tuck * .04;
+      return geom;
+    },
     walk(o) {
       const kw = o.variant === 'kuwuk';
+      const gait = o.gait == null ? 0 : Math.sin(o.gait) * 23;
+      const lift = o.gait == null ? 0 : Math.cos(o.gait) * 5;
       return {
         bounds: [kw ? -170 : -235, -170, 162, 14],
         shadow: [0, 0, 118, 10],
@@ -231,17 +327,17 @@
           kw
             ? { k: 'line', d: 'M -86 -78 C -116 -70 -134 -52 -150 -34', w: 13, f: 'spot', tail: true, tip: 'M -144 -40 C -146 -38 -148 -36 -150 -34' }
             : { k: 'line', d: 'M -86 -78 C -130 -66 -146 -18 -184 -12 C -204 -9 -218 -22 -214 -40', w: 15, f: 'spot', tail: true, tip: 'M -205 -13 C -214 -18 -217 -30 -214 -40' },
-          { k: 'line', d: 'M 58 -66 L 64 -34 L 60 -7', w: 18, f: 'spot', far: true },
-          { k: 'ell', e: [64, -7, 12, 6.5, 0], f: 'spot', far: true },
-          { k: 'line', d: 'M -74 -62 Q -94 -40 -88 -26 L -82 -7', w: 18, f: 'spot', far: true },
-          { k: 'ell', e: [-78, -7, 12, 6.5, 0], f: 'spot', far: true },
+          { k: 'line', d: `M 58 -66 L ${64-gait*.4} -34 L ${60-gait} ${-7-Math.max(0,lift)}`, w: 18, f: 'spot', far: true },
+          { k: 'ell', e: [64-gait, -7-Math.max(0,lift), 12, 6.5, 0], f: 'spot', far: true },
+          { k: 'line', d: `M -74 -62 Q -94 -40 ${-88+gait*.4} -26 L ${-82+gait} ${-7-Math.max(0,-lift)}`, w: 18, f: 'spot', far: true },
+          { k: 'ell', e: [-78+gait, -7-Math.max(0,-lift), 12, 6.5, 0], f: 'spot', far: true },
           { k: 'shape', d: 'M -96 -84 C -66 -104 6 -98 52 -104 C 82 -108 102 -92 98 -68 C 95 -48 74 -42 46 -45 C 14 -40 -30 -38 -68 -44 C -98 -48 -114 -68 -96 -84 Z',
             f: 'body', own: true, body: { belly: [-6, -37, 86, 12, 0], shade: [-4, -44, 104, 18], hi: [-10, -96, 80, 8] } },
           { k: 'ell', e: [-62, -70, 30, 32, -0.2], f: 'body', own: true },
-          { k: 'line', d: 'M -60 -54 Q -82 -36 -76 -24 L -66 -7', w: 20, f: 'spot', own: true },
-          { k: 'ell', e: [-60, -7, 13, 7, 0], f: 'spot', own: true },
-          { k: 'line', d: 'M 74 -70 Q 84 -40 84 -28 L 86 -7', w: 20, f: 'spot', own: true },
-          { k: 'ell', e: [92, -7, 13, 7, 0], f: 'spot', own: true },
+          { k: 'line', d: `M -60 -54 Q -82 -36 ${-76-gait*.4} -24 L ${-66-gait} ${-7-Math.max(0,lift)}`, w: 20, f: 'spot', own: true },
+          { k: 'ell', e: [-60-gait, -7-Math.max(0,lift), 13, 7, 0], f: 'spot', own: true },
+          { k: 'line', d: `M 74 -70 Q 84 -40 ${84+gait*.4} -28 L ${86+gait} ${-7-Math.max(0,-lift)}`, w: 20, f: 'spot', own: true },
+          { k: 'ell', e: [92+gait, -7-Math.max(0,-lift), 13, 7, 0], f: 'spot', own: true },
           { k: 'shape', d: 'M 46 -100 C 66 -126 96 -134 112 -120 L 116 -84 C 100 -72 84 -62 70 -58 Z', f: 'body' }
         ],
         head: { x: 114, y: -120, s: 1, turn: 0.45, tilt: 0 }
@@ -315,6 +411,8 @@
     }
   };
   A.POSES = Object.keys(POSES);
+  A.LEOPARD_NEW_POSES=['crouch','sniff','stretch','groom','curl','scratch','climb'];
+  A.LEOPARD_STATIC_POSES=A.POSES.filter(p=>p!=='run');
 
   function pathOf(p) {
     if (p.d) return new Path2D(p.d);
@@ -509,5 +607,39 @@
     sp.variant = variant;
     sp.pose = o.pose;
     return sp;
+  };
+
+  // Kepala terpisah: bonus mengintip tidak pernah memiliki tubuh yang bisa diklik.
+  A.leopardHeadSprite = function (o) {
+    const key = o.variant === 'black' && o.night ? 'blackIR' : o.variant || 'spotted';
+    const pal = A.PAL[key];
+    return A.makeSprite(o, [-44, -46, 44, 40], g =>
+      drawHead(g, pal, getPatterns(g, key, pal), { x:0, y:0, s:1.1, turn:0, tilt:0 }, o, 2.6));
+  };
+
+  // Ekor terpisah untuk bonus: tidak menyertakan kepala atau badan tersembunyi.
+  A.leopardTailSprite = function (o) {
+    const key=o.variant==='black'&&o.night?'blackIR':o.variant||'spotted',pal=A.PAL[key];
+    return A.makeSprite(o,[-90,-160,145,65],g=>{
+      const sway=Math.sin(o.gait||0)*22,pats=getPatterns(g,key,pal);
+      const d=new Path2D(`M -53 47 C -55 -8 -17 -107 24 -91 C 65 -75 ${101+sway} -96 ${85+sway} -137`);
+      g.lineCap='round';g.lineJoin='round';g.strokeStyle=pal.outline;g.lineWidth=23;g.stroke(d);
+      g.strokeStyle=pats.spot;g.lineWidth=17;g.stroke(d);
+      const tip=new Path2D(`M ${92+sway} -111 Q ${93+sway} -124 ${85+sway} -137`);
+      g.strokeStyle=pal.spot;g.lineWidth=18;g.stroke(tip);
+    });
+  };
+
+  A.scratchSprite = function (o) {
+    return A.makeSprite(o, [-24, -55, 24, 55], g => {
+      g.lineCap = 'round';
+      for (let i = 0; i < 4; i++) {
+        const x = -17 + i * 10, y = -44 + (i % 2) * 6;
+        const cut = new Path2D(`M ${x+5} ${y} Q ${x-6} -6 ${x-1} ${43-i*3}`);
+        g.strokeStyle = '#372a1d'; g.lineWidth = 6; g.stroke(cut);
+        g.strokeStyle = '#e0b979'; g.lineWidth = 3; g.stroke(cut);
+        g.strokeStyle = '#f2d59a'; g.lineWidth = 1; g.stroke(cut);
+      }
+    });
   };
 })();

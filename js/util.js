@@ -1,8 +1,10 @@
 (function () {
   'use strict';
   const J = (window.JSMT = window.JSMT || {});
-  J.W = 1600;
-  J.H = 900;
+  J.W = 2400;
+  J.H = 1350;
+  J.VW = 1600;
+  J.VH = 900;
   J.TAU = Math.PI * 2;
   J.R = 1;
 

@@ -1,140 +1,137 @@
-# Jejak Si Macan Tutul
+# Jejak Si Macan Tutul · V8 Kompetisi Expo
 
-Game edukasi bergaya *cari-cari* untuk booth pameran **Program Bakti Lingkungan · Bakti BCA**.
-Pemain berperan sebagai peneliti yang memeriksa rekaman kamera pengintai dan harus menemukan
-**macan tutul jawa** yang bersembunyi di hutan sebelum waktu habis.
+Game edukasi Bakti BCA: cari macan tutul jawa di hutan Bromo Tengger Semeru, kenali satwa lain, dan pelajari Java Wide Leopard Survey (JWLS).
 
-- Jumlah macan tutul di setiap hutan **acak**. Setelah semuanya ditemukan, game langsung pindah ke hutan berikutnya.
-- Macan tutul yang diklik atau disentuh langsung **di-highlight** dan **skor bertambah 1**.
-- Skor disimpan di **papan skor** perangkat (Hari Ini dan Sepanjang Pameran).
-- Bisa dimainkan dengan **mouse (PC)** maupun **layar sentuh**.
-- Semua gambar dibuat otomatis oleh kode, bergaya **kartun**. Game ini **tanpa logo resmi** dan bisa **jalan offline**.
+Versi ini melanjutkan **attachment Macan Tutul V2**, termasuk durasi awal tiga menit, hutan lebat, zoom, pergantian stasiun, dan kartu fakta yang dibaca tanpa mengurangi waktu permainan.
 
-## Cara menjalankan
+![Bonus ekor dan macan merunduk dari semak V8](docs/living-forest.gif)
 
-**Paling mudah (satu file, bisa dipindah antar PC):** pakai **`dist/jejak-si-macan-tutul.html`**.
-Salin file ini ke flashdisk atau PC mana pun, lalu buka dengan Chrome atau Edge. Tidak perlu internet atau instalasi.
-Panduan singkat untuk panitia ada di `dist/PANDUAN-PINDAH-PC.txt`.
+[Demo bonus macan lari dan mengintip](docs/bonus-demo.gif)
 
-**Dari folder proyek:** buka `index.html` dengan Google Chrome atau Microsoft Edge (klik dua kali file-nya).
+[Atlas 12 pose macan utama](docs/pose-macan.png) · [Atlas pose pengecoh](docs/pose-pengecoh.png)
 
-**Disarankan untuk pameran** adalah menjalankan server lokal. Dengan cara ini game tetap jalan tanpa internet dan layar tidak meredup sendiri:
+## Menjalankan di booth
 
-```bash
-python3 -m http.server 8080
+1. Salin **`dist/jejak-si-macan-tutul.html`** ke PC booth.
+2. Buka dengan Chrome atau Edge. Semua gambar, kode, dan materi permainan sudah berada di dalam file; internet tidak diperlukan untuk bermain.
+3. Pilih tombol layar penuh atau tekan F11. Gunakan monitor/touchscreen landscape.
+4. Coba satu sesi di perangkat booth sebelum acara. Nonaktifkan sleep dan screen saver melalui pengaturan PC.
+
+Bacaan siaran pers pada menu **Kenali JWLS** membutuhkan internet. Permainan dan kartu edukasi tetap berjalan tanpa koneksi. Penyimpanan skor untuk file lokal bergantung pada pengaturan browser: selalu uji simpan dan cadangan di PC tujuan.
+
+## Ukuran target dan menu panitia
+
+Macan utama diperbesar dengan batas minimum yang tetap berlaku pada level lanjut. Anak macan tetap lebih kecil secara proporsional. Bonus lari dan kepala mengintip juga diperbesar; pengecoh mempertahankan ukuran sebelumnya.
+
+Tombol **Menu utama** di kanan atas layar permainan tetap tersedia ketika kartu edukasi terbuka. Konfirmasi membatalkan sesi tanpa menyimpan skor sementara; batal melanjutkan sesi yang sama. Skor yang sudah tersimpan tidak diubah. **Esc** dapat membuka konfirmasi yang sama. **Ctrl+Shift+A** saat bermain membuka konfirmasi keluar lalu panel PIN admin, sehingga panitia bisa mengubah durasi dan suara sebelum memulai sesi baru.
+
+## Komposisi acak dan hutan rimbun
+
+Setiap stasiun memilih salah satu komposisi, lalu mengacak jumlah, jenis, posisi, pose, dan warna varian satwa. Angka target sudah termasuk anak macan.
+
+| Variasi | Macan utama | Pengecoh |
+| --- | --- | --- |
+| Jejak langka | 3 | 12–16 |
+| Satwa beragam | 4 | 10–14 |
+| Lebih banyak target | 5–6 | 9–13 |
+
+Jumlah macan tidak terus bertambah pada level lanjut. Tantangan berasal dari kamuflase, tutupan hutan, mode pencahayaan, dan pilihan pengecoh. Batas ukuran macan tetap dipertahankan. Hutan diacak dari seed baru pada setiap stasiun dan sesi; kepadatan konfigurasi permainan dijaga pada 0,94–1,00. Seed yang sama mereproduksi susunan hutan dan satwa yang sama; noise inframerah bersifat dekoratif.
+
+Urutan bonus lari, semak dan kepala mengintip, arah gerakan, lokasi, serta jeda kemunculannya juga diacak dalam batas waktu yang ditentukan.
+
+## Pose dan penempatan
+
+Macan utama memiliki **12 pose**: merunduk/mengendap, mengendus tanah, meregangkan tubuh, merawat bulu, meringkuk, mencakar batang, memanjat, berjalan, duduk waspada, berbaring, bersantai di dahan, dan mengintip. Setiap stasiun mengawali pemilihan dengan salah satu pose tanah baru; pose di pohon tidak lagi diwajibkan. Anak macan juga mendapat variasi pose.
+
+Keempat belas jenis pengecoh memiliki **3–5 pose per jenis** (57 variasi total), sesuai perilaku: kijang/kancil berdiri, berjalan, merumput dan waspada; mamalia kecil mengendus atau merunduk; primata berjalan atau meraih dahan; burung mencari makan, menoleh, dan membuka sayap; trenggiling meringkuk dan landak mengembangkan duri.
+
+Semua stasiun memakai pola **tersebar**. Posisi diacak dalam zona horizontal yang berbeda: minimal 380 satuan dunia antarpusat, minimal 120 antarbatas siluet, serta bentang target meliputi sekurangnya enam puluh persen lebar hutan. Batas yang sama berlaku untuk anak macan; anak tidak lagi otomatis ditempatkan dekat induknya. Pola berkelompok/campuran dihapus. Pose memanjat/mencakar dipasang pada batang; pose bertengger/meraih dahan memakai lokasi dahan; pose tanah berbaur dengan pakis dan serasah. Tanaman penutup dan mask klik dihitung dari pose sebenarnya. Satwa dalam permainan adalah simulasi gabungan rekaman pengamatan, bukan gambaran populasi pada satu titik.
+
+## Hutan bergerak dan stasiun malam
+
+Sebagian pengecoh memakai animasi: kucing kuwuk dan landak berjalan bolak-balik pada lintasan pendek, monyet bergelantungan dari titik dahan, dan elang terbang sambil mengepakkan sayap pada stasiun pagi. Musang dan bajing juga dapat memanjat batang pohon. Semua termasuk populasi pengecoh yang sama, bukan penambahan target. Warna kuwuk dan musang tetap dekat dengan warna macan, dengan pola dan anatomi pembeda.
+
+Lintasan dibatasi agar tidak menutupi target utama atau cakaran. Tanaman dan objek di depan memotong gambar serta area klik dengan mask yang sama. Pengecoh dapat tertutup sementara selama bergerak; klik pada bagian yang tertutup tidak dihukum. Menekan satwa yang terlihat lalu melepas ketika ia bergerak tetap mencatat satwa yang disentuh; drag/pinch tetap menjadi navigasi. Gerak satwa dan daun berhenti selama jeda/kartu fakta.
+
+Empat awan bergerak pelan di celah kanopi pada lapisan di belakang hutan. Batang, daun, satwa, dan area klik tetap berada di depannya; awan tidak membuka tutupan hutan. Gerak awan ikut berhenti saat jeda.
+
+Rumpun daun kecil pada pohon bergoyang halus; area goyangnya ditempatkan di luar area satwa dan petunjuk sehingga tidak menciptakan sasaran atau penalti tersembunyi.
+
+| Waktu stasiun | Macan utama | Bonus macan |
+| --- | --- | --- |
+| Pagi, siang, senja | +3 | +5 |
+| Malam (inframerah) | +5 | +7 |
+
+HUD menunjukkan nilai yang berlaku di stasiun tersebut. Pengecoh diam maupun bergerak tetap −2 poin dan −5 detik per klik; cakaran dan skip tetap +1 dan −1. Hasil, CSV dan cadangan memakai poin temuan aktual sehingga sesi campuran siang/malam tetap dapat direkonsiliasi.
+
+## Aturan
+
+- **Target utama: +3 poin, malam +5** untuk tiap macan tutul atau macan kumbang. Temukan semuanya untuk menyelesaikan stasiun.
+- **Bonus satwa: +5 poin, malam +7** untuk lari melompat, lintasan semak, kepala mengintip, ekor menyembul, atau macan merunduk yang naik dari semak. Gerak lari memiliki dua belas frame animasi dan fase tubuh melayang. Bonus tidak masuk indikator target utama, tidak wajib ditemukan, dan tidak memberi penalti jika terlewat.
+- Bonus pertama muncul setelah dua hingga empat detik waktu main aktif. Maksimal empat kemunculan per stasiun dengan jeda empat hingga enam detik: salah satu lintasan lari/semak, kepala mengintip, ekor, dan tubuh merunduk; urutannya diacak. Durasi: lari 3,2 detik, lintasan semak 2,4 detik, kepala 1,8 detik, ekor 2,2 detik, tubuh merunduk 2,6 detik. Ekor memiliki dua belas frame gerak dan sprite terpisah tanpa kepala/badan tersembunyi. Tanaman menutup tampilan sekaligus area klik; tidak bisa mengeklik bagian tubuh di balik daun. Kartu fakta dan jeda stasiun menghentikan jam bonus.
+- **Cakaran pohon: +1 poin** per kelompok bekas cakaran, sekali saja. Ada dua kelompok per stasiun; keduanya bonus opsional yang tidak masuk target utama. Semua cakaran terang yang digambar pada batang merupakan objek interaktif.
+- Ada **empat belas jenis pengecoh**: kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa, binturong, trenggiling peusing, linsang, monyet ekor panjang, musang luwak, garangan jawa, pelanduk kancil, dan bajing kelapa. Setiap stasiun memuat sembilan hingga enam belas pengecoh dan tiga hingga enam macan utama, sesuai komposisi acak. Pemilihan memprioritaskan jenis berwarna cokelat keemasan, sambil mempertahankan bentuk dan pola pembeda.
+- Setiap klik pada pengecoh, diam maupun bergerak, mengurangi dua poin dan lima detik, termasuk klik ulang pada satwa yang sama. Skor minimum nol; waktu dan jumlah kesalahan tetap dipotong/dicatat ketika skor sudah nol.
+- Scroll atau cubit untuk zoom, geser untuk menjelajah, dan pilih **Lihat Semua** untuk kembali ke tampilan penuh. Menggeser dan mencubit tidak dihitung sebagai jawaban.
+- **Ganti stasiun (−1 poin)** melewati kamera tanpa mengisi target yang belum ditemukan. Skor berkurang satu, dengan minimum nol. Contoh: dari lima macan, tiga sudah ditemukan = sembilan poin → skip → delapan poin tersisa. Klik berulang pada tombol selama transisi tidak menggandakan penalti.
+- Hasil menampilkan jumlah temuan, poin temuan, bonus satwa, cakaran, serta penalti skip dan pengecoh secara terpisah. Skor total = poin temuan + bonus satwa + poin cakaran − penalti skip aktual − penalti pengecoh aktual. Potongan aktual menjaga rekonsiliasi ketika skor sudah nol.
+
+Kepadatan satwa dan pertemuan dalam game merupakan simulasi edukasi, bukan gambaran jumlah satwa di satu lokasi.
+
+## Panel panitia dan data
+
+Ketuk pojok kiri atas beranda lima kali, atau tekan **Ctrl+Shift+A**. PIN awal: **1234**; ganti `adminPin` pada `js/config.js` lalu bangun ulang sebelum acara. PIN ini adalah pengunci antarmuka lokal, bukan autentikasi server.
+
+Panel menyediakan durasi **60 / 90 / 120 / 180 detik**, suara, ekspor CSV, cadangan JSON, pemulihan cadangan, dan penghapusan skor. Durasi bawaan pada perangkat baru adalah **180 detik**. Pengaturan lama yang masih valid dipertahankan.
+
+Skor hanya tersimpan di browser/perangkat tersebut. Untuk pindah PC:
+
+1. Di PC lama, pilih **Simpan cadangan** dan salin berkas JSON bersama HTML game.
+2. Di PC baru, buka game, pilih **Muat cadangan**, lalu pilih JSON. Impor menggabungkan skor dan mengabaikan ID yang sudah ada.
+3. Ekspor CSV untuk rekap; kolom temuan utama, poin temuan, penalti poin pengecoh, jumlah bonus satwa, poin bonus, cakaran, poin cakaran, jumlah skip, penalti skip, dan versi aturan disertakan.
+
+Skor versi lama tidak dihapus otomatis. Karena V8 mengubah populasi dan frekuensi peluang bonus, panitia sebaiknya memulai papan kompetisi baru melalui panel setelah menyimpan cadangan. Jangan membandingkan skor dengan aturan berbeda sebagai satu kompetisi.
+
+## Mengembangkan
+
+Tidak ada dependency runtime atau build framework. Ubah `stationMixes` di `js/config.js` untuk mengatur jumlah satwa; `stages` mengatur habitat dan pencahayaan. Untuk versi multi-file:
+
+```sh
+python -m http.server 8080
 ```
 
-Lalu buka `http://localhost:8080`.
+Buka `http://localhost:8080`. Service worker menyimpan aset untuk penggunaan offline setelah instalasi cache berhasil. Untuk distribusi satu file:
 
-### Mode kiosk (layar penuh, tanpa bilah browser)
-
-Di Windows, buat shortcut Chrome dengan target berikut:
-
-```
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --app=http://localhost:8080 --overscroll-history-navigation=0 --disable-pinch
-```
-
-Tekan `Alt+F4` untuk keluar dari mode kiosk. Selain itu, tombol ⛶ di layar awal juga bisa dipakai untuk layar penuh.
-
-Tips booth:
-- Matikan *sleep* dan *screen saver* di pengaturan daya komputer.
-- Selalu pakai **browser dan alamat yang sama** setiap hari, karena papan skor tersimpan di browser tersebut.
-- Jangan menghapus data browser selama pameran. Ekspor CSV setiap akhir hari sebagai cadangan.
-
-## Alur permainan
-
-1. **Layar awal**: hutan bergerak pelan, fakta "Tahukah kamu?" berganti-ganti, dan 5 skor tertinggi hari ini.
-2. **Briefing**: misi peneliti dan aturan main (macan kumbang juga dihitung, awas satwa pengecoh).
-3. **Bermain** (default 90 detik):
-   - Ada sekitar 3–6 macan tutul per stasiun, tersembunyi di **hutan lebat berlapis**: pohon besar, pohon muda, pakis haji, rotan, semak, rumput tinggi, dan tirai daun dari kanopi. Tanaman bisa berada di depan atau di belakang macan tutul.
-   - **Cahaya belang-belang** (bayangan kanopi dan bintik sinar matahari) jatuh juga di tubuh macan tutul, sehingga siluetnya pecah seperti kamuflase di alam. Pakis kering, daun kering, dan bunga oranye warnanya mirip bulu macan tutul.
-   - **Hanya bagian tubuh yang terlihat yang bisa diklik.** Mengklik semak yang menutupi macan tutul tidak dihitung.
-   - Persembunyian sulit: badan tertutup rimbun daun di dahan (hanya kaki dan ekor yang menjuntai), di balik batang pohon, atau mengintip dari semak.
-   - Kesulitan naik setiap stasiun: hutan makin rapat, bayangan makin gelap, macan tutul makin kecil, dan pengecoh makin banyak. Semuanya bisa diatur di `js/config.js` (`density`, `light`, `camo`, `hide`, `scale`, `minVis`).
-   - Ada mode **Pagi Berkabut**, **Senja**, dan **Malam · Inframerah**. Di mode malam, pemain mencari mata yang menyala.
-   - **Satwa pengecoh** (kucing kuwuk, kijang muncak, ayam hutan merah, landak jawa, lutung jawa, elang jawa): kalau salah pilih, muncul info satwa itu dan waktu berkurang 2 detik.
-   - Bonus waktu +5 detik setiap stasiun bersih, diikuti kartu fakta edukasi.
-   - Kalau lama tidak ada yang ditemukan, game memberi petunjuk berupa daun berguguran lalu lingkaran putus-putus.
-4. **Hasil**: skor, peringkat hari ini, ajakan aksi konservasi, dan isi nama lewat keyboard di layar atau keyboard fisik.
-5. **Papan skor**, lalu otomatis kembali ke layar awal. Game juga kembali ke layar awal kalau ditinggal 45 detik.
-
-## Pindah antar PC (game + data skor)
-
-1. **Game:** salin `dist/jejak-si-macan-tutul.html` ke PC tujuan.
-2. **Data skor:** skor tersimpan di browser masing-masing PC, jadi pindahkan lewat file cadangan:
-   - Di PC lama, buka Panel Admin, pilih **Simpan cadangan**, lalu ambil file `cadangan-jejak-si-macan-tutul-….json` dari folder Downloads.
-   - Di PC baru, buka Panel Admin, pilih **Muat cadangan**, lalu pilih file `.json` tadi.
-   - Skor **digabungkan** dengan skor yang sudah ada di PC baru. Memuat file yang sama berkali-kali **tidak membuat skor dobel**. Pengaturan durasi dan suara ikut terbawa.
-3. Cara yang sama juga berlaku kalau pindah dari `http://localhost` ke versi satu file (atau sebaliknya) di PC yang sama, karena penyimpanannya terpisah.
-
-Setelah mengubah `js/content.js` atau `js/config.js` (misalnya mengganti PIN), buat ulang file tunggalnya:
-
-```bash
+```sh
 node tools/build-single.mjs
 ```
 
-## Panel admin
+Pemeriksa konten mencegah digit dalam `js/content.js` agar angka hasil survei internal tidak ikut masuk tanpa sengaja. Metadata tanggal sumber pada panel informasi terpisah dari pemeriksa ini.
 
-- Buka dengan **ketuk pojok kiri atas layar awal 5 kali**, atau tekan **Ctrl+Shift+A**.
-- PIN bawaan adalah **`1234`**. **Ganti sebelum pameran** di `js/config.js` (`adminPin`).
-- Isinya: durasi sesi (60/90/120 detik), suara nyala/mati, **unduh skor (CSV untuk Excel)**, **simpan/muat cadangan** (untuk pindah PC), hapus skor hari ini, dan hapus semua skor.
+Jalankan regresi browser dengan Python Playwright dan Chromium yang sudah terpasang:
 
-## Mengubah konten dan pengaturan
-
-| Mau mengubah… | File |
-|---|---|
-| Teks, fakta edukasi, info satwa, ajakan aksi | `js/content.js` |
-| Durasi, bonus/penalti waktu, tingkat kesulitan per stasiun, PIN | `js/config.js` |
-| Warna dan tampilan layar | `css/style.css` |
-
-**Aturan konten: tidak boleh ada angka.** Data survei bersifat rahasia. Setiap kali mengubah `js/content.js`, jalankan:
-
-```bash
-node tools/check-no-digits.mjs
+```sh
+python tools/test-game.py
 ```
 
-Skrip ini akan **gagal** kalau ada digit di teks. Angka yang tampil di game hanya angka permainan (skor, waktu, nomor stasiun), yang diisi otomatis.
+Gunakan `CHROMIUM_PATH` jika executable bukan `/usr/bin/chromium`; gunakan `JSMT_TEST_OUTPUT` untuk mengganti folder hasil QA. Pengujian memulai server sementara dan tidak memakai profil browser pengunjung.
 
-Untuk melihat semua gambar satwa dan contoh hutan, buka `tools/preview.html`. Contoh parameter: `?v=scene&stage=3&seed=7&boxes=1`.
+Struktur utama:
 
-## Kaidah alam yang dijaga di gambar kartun
-
-- Badan macan tutul bertutul **roset** (lingkaran terbuka tanpa titik tengah). Kepala dan kaki bertutul **bintik padat**.
-- Perut, dagu, dan moncong berwarna krem. Telinga bulat dengan punggung telinga gelap. Pupil **bulat** seperti kucing besar.
-- Ekor panjang dengan ujung gelap.
-- **Macan kumbang** berbulu hitam, tapi rosetnya masih samar terlihat. Di kamera **inframerah**, rosetnya tampak jelas.
-- **Kucing kuwuk** jauh lebih kecil, bertutul bintik (bukan roset), punya garis putih di wajah, dan ekornya bercincin.
-- Perilaku macan tutul: berbaring di dahan dengan kaki dan ekor menjuntai, duduk, rebahan, berjalan di jalur setapak, dan mengintip dari balik semak. Ada juga bekas cakaran di batang pohon.
-- Ada anak macan tutul di dekat induknya, karena induk betina membesarkan anaknya.
-- Di alam, macan tutul hidup menyendiri. Game menjelaskan hal ini lewat kartu fakta khusus.
-
-## Struktur folder
-
-```
-index.html            halaman game
-css/style.css         tampilan
-js/config.js          pengaturan & tingkat kesulitan
-js/content.js         semua teks (tanpa angka)
-js/util.js            utilitas (RNG ber-seed, dsb.)
-js/art/leopard.js     gambar macan tutul, macan kumbang, kucing kuwuk + efek inframerah
-js/art/animals.js     satwa pengecoh
-js/art/forest.js      pohon, dahan, semak, pakis, daun, kamuflase
-js/scene.js           generator stasiun kamera (acak + jaminan tetap terlihat)
-js/game.js            logika permainan & efek
-js/leaderboard.js     papan skor lokal + ekspor CSV
-js/audio.js           efek suara (disintesis, tanpa file)
-js/ui.js, js/main.js  layar, input, mode kiosk, panel admin
-sw.js                 cache offline
-tools/                pemeriksa "tanpa angka", build satu file, preview aset
-dist/                 versi SATU FILE siap pindah PC + panduan panitia
-docs/PLAN.md          rencana & keputusan
-```
+- `js/scene.js`: penempatan satwa, lapisan tanaman, mask tubuh yang terlihat.
+- `js/motion.js`: pengecoh bergerak, lintasan, mask klik bersama render, dan goyangan daun.
+- `js/bonus.js`: lompatan/lari, kemunculan semak, kepala mengintip, waktu aktif dan mask bonus.
+- `js/game.js`: skor, penalti, transisi, timer dan efek.
+- `js/content.js`: aturan dan kartu edukasi.
+- `js/art/`: ilustrasi vektor satwa dan hutan; `animal-poses.js` menambahkan perilaku/pose pengecoh; `assets/forest-hero.webp`: ilustrasi pembuka.
+- `docs/EXPO-RELEASE.md`: perubahan, sumber, dan batas verifikasi.
 
 ## Sumber edukasi
 
-Isi edukasi diambil dari laporan kemajuan JWLS (Bakti BCA × SINTAS Indonesia; hanya informasi kualitatif, tanpa angka) dan dari sumber publik:
-- Antara Jatim, "Program JWLS identifikasi macan tutul jawa di TNBTS"
-- RRI Voice of Indonesia, "Javan Leopard Survey… Bromo Tengger Semeru"
-- Mongabay Indonesia, liputan macan tutul jawa dan JWLS
-- Kompas, "Mencari jejak macan tutul jawa yang terancam punah"
-- Hedges dkk., "Melanistic leopards reveal their spots: infrared camera traps…", yang menunjukkan roset macan kumbang terlihat di kamera inframerah
+Laporan yang diberikan panitia berjudul **Kajian Struktur Populasi Macan Tutul Jawa serta Preferensi Satwa Mangsanya di Bentang Alam Bromo Tengger Semeru, Jawa Timur — Laporan Kemajuan Januari 2024–Agustus 2026**. Hanya materi kualitatif dipakai; PDF dan angka survei internal tidak dimasukkan ke repo.
+
+Sumber publik: [siaran pers BCA, 4 Mei 2026](https://www.bca.co.id/id/tentang-bca/media-riset/pressroom/siaran-pers/2026/05/04/03/57/demi-keseimbangan-ekosistem-kolaborasi-bakti-bca-untuk-pelestarian-macan-tutul) [publikasi BBKSDA Jawa Timur tentang JWLS Gunung Wilis, 11 Agustus 2026](https://bbksdajawatimur.id/cari-jejak-macan-tutul-di-gunung-wilis-kamera-ungkap-cerita-lain), dan [Konservasi Alam & Keanekaragaman Hayati BCA](https://www.bca.co.id/id/tentang-bca/sustainability/environment/upaya-pengurangan-emisi-grk-operasional/konservasi-alam-and-keanekaragaman-hayati).
+
+Empat jenis pengecoh terbaru adalah contoh satwa hutan Jawa berdasarkan publikasi Gunung Wilis; bukan klaim bahwa semuanya terdeteksi pada survei Bromo Tengger Semeru dalam lampiran.
+
+Ilustrasi pembuka dibuat dengan bantuan AI; satwa permainan memakai ilustrasi programatis. Tulisan Bakti BCA merupakan teks identitas, bukan aset logo resmi. Gunakan master logo dari tim brand jika diperlukan untuk final produksi acara.

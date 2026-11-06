@@ -8,7 +8,9 @@
 <script src="../js/util.js"></script>
 <script src="../js/art/leopard.js"></script>
 <script src="../js/art/animals.js"></script>
+<script src="../js/art/animal-poses.js"></script>
 <script src="../js/art/forest.js"></script>
+  <script src="../js/motion.js"></script>
 <script src="../js/scene.js"></script>
 <script>
 const J=JSMT, A=J.Art;
@@ -27,7 +29,7 @@ if(what==='sheet'){
 } else {
   const st=parseInt(q.get('stage')||'0'); const seed=parseInt(q.get('seed')||'12345');
   const sc=J.Scene.generate(st,{R:1,seed});
-  g.drawImage(sc.comp,0,0,1600,900);
+  g.save();g.scale(1600/J.W,900/J.H);sc.motion.renderSky(g);g.drawImage(sc.comp,0,0,J.W,J.H);sc.motion.render(g);g.restore();
   if(q.get('reveal')){ for(const it of sc.items){ g.globalAlpha=0.9; g.drawImage(JSMT.Art.glow(it.sp, it.kind==='leopard'?'#ff2d2d':'#2dd3ff'),it.x+it.sp.ox,it.y+it.sp.oy,it.sp.lw,it.sp.lh); g.globalAlpha=1; } }
   if(q.get('boxes')){ g.lineWidth=2; for(const it of sc.items){ g.strokeStyle=it.kind==='leopard'?'red':'cyan'; g.strokeRect(it.box.x0,it.box.y0,it.box.x1-it.box.x0,it.box.y1-it.box.y0); g.fillStyle='#fff'; g.fillText((it.pose||it.type)+' vis '+(it.vis||0).toFixed(2),it.box.x0,it.box.y0-4);} }
   window.__info={gen:sc.genMs, leo:sc.leopards.length, items:sc.items.map(i=>[i.kind,i.pose||i.type,i.variant,+(i.vis||0).toFixed(2)])};

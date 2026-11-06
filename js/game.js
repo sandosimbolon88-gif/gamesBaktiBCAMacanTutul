@@ -8,7 +8,9 @@
   /* ---------- gambar adegan (dipakai juga oleh layar awal) ---------- */
   J.drawScene = function (ctx, sc, now, opt) {
     opt = opt || {};
-    ctx.drawImage(sc.comp, 0, 0, W, H);
+    if(sc.motion)sc.motion.renderSky(ctx);
+    ctx.drawImage(sc.comp,0,0,W,H);
+    if(sc.motion)sc.motion.render(ctx);
     if (sc.night) { // mata memantulkan cahaya kamera inframerah
       for (const it of sc.items) {
         const eyes = it.eyesVis || it.eyes;
@@ -89,9 +91,16 @@
   class Game {
     constructor(opts) {
       this.onEnd = opts.onEnd;
+      this.timers = new Set();
       this.active = false;
       this.scene = null;
     }
+
+    later(fn, ms) {
+      const id = setTimeout(() => { this.timers.delete(id); if (this.active) fn(); }, ms);
+      this.timers.add(id);
+    }
+    clearTimers() { for (const id of this.timers) clearTimeout(id); this.timers.clear(); }
 
     buildFactQueue() {
       const rr = J.rng(J.randomSeed());
@@ -110,8 +119,11 @@
     }
 
     start(duration) {
+      this.clearTimers();
       this.duration = duration;
       this.timeLeft = duration;
+      this.baseFound = 0; this.baseScore = 0; this.bonusFound = 0; this.bonusScore = 0; this.decoyPenalty = 0;
+      this.cluesFound = 0; this.clueScore = 0; this.skips = 0; this.skipPenalty = 0;
       this.score = 0; this.stage = 0; this.stagesCleared = 0; this.mistakes = 0;
       this.effects = []; this.particles = [];
       this.paused = false; this.ending = false; this.active = true;
@@ -126,30 +138,53 @@
     }
 
     loadScene(sc) {
+      if (J.resetCamera) J.resetCamera();
       this.scene = sc;
+      this.targetPoints=sc.night?CFG.nightTargetPoints:CFG.targetPoints;
+      this.bonusPoints=sc.night?CFG.nightBonusPoints:CFG.bonusPoints;
+      this.bonus = new J.Bonus(sc);
+      UI().hud.bonus(false, this.bonusScore, this.clueScore,sc);
       const now = J.now();
       this.stageStart = now; this.lastFind = now; this.hintTarget = null; this.nextScene = null;
       UI().hud.station(this.stage + 1, sc.mode);
       UI().hud.pips(sc.leopards);
       UI().clearBubbles();
-      if (sc.night) setTimeout(() => this.active && UI().banner(UI().esc(C.ui.nightTip), 'calm'), 450);
+      if (sc.night) this.later(() => this.active && UI().banner(UI().esc(C.ui.nightTip), 'calm'), 450);
     }
 
-    stop() { this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
+    stop() { this.clearTimers(); this.active = false; UI().hud.show(false); UI().clearBubbles(); UI().cancelFact(); }
 
     /* ---------- input ---------- */
-    pointer(lx, ly, tol) {
+    pointer(lx, ly, tol, bonusAtDown, movingAtDown) {
       if (!this.active || this.paused || this.ending) return;
       const now = J.now();
       if (now < this.lockUntil) return;
-      const it = J.Scene.hit(this.scene, lx, ly, tol);
+      const bonus = bonusAtDown && this.bonus.current === bonusAtDown ? bonusAtDown : movingAtDown ? null : this.bonus.hit(lx, ly, tol);
+      if (bonus) {
+        this.bonus.capture();
+        this.bonusFound++; this.bonusScore += this.bonusPoints; this.score += this.bonusPoints;
+        this.effects.push({ type: 'text', x: bonus.cx, y: bonus.box.y0 - 12, text: 'BONUS +' + this.bonusPoints, t0: now, dur: 1.1, color: '#ffe15a' });
+        this.effects.push({ type: 'ring', x: bonus.cx, y: bonus.cy, r0: 20, r1: 140, t0: now, dur: 0.6 });
+        J.Audio.found(); UI().hud.score(this.score, true); UI().hud.bonus(false, this.bonusScore, this.clueScore,this.scene);
+        return;
+      }
+      const it = movingAtDown&&this.scene.motion.items.includes(movingAtDown)?movingAtDown:J.Scene.hit(this.scene, lx, ly, tol);
+      if (it && it.kind === 'clue') {
+        if (it.found) return;
+        it.found=true; it.foundAt=now;
+        this.cluesFound++; this.clueScore+=CFG.cluePoints; this.score+=CFG.cluePoints;
+        this.effects.push({type:'text',x:it.cx,y:it.box.y0-10,text:'CAKARAN +'+CFG.cluePoints,t0:now,dur:1,color:'#ffe15a'});
+        J.Audio.found();UI().hud.score(this.score,true);UI().hud.bonus(this.bonus.current,this.bonusScore,this.clueScore,this.scene);
+        UI().bubble(it.cx,it.box.y0,'Jejak di pohon!','Cakaran adalah salah satu tanda yang dipelajari peneliti. Di alam, temuan jejak perlu diperiksa bersama bukti lainnya.','+'+CFG.cluePoints+' poin');
+        return;
+      }
       if (it && it.kind === 'leopard') {
         if (it.found) return;
         it.found = true; it.foundAt = now;
-        this.score++;
+        this.score+=this.targetPoints; this.baseFound++; this.baseScore+=this.targetPoints;
         this.lastFind = now; this.hintTarget = null;
         this.effects.push({ type: 'ring', x: it.cx, y: it.cy, r0: 20, r1: Math.max(90, (it.box.x1 - it.box.x0) * 0.7), t0: now, dur: 0.6 });
-        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+1', t0: now, dur: 0.9, color: '#ffe15a' });
+        this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 10, text: '+'+this.targetPoints, t0: now, dur: 0.9, color: '#ffe15a' });
         this.effects.push({ type: 'flash', t0: now, dur: 0.22 });
         J.Audio.found();
         UI().hud.score(this.score, true);
@@ -158,17 +193,17 @@
         return;
       }
       if (it && it.kind === 'decoy') {
-        let extra = '';
-        if (!it.penalized) {
-          it.penalized = true;
-          this.mistakes++;
-          this.timeLeft = Math.max(0, this.timeLeft - CFG.decoyPenaltySec);
-          extra = J.tpl(C.ui.penalty, { s: CFG.decoyPenaltySec });
-          this.effects.push({ type: 'text', x: it.cx, y: it.box.y0 - 6, text: extra, t0: now, dur: 1.1, color: '#ff8a70' });
-        }
+        this.mistakes++;
+        const deducted=Math.min(this.score,CFG.decoyPenaltyPoints);
+        this.score-=deducted; this.decoyPenalty+=deducted;
+        this.timeLeft=Math.max(0,this.timeLeft-CFG.decoyPenaltySec);
+        UI().hud.time(this.timeLeft,this.duration); UI().hud.score(this.score,true);
+        const extra='−'+CFG.decoyPenaltyPoints+' poin · '+J.tpl(C.ui.penalty,{s:CFG.decoyPenaltySec});
+        this.effects.push({type:'text',x:it.cx,y:it.box.y0-6,text:extra,t0:now,dur:1.1,color:'#ff8a70'});
         this.effects.push({ type: 'xbox', it, t0: now, dur: 1.2 });
         J.Audio.decoy();
         UI().bubble(it.cx, it.box.y0, it.info.name, it.info.text, extra);
+        if (this.timeLeft<=0) this.end();
         return;
       }
       // meleset
@@ -183,26 +218,37 @@
       }
     }
 
+    skipStation() {
+      if (!this.active || this.paused || this.ending) return;
+      this.paused = true; UI().clearBubbles();
+      const deducted=Math.min(this.score,CFG.skipPenaltyPoints);
+      this.score-=deducted;this.skipPenalty+=deducted;this.skips++;
+      UI().hud.score(this.score,true);
+      UI().banner('Stasiun dilewati<small>−'+deducted+' poin · Mengganti kamera...</small>');
+      const nextStage = this.stage + 1;
+      this.later(() => { if (!this.active) return; this.stage = nextStage;
+        const sc = J.Scene.generate(nextStage, { R: J.R });
+        this.addShutter(() => { this.loadScene(sc); }, false, () => { this.paused = false; this.lastFind = J.now(); });
+      }, 450);
+    }
+
     stageClear() {
       this.paused = true;
       UI().clearBubbles();
       this.stagesCleared++;
-      this.timeLeft += CFG.clearBonusSec;
-      UI().hud.time(this.timeLeft, this.duration);
       J.Audio.clear();
-      UI().banner(UI().esc(C.ui.cleared) + '<small>' + UI().esc(J.tpl(C.ui.bonus, { s: CFG.clearBonusSec })) + '</small>');
+      UI().banner(UI().esc(C.ui.cleared));
       const wasNight = this.scene.night;
       const nextStage = this.stage + 1;
-      setTimeout(() => { // buat stasiun berikutnya selagi pemain membaca fakta
+      this.later(() => { // buat stasiun berikutnya selagi pemain membaca fakta
         if (!this.active) return;
         try { this.nextScene = J.Scene.generate(nextStage, { R: J.R }); } catch (e) { console.error(e); }
       }, 120);
-      setTimeout(() => {
+      this.later(() => {
         if (!this.active) return;
         UI().showFact(this.nextFact(wasNight), () => {
-          if (!this.active) return;
-          this.stage = nextStage;
-          const sc = this.nextScene || J.Scene.generate(nextStage, { R: J.R });
+          if (!this.active) return; this.stage = nextStage;
+          const sc = this.nextScene || J.Scene.generate(nextStage, { R: J.R }); this.nextScene = null;
           this.addShutter(() => { this.loadScene(sc); }, false, () => { this.paused = false; this.lastFind = J.now(); });
         });
       }, 1150);
@@ -218,11 +264,11 @@
       J.Audio.over();
       UI().banner(UI().esc(C.ui.timeUp));
       for (const l of this.scene.leopards) if (!l.found) l.missed = true;
-      setTimeout(() => {
+      this.later(() => {
         if (!this.active) return;
         this.active = false;
         UI().hud.show(false);
-        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes });
+        this.onEnd({ score: this.score, stages: this.stagesCleared, mistakes: this.mistakes, baseFound: this.baseFound, baseScore:this.baseScore, decoyPenalty:this.decoyPenalty, bonusFound: this.bonusFound, bonusScore: this.bonusScore, cluesFound:this.cluesFound, clueScore:this.clueScore, skips:this.skips, skipPenalty:this.skipPenalty });
       }, 2600);
     }
 
@@ -230,6 +276,9 @@
     update(dt, now) {
       if (!this.active) return;
       if (!this.paused && !this.ending) {
+        this.scene.motion.update(dt);
+        this.bonus.update(dt);
+        UI().hud.bonus(this.bonus.current, this.bonusScore, this.clueScore,this.scene);
         this.timeLeft -= dt;
         const sec = Math.ceil(this.timeLeft);
         if (sec !== this.lastTickSec) {
@@ -267,6 +316,7 @@
     render(ctx, now) {
       if (!this.scene) return;
       J.drawScene(ctx, this.scene, now);
+      if (this.bonus && !this.ending) this.bonus.render(ctx);
       // lingkaran petunjuk kuat
       if (this.active && !this.paused && this.hintTarget && now - this.lastFind > CFG.strongHintAfterSec) {
         const it = this.hintTarget, k = (Math.sin(now * 3) + 1) / 2;
